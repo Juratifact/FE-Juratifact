@@ -1,11 +1,13 @@
-import HomePage from "@/features/landing/pages/HomePage";
-import { BrowserRouter } from "react-router-dom";
+import { RouterProvider } from "./providers/RouterProvider";
+import { QueryProvider } from "./providers/QueryProvider";
+import { Toaster } from "@/shared/components/ui/sonner";
 
 function App() {
   return (
-    <BrowserRouter>
-      <HomePage />
-    </BrowserRouter>
+    <QueryProvider>
+      <RouterProvider />
+      <Toaster position="top-right" richColors closeButton />
+    </QueryProvider>
   );
 }
 
