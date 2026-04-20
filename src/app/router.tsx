@@ -1,5 +1,10 @@
+import LoginPage from "@/features/auth/pages/LoginPage";
+import NotFoundPage from "@/features/auth/pages/NotFoundPage";
+import RegisterPage from "@/features/auth/pages/RegisterPage";
+import UnauthorizedPage from "@/features/auth/pages/UnauthorizedPage";
 import HomePage from "@/features/landing/pages/HomePage";
 import MapPage from "@/features/map/pages/MapPage";
+import { GuestRoute } from "@/shared/components/common/GuestRoute";
 import { UserLayout } from "@/shared/layouts/UserLayout";
 import { createBrowserRouter } from "react-router-dom";
 
@@ -9,6 +14,25 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "map", element: <MapPage /> },
+      {
+        path: "login",
+        element: (
+          <GuestRoute>
+            <LoginPage />
+          </GuestRoute>
+        ),
+      },
+      {
+        path: "register",
+        element: (
+          <GuestRoute>
+            <RegisterPage />
+          </GuestRoute>
+        ),
+      },
+      { path: "unauthorized", element: <UnauthorizedPage /> },
+      //404 fallback
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ]);
