@@ -1,4 +1,6 @@
+# ================================
 # Logs
+# ================================
 logs
 *.log
 npm-debug.log*
@@ -7,18 +9,117 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# ================================
+# Node modules
+# ================================
+node_modules/
 
+# ================================
+# Build output
+# ================================
+dist/
+dist-ssr/
+build/
+.out/
+
+# ================================
+# Environment variables (QUAN TRỌNG)
+# ================================
+.env
+.env.*
+!.env.example
+
+# ================================
+# Dependency directories
+# ================================
+.pnpm-store/
+.npm/
+.yarn/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ================================
+# Vite
+# ================================
+.vite/
+vite.config.ts.timestamp-*
+vite.config.js.timestamp-*
+
+# ================================
+# TypeScript
+# ================================
+*.tsbuildinfo
+
+# ================================
+# Cache
+# ================================
+.cache/
+.temp/
+.tmp/
+
+# ================================
+# Testing
+# ================================
+coverage/
+.nyc_output/
+
+# ================================
 # Editor directories and files
+# ================================
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+
+# ================================
+# OS generated files
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ================================
+# shadcn/ui
+# ================================
+components.json
+
+# ================================
+# Local development
+# ================================
+*.local
+
+# ================================
+# Debug
+# ================================
+*.pid
+*.seed
+*.pid.lock
+
+# ================================
+# Optional: lock files (tuỳ team)
+# ================================
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# ================================
+# Docker (nếu dùng)
+# ================================
+.dockerignore
+
+# ================================
+# ESLint cache
+# ================================
+.eslintcache
+
+# ================================
+# Stylelint cache
+# ================================
+.stylelintcache
