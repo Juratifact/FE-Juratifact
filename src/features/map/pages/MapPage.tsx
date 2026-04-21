@@ -27,10 +27,8 @@ export default function MapPage() {
     if (!searchQuery.trim()) return;
 
     try {
-      // Use VietMap Reverse Geocoding/Search API
       const apiKey = import.meta.env.VITE_VIETMAP_API_KEY;
-
-      // Try using the correct VietMap API endpoint
+      // Using VietMap API endpoint
       const response = await fetch(
         `https://maps.vietmap.vn/api/autocomplete?text=${encodeURIComponent(
           searchQuery,
@@ -39,7 +37,6 @@ export default function MapPage() {
 
       if (response.ok) {
         const data = await response.json();
-        // VietMap returns data in 'predictions' field
         const results = (data.predictions ||
           data.suggestions ||
           data.results ||
@@ -106,18 +103,18 @@ export default function MapPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Bản đồ vị trí</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Map Location</h1>
         <p className="mt-2 text-muted-foreground">
-          Hiển thị vị trí hiện tại của bạn trên bản đồ Việt Nam
+          Show your current location on the Vietnam map
         </p>
       </div>
 
       {/* Search Bar */}
       <Card>
         <CardHeader>
-          <CardTitle>Tìm địa chỉ</CardTitle>
+          <CardTitle>Search Address</CardTitle>
           <CardDescription>
-            Tìm kiếm địa chỉ và xem lộ trình từ vị trí hiện tại của bạn
+            Search for an address and view directions from your current location
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -126,7 +123,7 @@ export default function MapPage() {
               <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Nhập địa chỉ cần tìm..."
+                  placeholder="Enter address to search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => {
@@ -143,7 +140,7 @@ export default function MapPage() {
                 className="gap-2"
               >
                 <Search className="size-4" />
-                Tìm
+                Search
               </Button>
             </div>
 
@@ -173,7 +170,7 @@ export default function MapPage() {
             {/* Selected Destination */}
             {destinationCoords && (
               <div className="p-3 bg-accent/10 rounded-md border border-accent">
-                <p className="text-sm font-medium">📍 Địa chỉ đã chọn:</p>
+                <p className="text-sm font-medium">📍 Selected Address:</p>
                 <p className="text-sm text-muted-foreground">
                   {destinationCoords.name}
                 </p>
@@ -186,9 +183,9 @@ export default function MapPage() {
       {/* Map */}
       <Card>
         <CardHeader>
-          <CardTitle>Vị trí của bạn</CardTitle>
+          <CardTitle>Your Location</CardTitle>
           <CardDescription>
-            Bản đồ tự động cập nhật vị trí của bạn mỗi 5 giây
+            The map automatically updates your location every 5 seconds
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -198,44 +195,6 @@ export default function MapPage() {
             allowMapControls={true}
             destinationCoords={destinationCoords}
           />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Hướng dẫn sử dụng</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm">
-          <div>
-            <h3 className="font-semibold mb-2">Điều kiện tiên quyết:</h3>
-            <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              <li>Trình duyệt phải hỗ trợ Geolocation API</li>
-              <li>Bạn cần cấp quyền truy cập vị trí cho ứng dụng</li>
-              <li>Kết nối Internet ổn định</li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold mb-2">Cách sử dụng:</h3>
-            <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              <li>Bản đồ sẽ tự động lấy vị trí hiện tại của bạn</li>
-              <li>
-                Mọi khi phát hiện vị trí mới, bản đồ sẽ tự động cập nhật marker
-              </li>
-              <li>Sử dụng nút điều hướng ở góc phải để phóng to/thu nhỏ</li>
-              <li>
-                Sử dụng nút toàn màn hình để xem bản đồ ở chế độ toàn màn hình
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="font-semibold mb-2">Ghi chú:</h3>
-            <p className="text-muted-foreground">
-              Độ chính xác của vị trí tùy thuộc vào thiết bị và điều kiện kết
-              nối. Vị trí có thể chênh lệch từ vài mét đến vài chục mét.
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
