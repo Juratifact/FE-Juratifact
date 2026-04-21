@@ -30,6 +30,7 @@ export interface RegisterDto {
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
+  role?: UserRole;
   subcription?: {
     hasActiveSubscription: boolean;
     subscriptionType?: string;

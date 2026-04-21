@@ -21,6 +21,15 @@ export default function LoginPage() {
           <p className="text-sm text-muted-foreground">
             Đăng nhập để tiếp tục mua bán đồ cũ minh bạch
           </p>
+          <div className="mt-3 rounded-md border border-dashed border-primary/40 bg-primary/5 p-3 text-left">
+            <p className="text-xs font-semibold text-primary">
+              Tài khoản test Admin
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Email: admin@gmail.com
+            </p>
+            <p className="text-xs text-muted-foreground">Mật khẩu: 123456</p>
+          </div>
         </CardHeader>
         <CardContent>
           <LoginForm />

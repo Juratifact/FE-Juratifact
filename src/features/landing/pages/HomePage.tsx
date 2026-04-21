@@ -6,6 +6,7 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 
+// Giữ nguyên dữ liệu sản phẩm
 const products = [
   {
     title: "iPhone 13 128GB",
@@ -41,49 +42,60 @@ const products = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased">
+    <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
       <main className="container mx-auto px-8 py-20 space-y-32">
         {/* Hero Section*/}
-        <section className="relative grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-          <div className="lg:col-span-8 space-y-10">
+        <section className="relative w-full aspect-video md:aspect-21/9 overflow-hidden group/hero rounded-none border-2 border-primary">
+          <div className="absolute inset-0 z-0">
+            <img
+              src="src/shared/pictures/apple-watch-ultra.jpg"
+              alt="Apple Watch Ultra Background"
+              className="object-cover size-full grayscale hover:grayscale-0 transition-all duration-1000 scale-105 group-hover/hero:scale-100"
+            />
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+          </div>
+          <div className="relative z-10 flex flex-col justify-center h-full max-w-5xl px-12 md:px-20 py-16 text-white space-y-10">
             <div className="space-y-4">
               <Badge
                 variant="outline"
-                className="rounded-none border-primary/40 text-primary px-3 py-1 text-[10px] font-bold uppercase tracking-widest"
+                className="rounded-none border-primary/60 text-primary px-3 py-1 text-[10px] font-bold uppercase tracking-widest bg-black/30"
               >
                 Trusted by 5+ Users
               </Badge>
-              <h1 className="text-7xl md:text-[120px] font-black tracking-[-0.06em] leading-[0.85] uppercase italic">
+              <h1 className="text-6xl md:text-[100px] font-black tracking-[-0.06em] leading-[0.85] uppercase italic">
                 Better <br />
-                <span className="text-muted-foreground/20">Pre-owned</span>{" "}
-                <br />
+                <span className="text-white/30">Pre-owned</span> <br />
                 Better Life.
               </h1>
             </div>
+
             <div className="max-w-md space-y-8">
-              <p className="text-xl text-muted-foreground font-medium leading-relaxed">
+              <p className="text-xl text-white/80 font-medium leading-relaxed">
                 A premium marketplace for high-quality secondhand goods.
               </p>
               <div className="flex items-center gap-6">
                 <Button
                   size="lg"
-                  className="rounded-none h-16 px-10 text-xs font-bold uppercase tracking-[0.2em] group"
+                  className="rounded-none h-16 px-10 text-xs font-bold uppercase tracking-[0.2em] group bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   Explore Market{" "}
                   <ArrowRight className="ml-3 size-4 group-hover:translate-x-2 transition-transform" />
                 </Button>
-                <button className="text-xs font-bold uppercase tracking-widest border-b-2 border-primary pb-1">
+                <button className="text-xs font-bold uppercase tracking-widest border-b-2 border-primary pb-1 text-white hover:text-primary transition-colors">
                   How it works
                 </button>
               </div>
             </div>
           </div>
-          <div className="lg:col-span-4 aspect-4/5 bg-muted">
-            {/* Thumbnail Hero */}
+          <div className="absolute bottom-10 right-10 z-20 text-right text-white">
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">
+              New Arrival
+            </p>
+            <p className="text-2xl font-black italic uppercase">
+              The Watch Collection
+            </p>
           </div>
         </section>
-
-        {/* Product Carousel*/}
         <section className="space-y-12">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <h2 className="text-4xl font-black tracking-tighter uppercase italic">
