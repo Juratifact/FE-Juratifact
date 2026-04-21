@@ -8,7 +8,7 @@ export function UserLayout() {
       <Header />
 
       {/* MAIN CONTAIN - Outlet (thay doi theo url) */}
-      <main className="flex-1 max-w-4xl mx-auto w-full p-6">
+      <main className="flex-1 w-full flex flex-col">
         <Outlet />
       </main>
 

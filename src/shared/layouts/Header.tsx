@@ -15,13 +15,10 @@ import { useLogoutMutation } from "@/features/auth/hooks/useAuthMutation";
 const Header = () => {
   const location = useLocation();
   const logoutMutation = useLogoutMutation();
-
-  // Logic từ code mẫu của bạn
   const token = useAuthStore((state) => state.accessToken);
   const role = useAuthStore((state) => state.role);
   const isAdmin = role === "admin";
 
-  // Style đồng bộ theo ảnh bạn gửi
   const menuTriggerClass = cn(
     navigationMenuTriggerStyle(),
     "h-10 px-6 py-2 text-base font-bold transition-all rounded-xl bg-transparent hover:bg-gray-200 focus:bg-gray-200",
@@ -33,27 +30,34 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          {/* Logo */}
           <Link
             to="/"
-            className="text-2xl font-black tracking-tighter text-primary shrink-0"
+            className="flex items-center gap-1 group shrink-0 transition-opacity hover:opacity-90"
           >
-            Juratifact
+            <div className="flex items-center justify-center size-24 overflow-hidden">
+              <img
+                src="/juralogo.png"
+                alt="Logo"
+                className="size-full object-contain dark:invert"
+              />
+            </div>
+
+            <span className="text-2xl font-black tracking-[-0.05em] uppercase italic text-foreground leading-none -ml-10">
+              Juratifact
+            </span>
           </Link>
 
-          {/* Search Bar */}
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Tìm đồ cũ bạn cần..."
-              className="h-10 rounded-full pl-9"
+              className="h-10 rounded-full pl-9 focus-visible:ring-primary/20"
             />
           </div>
 
           <nav className="flex items-center gap-2">
             <NavigationMenu>
               <NavigationMenuList className="flex items-center gap-1">
-                {/* 1. Logic Home / Dashboard */}
                 <NavigationMenuItem>
                   <NavigationMenuLink asChild>
                     <Link
@@ -70,7 +74,6 @@ const Header = () => {
                   </NavigationMenuLink>
                 </NavigationMenuItem>
 
-                {/* 2. Bản đồ (Chỉ hiện cho User bình thường) */}
                 {!isAdmin && (
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
@@ -87,7 +90,6 @@ const Header = () => {
                   </NavigationMenuItem>
                 )}
 
-                {/* 3. Profile (Khi đã login) */}
                 {token && (
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
@@ -104,7 +106,6 @@ const Header = () => {
                   </NavigationMenuItem>
                 )}
 
-                {/* 4. Login / Logout */}
                 {!token ? (
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
@@ -125,7 +126,7 @@ const Header = () => {
                       onClick={() => logoutMutation.mutate()}
                       className={cn(
                         menuTriggerClass,
-                        "text-destructive hover:text-destructive",
+                        "text-destructive hover:bg-destructive/10 hover:text-destructive",
                       )}
                     >
                       Logout
@@ -133,7 +134,6 @@ const Header = () => {
                   </NavigationMenuItem>
                 )}
 
-                {/* 5. Đăng bán (Chỉ user và đã login) */}
                 {token && !isAdmin && (
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
@@ -141,7 +141,7 @@ const Header = () => {
                         to="/post-product"
                         className={cn(
                           menuTriggerClass,
-                          "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground",
+                          "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground ml-2 shadow-sm",
                           location.pathname === "/post-product" && activeClass,
                         )}
                       >
