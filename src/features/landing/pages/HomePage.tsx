@@ -43,7 +43,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground antialiased">
       <main className="container mx-auto px-8 py-20 space-y-32">
-        {/* Hero Section - Giữ nguyên của bạn */}
+        {/* Hero Section*/}
         <section className="relative grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
           <div className="lg:col-span-8 space-y-10">
             <div className="space-y-4">
@@ -83,7 +83,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Product Carousel - kéo qua lại và loop vô hạn */}
+        {/* Product Carousel*/}
         <section className="space-y-12">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <h2 className="text-4xl font-black tracking-tighter uppercase italic">
