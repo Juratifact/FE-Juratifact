@@ -24,7 +24,8 @@ export interface RegisterDto {
   email: string;
   password: string;
   fullName?: string;
-  date_of_birth?: string;
+  phoneNumber: string;
+  userName?: string;
 }
 
 export interface AuthResponse {

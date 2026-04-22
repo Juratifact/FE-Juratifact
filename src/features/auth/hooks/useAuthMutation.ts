@@ -13,6 +13,8 @@ export const useRegisterMutation = () => {
       fullName: string;
       email: string;
       password: string;
+      phoneNumber: string;
+      userName: string;
     }) => authService.register(userData),
     onSuccess: () => {
       toast.success("Dang ki thanh cong!", {
