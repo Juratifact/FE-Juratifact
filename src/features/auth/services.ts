@@ -1,9 +1,5 @@
 import apiClient from "@/lib/axios";
-import type {
-  RegisterDto,
-  LoginRequest,
-  AuthResponse,
-} from "./types";
+import type { RegisterDto, LoginRequest, AuthResponse } from "./types";
 import { API_ENDPOINTS } from "@/shared/constants";
 //1> dinh nghia
 
