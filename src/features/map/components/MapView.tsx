@@ -27,8 +27,6 @@ export default function MapView({
   const destMarkerRef = useRef<vietmapgl.Marker | null>(null);
 
   const { data, error } = useUserLocationQuery();
-
-  // Initialize map
   useEffect(() => {
     if (mapRef.current || !mapContainer.current) return;
 
@@ -39,13 +37,10 @@ export default function MapView({
         center: [106.66, 10.762],
         zoom,
       });
-
-      // Add navigation controls
       if (allowMapControls) {
         const nav = new vietmapgl.NavigationControl();
         mapRef.current.addControl(nav, "top-right");
 
-        // Add fullscreen control
         const fullscreen = new vietmapgl.FullscreenControl();
         mapRef.current.addControl(fullscreen, "top-right");
       }
@@ -62,7 +57,6 @@ export default function MapView({
     };
   }, [zoom, allowMapControls]);
 
-  // Update marker with current location
   useEffect(() => {
     if (!data || !mapRef.current) return;
 
@@ -93,16 +87,12 @@ export default function MapView({
     }
   }, [data]);
 
-  // Handle destination marker
   useEffect(() => {
     if (!destinationCoords || !mapRef.current) return;
 
-    // Remove old destination marker if exists
     if (destMarkerRef.current) {
       destMarkerRef.current.remove();
     }
-
-    // Create destination marker
     const destEl = document.createElement("div");
     destEl.className =
       "w-5 h-5 rounded-full bg-blue-500 border-2 border-white shadow-lg";

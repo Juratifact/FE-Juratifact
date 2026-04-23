@@ -9,7 +9,7 @@ export function GuestRoute({ children }: GuestRouteProps) {
   const { access_token, role } = useAuthStore();
 
   if (access_token) {
-    const redirectTo = role === "admin" ? "/admin" : "/";
+    const redirectTo = role === "Admin" ? "/admin" : "/";
     return <Navigate to={redirectTo} replace />;
   }
   return <>{children}</>;

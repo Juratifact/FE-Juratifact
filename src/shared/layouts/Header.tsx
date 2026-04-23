@@ -18,7 +18,7 @@ const Header = () => {
   const logoutMutation = useLogoutMutation();
   const token = useAuthStore((state) => state.access_token);
   const role = useAuthStore((state) => state.role);
-  const isAdmin = role === "admin";
+  const isAdmin = role === "Admin";
 
   const toggleTheme = () => {
     const html = document.documentElement;
