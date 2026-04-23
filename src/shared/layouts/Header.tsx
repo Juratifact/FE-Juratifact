@@ -16,7 +16,7 @@ import { Button } from "@/shared/components/ui/button";
 const Header = () => {
   const location = useLocation();
   const logoutMutation = useLogoutMutation();
-  const token = useAuthStore((state) => state.accessToken);
+  const token = useAuthStore((state) => state.access_token);
   const role = useAuthStore((state) => state.role);
   const isAdmin = role === "admin";
 
@@ -28,19 +28,18 @@ const Header = () => {
       html.classList.add("dark");
     }
   };
-
-  // Pill Navigation Item Style
   const menuTriggerClass = cn(
     navigationMenuTriggerStyle(),
     "h-8 px-4 text-xs sm:text-sm font-medium tracking-wide transition-all duration-300 rounded-full bg-transparent hover:bg-muted/50 focus:bg-muted/50",
   );
 
-  const activeClass = "bg-secondary/80 text-secondary-foreground shadow-sm";
+  const activeClass =
+    "!bg-secondary/80 text-secondary-foreground shadow-sm !rounded-full";
 
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-8 py-4 mt-4">
-        {/* The Floating Container - Viên thuốc bay lơ lửng */}
+        {/* The Floating Container*/}
         <div className="flex items-center justify-between gap-3 sm:gap-4 md:gap-6 rounded-full border border-border/40 bg-background/40 backdrop-blur-md p-3 sm:p-4 shadow-md hover:shadow-lg transition-shadow duration-300">
           {/* LEFT: Pill Navigation Menu */}
           <nav className="hidden lg:flex items-center shrink-0">
@@ -99,7 +98,7 @@ const Header = () => {
             </div>
           </nav>
 
-          {/* CENTER: Logo & Juratifact - Centered */}
+          {/* CENTER: Logo & Juratifact*/}
           <Link
             to="/"
             className="flex items-center gap-1 sm:gap-1.5 shrink-0 group hover:opacity-80 transition-opacity duration-300"
@@ -107,16 +106,16 @@ const Header = () => {
             <img
               src="/juralogo.png"
               alt="Logo"
-              className="size-10 sm:size-12 object-contain dark:invert"
+              className="size-24 sm:size-16 object-contain dark:invert"
             />
-            <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground hidden md:block">
+            <span className="text-lg sm:text-3xl font-bold tracking-tight text-foreground hidden md:block -ml-7">
               Juratifact
             </span>
           </Link>
 
           {/* RIGHT: Search, Theme Toggle & Actions */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Search Bar - Siêu mỏng bo tròn hoàn toàn */}
+            {/* Search Bar*/}
             <div className="relative hidden sm:flex items-center">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input

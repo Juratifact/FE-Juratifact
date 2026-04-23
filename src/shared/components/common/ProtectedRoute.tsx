@@ -11,8 +11,8 @@ export function ProtectedRoute({
   allowedRoles,
 }: ProtectedRouteProps) {
   const location = useLocation();
-  const { accessToken, role } = useAuthStore();
-  if (!accessToken) {
+  const { access_token, role } = useAuthStore();
+  if (!access_token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   if (allowedRoles && !allowedRoles.includes(role!)) {

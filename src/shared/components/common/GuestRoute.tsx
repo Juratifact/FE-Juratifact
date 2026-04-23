@@ -6,11 +6,11 @@ interface GuestRouteProps {
 }
 
 export function GuestRoute({ children }: GuestRouteProps) {
-    const {accessToken,role} = useAuthStore();
+  const { access_token, role } = useAuthStore();
 
-    if(accessToken){
-        const redirectTo = role === "admin" ? "/admin" : "/";
-        return <Navigate to={redirectTo} replace />;
-    }
-    return <>{children}</>;
+  if (access_token) {
+    const redirectTo = role === "admin" ? "/admin" : "/";
+    return <Navigate to={redirectTo} replace />;
+  }
+  return <>{children}</>;
 }

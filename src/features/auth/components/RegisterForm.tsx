@@ -5,12 +5,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
-import {Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function RegisterForm() {
-  console.log("render ne `````");
-
   //React query mutation
   const registerMutation = useRegisterMutation();
 
@@ -35,7 +33,8 @@ export function RegisterForm() {
       email: "",
       password: "",
       confirmPassword: "",
-      date_of_birth: undefined,
+      phoneNumber: "",
+      userName: "",
     },
   });
 
@@ -104,12 +103,33 @@ export function RegisterForm() {
           </p>
         )}
       </div>
-      {/* DATE OF BIRTH */}
+      {/* PHONE */}
       <div className="space-y-2">
-        <Label htmlFor="date_of_birth">Ngày sinh</Label>
-        <Input id="date_of_birth" type="date" {...register("date_of_birth")} />
-        {errors.date_of_birth && (
-          <p className="text-red-500 text-xs">{errors.date_of_birth.message}</p>
+        <Label htmlFor="phone">Phone Number</Label>
+        <Input
+          id="phone"
+          type="text"
+          placeholder="0912345678"
+          {...register("phoneNumber")} // Sử dụng đúng tên "phone"
+          className={errors.phoneNumber ? "border-destructive" : ""}
+        />
+        {errors.phoneNumber && (
+          <p className="text-destructive text-xs">
+            {errors.phoneNumber.message}
+          </p>
+        )}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="userName">Username</Label>
+        <Input
+          id="userName"
+          type="text"
+          placeholder="nguyenvana123"
+          {...register("userName")}
+          className={errors.userName ? "border-destructive" : ""}
+        />
+        {errors.userName && (
+          <p className="text-destructive text-xs">{errors.userName.message}</p>
         )}
       </div>
       <Button
