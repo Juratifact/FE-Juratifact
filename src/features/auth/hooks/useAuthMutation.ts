@@ -6,6 +6,12 @@ import { toast } from "sonner";
 import type { AuthResponse, JwtPayload, LoginRequest } from "../types";
 import { jwtDecode } from "jwt-decode";
 import type { AxiosError } from "axios";
+import type { UserRole } from "@/shared/types";
+
+type JwtClaims = JwtPayload & {
+  Role?: UserRole;
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: UserRole;
+};
 
 export const useRegisterMutation = () => {
   const navigate = useNavigate();
@@ -59,14 +65,19 @@ export const useLoginMutation = () => {
   return useMutation<AuthResponse, Error, LoginRequest>({
     mutationFn: (data) => authService.login(data),
     onSuccess: (response) => {
-      const decoded = jwtDecode<JwtPayload>(response.access_token);
+      const decoded = jwtDecode<JwtClaims>(response.access_token);
+      const role =
+        decoded.role ??
+        decoded.Role ??
+        null;
+      console.log("Decoded JWT Payload:", decoded);
       setAuth({
         access_token: response.access_token,
-        role: decoded.role,
+        role,
       });
       toast.success("Đăng nhập thành công");
       // Redirect dựa trên role, Admin thì vào trang admin, user thì vào trang profile
-      if (decoded.role === "admin") {
+      if (role === "Admin") {
         navigate("/admin", { replace: true });
       } else {
         navigate(from, { replace: true });

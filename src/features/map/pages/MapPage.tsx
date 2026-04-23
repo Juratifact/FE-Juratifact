@@ -60,7 +60,6 @@ export default function MapPage() {
 
         setSearchResults(formatted.slice(0, 5));
       } else {
-        // If autocomplete fails, try alternative approach with GeoDecode API
         const geoResponse = await fetch(
           `https://maps.vietmap.vn/api/geode?address=${encodeURIComponent(
             searchQuery,
