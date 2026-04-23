@@ -16,9 +16,9 @@ const apiClient = axios.create({
 
 //request Interceptor: attach token
 apiClient.interceptors.request.use((config) => {
-  const accessToken = useAuthStore.getState().accessToken; // dung getState vi ts la tinh chi lay gia tri, kh phai tsx nen kh dc dung hook, dung hook no re render
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+  const access_token = useAuthStore.getState().access_token; // dung getState vi ts la tinh chi lay gia tri, kh phai tsx nen kh dc dung hook, dung hook no re render
+  if (access_token) {
+    config.headers.Authorization = `Bearer ${access_token}`;
   }
   return config;
 });
@@ -84,9 +84,9 @@ apiClient.interceptors.response.use(
           { withCredentials: true },
         );
         const newToken: string =
-          res.data?.data?.accessToken ?? res.data?.accessToken;
+          res.data?.data?.access_token ?? res.data?.access_token;
         useAuthStore.getState().setAuth({
-          accessToken: newToken,
+          access_token: newToken,
           role: useAuthStore.getState().role,
         });
         proccessQueue(null, newToken);

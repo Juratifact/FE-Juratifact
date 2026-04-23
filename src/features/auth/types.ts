@@ -1,8 +1,8 @@
 import type { UserRole } from "@/shared/types";
 
 export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
 }
 export interface LoginRequest {
   email: string;
@@ -29,8 +29,8 @@ export interface RegisterDto {
 }
 
 export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token?: string;
   role?: UserRole;
   subcription?: {
     hasActiveSubscription: boolean;
@@ -39,15 +39,15 @@ export interface AuthResponse {
 }
 
 export interface RegisterResponse {
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
 }
 export interface AuthState {
-  accessToken: string | null;
+  access_token: string | null;
   role: UserRole | null;
 }
 export interface AuthActions {
-  setAuth: (payload: { accessToken: string; role: UserRole | null }) => void;
+  setAuth: (payload: { access_token: string; role: UserRole | null }) => void;
   clearAuth: () => void;
 }
 export interface JwtPayload {

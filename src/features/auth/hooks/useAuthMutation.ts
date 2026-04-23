@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { AuthResponse, JwtPayload, LoginRequest } from "../types";
 import { jwtDecode } from "jwt-decode";
+import type { AxiosError } from "axios";
 
 export const useRegisterMutation = () => {
   const navigate = useNavigate();
@@ -22,9 +23,25 @@ export const useRegisterMutation = () => {
       });
       navigate("/login");
     },
-    onError: (error: any) => {
+    onError: (
+      error: AxiosError<{
+        errors?: Record<string, string[]>;
+        title?: string;
+        message?: string;
+      }>,
+    ) => {
+      const validationErrors = error.response?.data?.errors as
+        | Record<string, string[]>
+        | undefined;
+      const firstValidationMessage = validationErrors
+        ? Object.values(validationErrors).flat()[0]
+        : undefined;
+
       toast.error(
-        error.response?.data?.message || "Dang ki that bai, vui long thu lai",
+        firstValidationMessage ||
+          error.response?.data?.title ||
+          error.response?.data?.message ||
+          "Dang ki that bai, vui long thu lai",
       );
     },
     onSettled: () => {
@@ -42,15 +59,15 @@ export const useLoginMutation = () => {
   return useMutation<AuthResponse, Error, LoginRequest>({
     mutationFn: (data) => authService.login(data),
     onSuccess: (response) => {
-      const decoded = jwtDecode<JwtPayload>(response.accessToken);
+      const decoded = jwtDecode<JwtPayload>(response.access_token);
       setAuth({
-        accessToken: response.accessToken,
+        access_token: response.access_token,
         role: decoded.role,
       });
       toast.success("Đăng nhập thành công");
       // Redirect dựa trên role, Admin thì vào trang admin, user thì vào trang profile
       if (decoded.role === "admin") {
-        navigate("/admin/ritual", { replace: true });
+        navigate("/admin", { replace: true });
       } else {
         navigate(from, { replace: true });
       }
