@@ -2,7 +2,6 @@ import {
   Package,
   Users,
   ShoppingCart,
-  Plus,
   Search,
   MoreHorizontal,
   ArrowUpRight,
@@ -77,11 +76,6 @@ export default function AdminPage() {
           <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em]">
             Hệ thống quản trị Juratifact
           </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button className="rounded-none font-black italic uppercase text-xs border-2 border-primary hover:bg-transparent hover:text-primary transition-all">
-            <Plus className="mr-2 h-4 w-4" /> Đăng tin mới
-          </Button>
         </div>
       </div>
 
