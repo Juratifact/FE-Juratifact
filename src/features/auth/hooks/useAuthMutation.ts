@@ -8,9 +8,39 @@ import { jwtDecode } from "jwt-decode";
 import type { AxiosError } from "axios";
 import type { UserRole } from "@/shared/types";
 
+const ROLE_CLAIM_KEY =
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+
+const VALID_ROLES: UserRole[] = ["User", "Admin", "Shipper", "Buyer", "Seller"];
+
+const isUserRole = (value: unknown): value is UserRole => {
+  return typeof value === "string" && VALID_ROLES.includes(value as UserRole);
+};
+
+const normalizeClaimRoles = (value: unknown): UserRole[] => {
+  if (Array.isArray(value)) {
+    return value.filter(isUserRole);
+  }
+
+  return isUserRole(value) ? [value] : [];
+};
+
+const getPreferredRole = (claims: JwtClaims): UserRole | null => {
+  const roles = [
+    ...normalizeClaimRoles(claims.role),
+    ...normalizeClaimRoles(claims.Role),
+    ...normalizeClaimRoles(claims[ROLE_CLAIM_KEY]),
+  ];
+
+  if (!roles.length) return null;
+  if (roles.includes("Admin")) return "Admin";
+  return roles[0];
+};
+
 type JwtClaims = JwtPayload & {
-  Role?: UserRole;
-  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: UserRole;
+  role?: UserRole | UserRole[];
+  Role?: UserRole | UserRole[];
+  [ROLE_CLAIM_KEY]?: UserRole | UserRole[];
 };
 
 export const useRegisterMutation = () => {
@@ -66,10 +96,7 @@ export const useLoginMutation = () => {
     mutationFn: (data) => authService.login(data),
     onSuccess: (response) => {
       const decoded = jwtDecode<JwtClaims>(response.access_token);
-      const role =
-        decoded.role ??
-        decoded.Role ??
-        null;
+      const role = getPreferredRole(decoded);
       console.log("Decoded JWT Payload:", decoded);
       setAuth({
         access_token: response.access_token,

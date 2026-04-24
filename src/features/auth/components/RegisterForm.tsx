@@ -30,17 +30,19 @@ export function RegisterForm() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: "",
+      userName: "",
       email: "",
       password: "",
       confirmPassword: "",
       phoneNumber: "",
-      userName: "",
     },
   });
 
   //onSubmit
   const onSubmit = async (data: RegisterFormInput) => {
-    registerMutation.mutate(data);
+    const { confirmPassword, ...payload } = data;
+    void confirmPassword;
+    registerMutation.mutate(payload);
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -56,6 +58,21 @@ export function RegisterForm() {
         />
         {errors.fullName && (
           <p className="text-destructive text-xs">{errors.fullName.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="userName">Username</Label>
+        <Input
+          id="userName"
+          type="text"
+          placeholder="nguyenvana"
+          {...register("userName")}
+          className={errors.userName ? "border-destructive" : ""}
+          required
+        />
+        {errors.userName && (
+          <p className="text-destructive text-xs">{errors.userName.message}</p>
         )}
       </div>
 
@@ -110,26 +127,13 @@ export function RegisterForm() {
           id="phone"
           type="text"
           placeholder="0912345678"
-          {...register("phoneNumber")} // Sử dụng đúng tên "phone"
+          {...register("phoneNumber")}
           className={errors.phoneNumber ? "border-destructive" : ""}
         />
         {errors.phoneNumber && (
           <p className="text-destructive text-xs">
             {errors.phoneNumber.message}
           </p>
-        )}
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="userName">Username</Label>
-        <Input
-          id="userName"
-          type="text"
-          placeholder="nguyenvana123"
-          {...register("userName")}
-          className={errors.userName ? "border-destructive" : ""}
-        />
-        {errors.userName && (
-          <p className="text-destructive text-xs">{errors.userName.message}</p>
         )}
       </div>
       <Button
