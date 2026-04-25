@@ -1,4 +1,5 @@
-import { Link, useLocation } from "react-router-dom";
+import { useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -15,10 +16,31 @@ import { Button } from "@/shared/components/ui/button";
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const logoutMutation = useLogoutMutation();
   const token = useAuthStore((state) => state.access_token);
   const role = useAuthStore((state) => state.role);
   const isAdmin = role === "Admin";
+  const isProductsPage = location.pathname === "/products";
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const currentTitleSearch =
+    new URLSearchParams(location.search).get("title") ?? "";
+
+  const applySearch = () => {
+    const value = searchInputRef.current?.value.trim() ?? "";
+    const params = isProductsPage
+      ? new URLSearchParams(location.search)
+      : new URLSearchParams();
+
+    if (value) {
+      params.set("title", value);
+    } else {
+      params.delete("title");
+    }
+
+    params.delete("page");
+    navigate(`/products${params.toString() ? `?${params.toString()}` : ""}`);
+  };
 
   const toggleTheme = () => {
     const html = document.documentElement;
@@ -57,7 +79,7 @@ const Header = () => {
                             activeClass,
                         )}
                       >
-                        {isAdmin ? "Dashboard" : "Trang chủ"}
+                        {isAdmin ? "Dashboard" : "Home"}
                       </Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
@@ -72,7 +94,7 @@ const Header = () => {
                             location.pathname === "/map" && activeClass,
                           )}
                         >
-                          Bản đồ
+                          Map
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
@@ -88,7 +110,22 @@ const Header = () => {
                             location.pathname === "/profile" && activeClass,
                           )}
                         >
-                          Cá nhân
+                          Profile
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                  )}
+                  {token && (
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/products"
+                          className={cn(
+                            menuTriggerClass,
+                            location.pathname === "/products" && activeClass,
+                          )}
+                        >
+                          Products
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
@@ -119,7 +156,16 @@ const Header = () => {
             <div className="relative hidden sm:flex items-center">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
-                placeholder="Tìm kiếm..."
+                key={location.search}
+                ref={searchInputRef}
+                defaultValue={currentTitleSearch}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    applySearch();
+                  }
+                }}
+                placeholder="Search products..."
                 className="h-8 sm:h-9 w-40 sm:w-48 rounded-full border border-border/40 bg-muted/30 pl-9 text-xs sm:text-sm placeholder:text-muted-foreground/60 focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:border-primary/30 transition-all duration-300"
               />
             </div>
@@ -146,7 +192,7 @@ const Header = () => {
                   asChild
                   className="rounded-full px-4 sm:px-6 h-8 sm:h-9 text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300"
                 >
-                  <Link to="/login">Đăng nhập</Link>
+                  <Link to="/login">Sign in</Link>
                 </Button>
               ) : (
                 <div className="flex items-center gap-1 sm:gap-2">
@@ -156,7 +202,7 @@ const Header = () => {
                       size="sm"
                       className="rounded-full h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-all duration-300 hover:shadow-md"
                     >
-                      <Link to="/post-product">Đăng tin</Link>
+                      <Link to="/products/create">Post</Link>
                     </Button>
                   )}
                   <Button
@@ -165,7 +211,7 @@ const Header = () => {
                     className="rounded-full h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-colors duration-300"
                     onClick={() => logoutMutation.mutate()}
                   >
-                    Đăng xuất
+                    Sign out
                   </Button>
                 </div>
               )}

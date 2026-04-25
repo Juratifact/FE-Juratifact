@@ -5,6 +5,9 @@ import UnauthorizedPage from "@/features/auth/pages/UnauthorizedPage";
 import AdminPage from "@/features/landing/pages/AdminPage";
 import HomePage from "@/features/landing/pages/HomePage";
 import MapPage from "@/features/map/pages/MapPage";
+import ProductCatalog from "@/features/products/pages/ProductCatalog";
+import ManageProductCreate from "@/features/products/pages/ManageProductCreate";
+import ManageProductEdit from "@/features/products/pages/ManageProductEdit";
 import { GuestRoute } from "@/shared/components/common/GuestRoute";
 import { ProtectedRoute } from "@/shared/components/common/ProtectedRoute";
 import AdminLayout from "@/shared/layouts/AdminLayout";
@@ -17,6 +20,23 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "map", element: <MapPage /> },
+      { path: "products", element: <ProductCatalog /> },
+      {
+        path: "products/create",
+        element: (
+          <ProtectedRoute allowedRoles={["Buyer", "Seller"]}>
+            <ManageProductCreate />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "products/:id/edit",
+        element: (
+          <ProtectedRoute allowedRoles={["Buyer", "Seller"]}>
+            <ManageProductEdit />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: "login",
         element: (
