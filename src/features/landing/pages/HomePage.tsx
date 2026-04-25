@@ -1,6 +1,7 @@
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -75,14 +76,17 @@ export default function HomePage() {
               </p>
               <div className="flex items-center gap-6">
                 <Button
+                  asChild
                   size="lg"
                   className="rounded-none h-16 px-10 text-xs font-bold uppercase tracking-[0.2em] group bg-primary text-primary-foreground hover:bg-primary/90"
                 >
-                  Explore Market{" "}
-                  <ArrowRight className="ml-3 size-4 group-hover:translate-x-2 transition-transform" />
+                  <Link to="/products">
+                    Explore Market
+                    <ArrowRight className="ml-3 size-4 group-hover:translate-x-2 transition-transform" />
+                  </Link>
                 </Button>
                 <button className="text-xs font-bold uppercase tracking-widest border-b-2 border-primary pb-1 text-white hover:text-primary transition-colors">
-                  How it works
+                  How It Works
                 </button>
               </div>
             </div>
