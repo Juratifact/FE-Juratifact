@@ -4,6 +4,10 @@ import type { ProductFormData } from "./schema";
 // ─── Product Entity ───────────────────────────────────────
 export interface Product {
   id: string;
+  sellerId?: string;
+  sellerFullName?: string;
+  sellerUserName?: string;
+  sellerProfilePicture?: string;
   title: string;
   description?: string;
   condition: "New" | "Like new" | "Good";

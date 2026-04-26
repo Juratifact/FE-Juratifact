@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Eye, ShoppingBag } from "lucide-react";
+import { Eye, MessageCircle, ShoppingBag } from "lucide-react";
 
 import {
   Card,
@@ -12,6 +12,12 @@ import {
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
+import { Separator } from "@/shared/components/ui/separator";
 import { useCreateProductComment } from "../hooks/useProduct";
 import type { Product, ProductComment } from "../types";
 
@@ -27,12 +33,6 @@ const conditionVariant: Record<
   New: "default",
   "Like new": "secondary",
   Good: "outline",
-};
-
-const conditionColor: Record<string, string> = {
-  New: "text-green-600",
-  "Like new": "text-blue-600",
-  Good: "text-amber-600",
 };
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
@@ -77,59 +77,79 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   };
 
   return (
-    <Card className="h-full overflow-hidden border-border/60 bg-background/95 transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-xl">
+    <Card className="mx-auto w-full max-w-2xl overflow-hidden rounded-2xl border bg-card shadow-sm transition-all hover:shadow-md">
+      <CardHeader className="space-y-3 pb-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Avatar className="h-10 w-10 border">
+              <AvatarImage
+                src={product.sellerProfilePicture}
+                alt={
+                  product.sellerUserName ?? product.sellerFullName ?? "Seller"
+                }
+              />
+              <AvatarFallback>
+                {(product.sellerFullName ?? "Seller").slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold">
+                {product.sellerFullName ?? "Người bán"}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">
+                {product.sellerUserName
+                  ? `@${product.sellerUserName}`
+                  : "@unknown"}
+              </p>
+            </div>
+          </div>
+
+          {product.status === 1 ? (
+            <Badge variant="secondary">Available</Badge>
+          ) : (
+            <Badge variant="destructive">Sold</Badge>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <Badge variant={conditionVariant[product.condition] ?? "outline"}>
+            {product.condition}
+          </Badge>
+
+          <span className="text-xs text-muted-foreground">
+            {new Date(product.createdAt).toLocaleDateString("vi-VN")}
+          </span>
+        </div>
+      </CardHeader>
+
       <Link to={`/products/${product.id}`} className="group block">
-        {/* Image Container */}
-        <div className="relative h-56 overflow-hidden bg-muted">
+        <div className="relative aspect-4/3 overflow-hidden bg-muted">
           {mainImage ? (
             <img
               src={mainImage}
               alt={product.title}
-              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             />
           ) : (
-            <div className="flex h-full items-center justify-center bg-linear-to-br from-primary/10 to-secondary/10">
-              <ShoppingBag className="h-12 w-12 text-muted-foreground/50" />
+            <div className="flex h-full items-center justify-center bg-muted">
+              <ShoppingBag className="h-12 w-12 text-muted-foreground" />
             </div>
           )}
-
-          {/* Status Badge */}
-          <div className="absolute right-2 top-2">
-            {product.status === 1 ? (
-              <Badge variant="default">Available</Badge>
-            ) : (
-              <Badge variant="destructive">Sold</Badge>
-            )}
-          </div>
-
-          {/* Condition Badge */}
-          <div className="absolute left-2 top-2">
-            <Badge
-              variant={conditionVariant[product.condition] ?? "outline"}
-              className={conditionColor[product.condition]}
-            >
-              {product.condition}
-            </Badge>
-          </div>
         </div>
 
-        {/* Content */}
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+        <CardContent className="space-y-3 pt-4">
+          <CardTitle className="line-clamp-2 text-lg leading-snug transition-colors group-hover:text-primary">
             {product.title}
           </CardTitle>
-        </CardHeader>
 
-        <CardContent className="space-y-3">
-          {/* Description */}
           {product.description && (
-            <CardDescription className="line-clamp-2 text-sm">
+            <CardDescription className="line-clamp-2 text-sm leading-relaxed">
               {product.description}
             </CardDescription>
           )}
 
-          {/* Price */}
-          <div className="text-xl font-extrabold tracking-tight text-primary">
+          <div className="text-2xl font-bold tracking-tight text-primary">
             {new Intl.NumberFormat("vi-VN", {
               style: "currency",
               currency: "VND",
@@ -137,24 +157,24 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             }).format(product.price)}
           </div>
 
-          {/* Metadata */}
-          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground pt-2 border-t">
-            <span>
-              {new Date(product.createdAt).toLocaleDateString("vi-VN")}
-            </span>
+          <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
             {product.videoUrls && product.videoUrls.length > 0 && (
-              <span className="flex items-center gap-1">
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1">
                 <Eye className="h-3 w-3" />
                 Video
               </span>
             )}
+
+            <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1">
+              <MessageCircle className="h-3 w-3" />
+              {localComments.length}
+            </span>
           </div>
 
-          {/* Action Button */}
           {onAddToCart && (
             <Button
               size="sm"
-              variant="outline"
+              variant="secondary"
               className="w-full"
               onClick={(e) => {
                 e.preventDefault();
@@ -168,11 +188,13 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </CardContent>
       </Link>
 
-      <CardContent className="space-y-3 border-t bg-muted/20 pt-4">
+      <Separator />
+
+      <CardContent className="space-y-3 bg-muted/30 pt-4">
         <div>
           <p className="mb-2 text-sm font-semibold">Comments</p>
 
-          <div className="flex gap-2 mb-3">
+          <div className="mb-3 flex gap-2">
             <Input
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
@@ -201,7 +223,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               localComments.slice(0, 3).map((comment) => (
                 <div
                   key={comment.id}
-                  className="rounded-lg border bg-background px-2.5 py-2"
+                  className="rounded-lg border bg-background px-3 py-2"
                 >
                   <div className="text-xs font-medium">
                     {comment.userName ?? "User"}
