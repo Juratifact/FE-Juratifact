@@ -97,9 +97,9 @@ export const useLoginMutation = () => {
     onSuccess: (response) => {
       const decoded = jwtDecode<JwtClaims>(response.access_token);
       const role = getPreferredRole(decoded);
-      console.log("Decoded JWT Payload:", decoded);
       setAuth({
         access_token: response.access_token,
+        userId: response.userId,
         role,
       });
       toast.success("Đăng nhập thành công");

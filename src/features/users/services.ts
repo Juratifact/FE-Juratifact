@@ -27,9 +27,14 @@ const pickString = (
   return undefined;
 };
 
-const normalizeUser = (item: UserApiItem): UserProfile => ({
+const normalizeUser = (
+  item: UserApiItem,
+  fallbackId?: string,
+): UserProfile => ({
   id:
-    pickString(item, "id", "userId", "UserId", "userID") ?? crypto.randomUUID(),
+    pickString(item, "id", "userId", "UserId", "userID") ??
+    fallbackId ??
+    crypto.randomUUID(),
   email: pickString(item, "email", "Email"),
   fullName: pickString(item, "fullName", "FullName"),
   userName: pickString(item, "userName", "UserName"),
@@ -107,7 +112,9 @@ export const userService = {
       hasNextPage?: boolean;
     };
 
-    const users = (raw.items ?? raw.data ?? []).map(normalizeUser);
+    const users = (raw.items ?? raw.data ?? []).map((item) =>
+      normalizeUser(item),
+    );
 
     const currentPage =
       raw.meta?.currentPage ??
@@ -170,7 +177,7 @@ export const userService = {
     if (!raw) return [];
 
     if (Array.isArray(raw)) {
-      return raw.map(normalizeUser);
+      return raw.map((item) => normalizeUser(item));
     }
 
     if (
@@ -179,18 +186,18 @@ export const userService = {
       "data" in raw &&
       Array.isArray(raw.data)
     ) {
-      return raw.data.map(normalizeUser);
+      return raw.data.map((item) => normalizeUser(item));
     }
 
     return [normalizeUser(raw as UserApiItem)];
   },
 
   async getMyProfile(userId: string): Promise<UserProfile> {
-    const raw = (await apiClient.get(API_ENDPOINTS.USER.MY_PROFILE, {
-      params: { userId },
-    })) as UserApiItem;
+    const raw = (await apiClient.get(
+      `${API_ENDPOINTS.USER.MY_PROFILE}/${userId}`,
+    )) as UserApiItem;
 
-    return normalizeUser(raw);
+    return normalizeUser(raw, userId);
   },
 
   async updateProfile(
@@ -202,13 +209,12 @@ export const userService = {
     const updated = (await apiClient.put(
       `${API_ENDPOINTS.USER.PROFILE}/${id}`,
       formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      },
-    )) as UserApiItem;
+    )) as UserApiItem | string | null;
 
-    return normalizeUser(updated);
+    if (updated && typeof updated === "object" && !Array.isArray(updated)) {
+      return normalizeUser(updated as UserApiItem, id);
+    }
+
+    return normalizeUser({ userId: id }, id);
   },
 };

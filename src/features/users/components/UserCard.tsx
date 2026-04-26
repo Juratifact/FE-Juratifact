@@ -14,35 +14,37 @@ interface UserCardProps {
 export function UserCard({ user }: UserCardProps) {
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-3">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-4">
           {user.profilePicture ? (
             <img
               src={user.profilePicture}
               alt={user.userName ?? user.fullName ?? "avatar"}
-              className="h-10 w-10 rounded-full border object-cover"
+              className="h-16 w-16 rounded-full border object-cover"
             />
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-xs text-muted-foreground">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full border bg-muted text-sm text-muted-foreground">
               N/A
             </div>
           )}
           <div>
-            <CardTitle className="text-base">
+            <CardTitle className="text-xl">
               {user.fullName ?? "Người dùng"}
             </CardTitle>
             {user.userName && (
-              <p className="text-sm text-muted-foreground">@{user.userName}</p>
+              <p className="text-base text-muted-foreground">
+                @{user.userName}
+              </p>
             )}
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2 text-sm">
-        {user.email && <p>Email: {user.email}</p>}
+      <CardContent className="space-y-3 text-base">
+        {user.email && <p className="break-all">Email: {user.email}</p>}
         {user.phoneNumber && <p>SĐT: {user.phoneNumber}</p>}
         {user.address && <p>Địa chỉ: {user.address}</p>}
         {user.createdAt && (
-          <Badge variant="outline">
+          <Badge variant="outline" className="text-sm">
             Tạo: {new Date(user.createdAt).toLocaleDateString("vi-VN")}
           </Badge>
         )}
