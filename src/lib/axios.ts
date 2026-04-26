@@ -7,9 +7,6 @@ import { toast } from "sonner";
 //Create axios instance
 const apiClient = axios.create({
   baseURL: env.API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
   timeout: 15_000, //15s timeout
   withCredentials: true, // cho phép gửi cookie (refresh token) trong các request
 });
@@ -87,6 +84,7 @@ apiClient.interceptors.response.use(
           res.data?.data?.access_token ?? res.data?.access_token;
         useAuthStore.getState().setAuth({
           access_token: newToken,
+          userId: useAuthStore.getState().userId ?? undefined,
           role: useAuthStore.getState().role,
         });
         proccessQueue(null, newToken);

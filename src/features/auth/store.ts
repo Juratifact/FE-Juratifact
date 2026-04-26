@@ -7,17 +7,20 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     persist(
       (set) => ({
         access_token: null,
+        userId: null,
         role: null,
 
-        setAuth: ({ access_token, role }) =>
+        setAuth: ({ access_token, userId, role }) =>
           set({
             access_token,
+            userId,
             role,
           }),
 
         clearAuth: () =>
           set({
             access_token: null,
+            userId: null,
             role: null,
           }),
       }),
