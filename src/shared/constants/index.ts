@@ -19,12 +19,6 @@ export const API_ENDPOINTS = {
     CONDITION: "/Product/Condition",
     COMMENT: "/Product/Comment",
   },
-  RITUAL: {
-    BASE: "/Ritual",
-  },
-  RITUAL_CATEGORY: {
-    BASE: "/RitualCategory",
-  },
 };
 export const QUERY_KEYS = {
   PRODUCTS: ["products"] as const,
@@ -32,9 +26,6 @@ export const QUERY_KEYS = {
   USERS: ["users"] as const,
   MY_PROFILE: (id: string) => ["users", "my-profile", id] as const,
   USER_BY_NAME: (userName: string) => ["users", "name", userName] as const,
-  RITUALS: ["rituals"] as const,
-  RITUAL_DETAIL: (id: string) => ["rituals", id] as const,
-  RITUAL_CATEGORIES: ["ritual-categories"] as const,
   USER_LOCATION: ["user-location"] as const,
 };
 
