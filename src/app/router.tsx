@@ -8,6 +8,9 @@ import MapPage from "@/features/map/pages/MapPage";
 import ProductCatalog from "@/features/products/pages/ProductCatalog";
 import ManageProductCreate from "@/features/products/pages/ManageProductCreate";
 import ManageProductEdit from "@/features/products/pages/ManageProductEdit";
+import ManageUserList from "@/features/users/pages/ManageUserList";
+import ProfilePage from "@/features/users/pages/ProfilePage";
+import UserSearchPage from "@/features/users/pages/UserSearchPage";
 import { GuestRoute } from "@/shared/components/common/GuestRoute";
 import { ProtectedRoute } from "@/shared/components/common/ProtectedRoute";
 import AdminLayout from "@/shared/layouts/AdminLayout";
@@ -34,6 +37,26 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["Buyer", "Seller"]}>
             <ManageProductEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute
+            allowedRoles={["User", "Buyer", "Seller", "Shipper", "Admin"]}
+          >
+            <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "users/search",
+        element: (
+          <ProtectedRoute
+            allowedRoles={["User", "Buyer", "Seller", "Shipper", "Admin"]}
+          >
+            <UserSearchPage />
           </ProtectedRoute>
         ),
       },
@@ -71,6 +94,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["Admin"]}>
             <AdminPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "users",
+        element: (
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <ManageUserList />
           </ProtectedRoute>
         ),
       },
