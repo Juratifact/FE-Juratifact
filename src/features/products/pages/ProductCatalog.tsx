@@ -124,9 +124,8 @@ export default function ProductCatalog() {
   const titleQuery = searchParams.get("title") || "";
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-10">
-      {/* Header */}
-      <div className="mb-8 rounded-2xl border bg-linear-to-br from-background via-background to-secondary/30 p-6 shadow-sm md:p-8">
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <div className="mx-auto mb-6 w-full max-w-4xl rounded-2xl border bg-card p-6 shadow-sm md:p-7">
         <h1 className="text-3xl font-black tracking-tight md:text-4xl">
           Product Marketplace
         </h1>
@@ -135,28 +134,25 @@ export default function ProductCatalog() {
         </p>
       </div>
 
-      {/* Filters */}
-      <div className="mb-6 space-y-4 rounded-2xl border bg-background/80 p-4 shadow-xs backdrop-blur md:p-5">
-        {/* Filter row */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+      <div className="sticky top-2 z-20 mx-auto mb-6 w-full max-w-4xl rounded-2xl border bg-background/95 p-3 shadow-sm backdrop-blur supports-backdrop-filter:bg-background/80 md:p-4">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-1.5 rounded-full border bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
             <Filter className="h-4 w-4" />
             Filters:
           </div>
 
           {titleQuery && (
-            <Badge variant="outline" className="gap-1">
+            <Badge variant="outline" className="gap-1 rounded-full">
               Search: {titleQuery}
             </Badge>
           )}
 
-          {/* Condition filter */}
           <select
             value={searchParams.get("condition") || ""}
             onChange={(e) =>
               handleFilterChange("condition", e.target.value || undefined)
             }
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-9 rounded-full border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="">All conditions</option>
             {PRODUCT_CONDITIONS.map((cond) => (
@@ -166,7 +162,6 @@ export default function ProductCatalog() {
             ))}
           </select>
 
-          {/* Sort filter */}
           <select
             value={`${searchParams.get("sortBy") || ""}:${searchParams.get("sortOrder") || ""}`}
             onChange={(e) =>
@@ -186,7 +181,7 @@ export default function ProductCatalog() {
                 setSearchParams(params);
               })()
             }
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-9 rounded-full border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="">Sort by</option>
             <option value="date:DESC">Newest</option>
@@ -194,31 +189,32 @@ export default function ProductCatalog() {
             <option value="price:DESC">Price: high to low</option>
           </select>
 
-          {/* Clear filters */}
           {hasActiveFilters && (
-            <Button variant="outline" size="sm" onClick={clearFilters}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full"
+              onClick={clearFilters}
+            >
               <X className="mr-1 h-3 w-3" />
               Clear filters
             </Button>
           )}
 
-          {/* Result count */}
-          <Badge variant="secondary" className="ml-auto">
+          <Badge variant="secondary" className="ml-auto rounded-full">
             {products.length} results
           </Badge>
         </div>
       </div>
 
-      {/* Error state */}
       {error && (
-        <div className="mb-6 rounded-lg border border-destructive/50 bg-destructive/10 p-4">
+        <div className="mx-auto mb-6 w-full max-w-4xl rounded-xl border border-destructive/50 bg-destructive/10 p-4">
           <p className="text-sm text-destructive">
             Failed to load products. Please try again.
           </p>
         </div>
       )}
 
-      {/* Loading initial */}
       {isLoading && !products.length ? (
         <LoadingSpinner className="py-20" size="lg" />
       ) : !products.length ? (
@@ -228,21 +224,16 @@ export default function ProductCatalog() {
         />
       ) : (
         <>
-          {/* Window virtualized list + infinite scroll (single page scrollbar) */}
-          <div ref={listRef} className="space-y-4">
-            <div style={{ paddingTop, paddingBottom }} className="space-y-4">
+          <div ref={listRef} className="mx-auto w-full max-w-4xl space-y-5">
+            <div style={{ paddingTop, paddingBottom }} className="space-y-5">
               {virtualItems.map((product, index) => (
-                <div
-                  key={product.id ?? `${startIndex}-${index}`}
-                  className="mx-auto max-w-3xl"
-                >
+                <div key={product.id ?? `${startIndex}-${index}`}>
                   <ProductCard product={product} />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Loading next page indicator */}
           {isFetchingNextPage && (
             <div className="mt-8 flex justify-center">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -255,13 +246,12 @@ export default function ProductCatalog() {
           {hasMore && !isFetchingNextPage && (
             <div
               ref={observerRef}
-              className="mt-4 text-center text-xs text-muted-foreground"
+              className="mt-5 text-center text-xs text-muted-foreground"
             >
               Scroll down to load more products
             </div>
           )}
 
-          {/* End of list message */}
           {!hasMore && products.length > 0 && (
             <div className="mt-8 py-8 text-center text-sm text-muted-foreground">
               No more products
