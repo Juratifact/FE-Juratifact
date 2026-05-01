@@ -1,96 +1,113 @@
-import { Search, Bell, User, Settings, LogOut, Menu } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
+import { NavLink } from "react-router-dom";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
+  LayoutDashboard,
+  FlagTriangleRight,
+  Users,
+  Layers3,
+  Sparkles,
+  ChevronRight,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const navItems = [
+  { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
+  { label: "Reports", to: "/admin/reports", icon: FlagTriangleRight },
+  { label: "Users", to: "/admin/users", icon: Users },
+  { label: "Categories", to: "/admin/categories", icon: Layers3 },
+  { label: "Upgrade", to: "/admin/upgrade", icon: Sparkles },
+];
 
 export default function AdminHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container flex h-20 items-center justify-between px-8">
-        
-        {/* Left: Logo & Sidebar Toggle */}
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="size-10 bg-black rounded-sm flex items-center justify-center overflow-hidden">
-              <img 
-                src="src/shared/pictures/logo-lizard.png" 
-                alt="Juratifact Admin" 
-                className="size-7 invert object-contain" 
+    <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:sticky lg:top-0 lg:h-screen bg-slate-950 text-slate-50 border-r border-white/10">
+      <div className="flex h-full flex-col p-5">
+        <div className="rounded-3xl bg-linear-to-br from-orange-500 via-orange-600 to-rose-600 p-5 shadow-2xl shadow-orange-950/30">
+          <div className="flex items-center gap-3">
+            <div className="grid size-12 place-items-center rounded-2xl bg-white/15 backdrop-blur-sm ring-1 ring-white/20">
+              <img
+                src="/juralogo.png"
+                alt="Juratifact Admin"
+                className="size-8 object-contain brightness-0 invert"
               />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-black italic uppercase leading-none tracking-tighter">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/75">
+                Admin Center
+              </p>
+              <h1 className="text-2xl font-black italic uppercase leading-none">
                 Juratifact
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                Admin Panel
-              </span>
+              </h1>
             </div>
           </div>
-          
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="size-6" />
-          </Button>
-        </div>
-
-        {/* Center: Universal Search (Đồng bộ với UI chính) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-12">
-          <div className="relative w-full group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm quản trị (Sản phẩm, Người dùng, Đơn hàng)..."
-              className="w-full h-11 bg-muted/50 border-2 border-transparent focus:border-black focus:bg-background rounded-none pl-12 pr-4 text-xs font-bold uppercase tracking-widest outline-none transition-all"
-            />
+          <div className="mt-4 rounded-2xl bg-white/10 p-3 text-xs font-medium text-white/90">
+            Quản lý báo cáo, người dùng và danh mục theo phong cách marketplace.
           </div>
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-4">
-          {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative hover:bg-muted rounded-none">
-            <Bell className="size-5" />
-            <span className="absolute top-2 right-2 size-2 bg-primary rounded-full border-2 border-background" />
-          </Button>
+        <nav className="mt-6 space-y-1.5">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === "/admin"}
+                className={({ isActive }) =>
+                  cn(
+                    "group flex items-center justify-between rounded-2xl px-4 py-3 transition-all duration-200",
+                    isActive
+                      ? "bg-white text-slate-950 shadow-lg shadow-orange-950/20"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white",
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span className="flex items-center gap-3 font-semibold">
+                      <span
+                        className={cn(
+                          "grid size-9 place-items-center rounded-xl transition-colors",
+                          isActive
+                            ? "bg-orange-100 text-orange-600"
+                            : "bg-white/5 text-white/80",
+                        )}
+                      >
+                        <Icon className="size-4" />
+                      </span>
+                      <span className="text-sm">{item.label}</span>
+                    </span>
+                    <ChevronRight
+                      className={cn(
+                        "size-4 transition-transform",
+                        isActive
+                          ? "text-orange-500"
+                          : "text-slate-500 group-hover:translate-x-1",
+                      )}
+                    />
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
+        </nav>
 
-          <div className="h-8 w-px bg-border mx-2 hidden sm:block" />
-
-          {/* User Profile Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-3 p-2 hover:bg-muted rounded-none transition-all">
-                <div className="size-9 bg-black flex items-center justify-center text-white font-black italic text-sm">
-                  AD
-                </div>
-                <div className="hidden sm:flex flex-col items-start leading-tight">
-                  <span className="text-xs font-black uppercase italic">Administrator</span>
-                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Super User</span>
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-none border-2 border-black p-2">
-              <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest opacity-50">Tài khoản quản lý</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="focus:bg-black focus:text-white rounded-none cursor-pointer py-3 text-xs font-black uppercase italic">
-                <User className="mr-3 size-4" /> Hồ sơ cá nhân
-              </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-black focus:text-white rounded-none cursor-pointer py-3 text-xs font-black uppercase italic">
-                <Settings className="mr-3 size-4" /> Cài đặt hệ thống
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="focus:bg-red-600 focus:text-white rounded-none cursor-pointer py-3 text-xs font-black uppercase italic text-red-600">
-                <LogOut className="mr-3 size-4" /> Đăng xuất
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="mt-auto rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                Growth mode
+              </p>
+              <p className="mt-1 text-sm font-semibold text-white">
+                Boost admin workflow
+              </p>
+            </div>
+            <Sparkles className="size-5 text-orange-400" />
+          </div>
+          <button className="mt-4 w-full rounded-2xl bg-linear-to-r from-orange-500 to-rose-500 px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-orange-950/30 transition-transform hover:scale-[1.01]">
+            Upgrade tools
+          </button>
         </div>
       </div>
-    </header>
+    </aside>
   );
 }
