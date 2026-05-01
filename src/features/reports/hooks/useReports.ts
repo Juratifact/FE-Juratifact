@@ -1,0 +1,149 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import type {
+  CreateReportDto,
+  ReportFilterParams,
+  UpdateReportDto,
+} from "../types";
+import { reportService, approveReport, rejectReport } from "../services";
+import { toast } from "sonner";
+import { QUERY_KEYS } from "@/shared/constants";
+import { useMemo } from "react";
+
+export function useReports() {
+  const [searchParams] = useSearchParams();
+  const filter = useMemo<ReportFilterParams>(() => {
+    return {
+      page: Number(searchParams.get("page")) || 1,
+      limit: Number(searchParams.get("limit")) || 10,
+      search: searchParams.get("search") || undefined,
+      status:
+        (searchParams.get("status") as
+          | "pending"
+          | "approved"
+          | "rejected"
+          | undefined) || undefined,
+    };
+  }, [searchParams]);
+
+  const query = useQuery({
+    queryKey: [QUERY_KEYS.REPORTS, filter],
+    queryFn: () => reportService.getAll(filter),
+    placeholderData: (prev) => prev,
+  });
+
+  return {
+    reports: query.data?.data ?? [],
+    pagination: query.data?.meta,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+}
+
+export function useCreateReport() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateReportDto) => reportService.create(data),
+    onSuccess: () => {
+      toast.success("Báo cáo đã được tạo thành công");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
+      navigate("/admin/reports");
+    },
+    onError: () => {
+      toast.error("Không thể tạo báo cáo");
+    },
+  });
+}
+
+export function useUpdateReport() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateReportDto }) =>
+      reportService.update(id, data),
+    onSuccess: (_data, variables) => {
+      toast.success("Cập nhật báo cáo thành công!");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.REPORT_DETAIL(variables.id),
+      });
+      navigate("/admin/reports");
+    },
+    onError: () => {
+      toast.error("Không thể cập nhật báo cáo");
+    },
+  });
+}
+
+export function useDeleteReport() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => reportService.remove(id),
+    onSuccess: () => {
+      toast.success("Xóa báo cáo thành công!");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
+    },
+    onError: () => {
+      toast.error("Không thể xóa báo cáo");
+    },
+  });
+}
+
+export function useReportDetail(id: string) {
+  const query = useQuery({
+    queryKey: [QUERY_KEYS.REPORT_DETAIL(id)],
+    queryFn: () => reportService.getById(id),
+    enabled: !!id,
+  });
+
+  return {
+    report: query.data,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+}
+
+export function useApproveReport() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (reportId: string) => approveReport(reportId),
+    onSuccess: () => {
+      toast.success("Duyệt báo cáo thành công!");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
+    },
+    onError: () => {
+      toast.error("Không thể duyệt báo cáo");
+    },
+  });
+}
+
+export function useRejectReport() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (reportId: string) => rejectReport(reportId),
+    onSuccess: () => {
+      toast.success("Từ chối báo cáo thành công!");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
+    },
+    onError: () => {
+      toast.error("Không thể từ chối báo cáo");
+    },
+  });
+}
+
+export function useCreateProductReport() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateReportDto) => reportService.create(data),
+    onSuccess: () => {
+      toast.success("Đã gửi báo cáo sản phẩm");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
+    },
+    onError: () => {
+      toast.error("Không thể gửi báo cáo");
+    },
+  });
+}

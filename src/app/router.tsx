@@ -3,11 +3,14 @@ import NotFoundPage from "@/features/auth/pages/NotFoundPage";
 import RegisterPage from "@/features/auth/pages/RegisterPage";
 import UnauthorizedPage from "@/features/auth/pages/UnauthorizedPage";
 import AdminPage from "@/features/landing/pages/AdminPage";
+import AdminCategoriesPage from "@/features/landing/pages/AdminCategoriesPage";
+import AdminUpgradePage from "@/features/landing/pages/AdminUpgradePage";
 import HomePage from "@/features/landing/pages/HomePage";
 import MapPage from "@/features/map/pages/MapPage";
 import ProductCatalog from "@/features/products/pages/ProductCatalog";
 import ManageProductCreate from "@/features/products/pages/ManageProductCreate";
 import ManageProductEdit from "@/features/products/pages/ManageProductEdit";
+import ManageReportList from "@/features/reports/pages/ManageReportList";
 import ManageUserList from "@/features/users/pages/ManageUserList";
 import ProfilePage from "@/features/users/pages/ProfilePage";
 import UserSearchPage from "@/features/users/pages/UserSearchPage";
@@ -102,6 +105,30 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["Admin"]}>
             <ManageUserList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "reports",
+        element: (
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <ManageReportList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "categories",
+        element: (
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminCategoriesPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "upgrade",
+        element: (
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminUpgradePage />
           </ProtectedRoute>
         ),
       },
