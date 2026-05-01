@@ -42,6 +42,36 @@ type SellerApiItem = {
   profilePictureUrl?: string;
 };
 
+type ProductCommentApiItem = Partial<ProductComment> & {
+  id?: string;
+  commentId?: string;
+  content?: string;
+  createdAt?: string;
+  parentCommentId?: string;
+  userName?: string;
+  UserName?: string;
+  fullName?: string;
+  FullName?: string;
+  name?: string;
+  Name?: string;
+  displayName?: string;
+  DisplayName?: string;
+  createdByName?: string;
+  CreatedByName?: string;
+  author?: string;
+  Author?: string;
+  authorName?: string;
+  AuthorName?: string;
+};
+
+type ProductCommentListRawResponse =
+  | ProductCommentApiItem[]
+  | {
+      items?: ProductCommentApiItem[];
+      data?: ProductCommentApiItem[];
+      comments?: ProductCommentApiItem[];
+    };
+
 const sellerProfileCache = new Map<string, SellerApiItem>();
 
 const normalizeArray = (value: unknown): string[] => {
@@ -108,6 +138,76 @@ const normalizeSeller = (item: SellerApiItem | undefined) => {
       "profilePictureUrl",
     ]),
   };
+};
+
+const normalizeComment = (item: ProductCommentApiItem): ProductComment => {
+  console.log("🔍 [normalizeComment] Raw API item:", item);
+  console.log("🔍 [normalizeComment] Item keys:", Object.keys(item));
+  console.log("🔍 [normalizeComment] All item entries:", Object.entries(item));
+
+  const displayName = pickString(item as Record<string, unknown>, [
+    "createdByName", // Move to top - this is what the API actually uses
+    "CreatedByName",
+    "fullName",
+    "FullName",
+    "name",
+    "Name",
+    "displayName",
+    "DisplayName",
+    "userName",
+    "UserName",
+    "author",
+    "Author",
+    "authorName",
+    "AuthorName",
+  ]);
+
+  console.log(
+    "✅ [normalizeComment] Extracted displayName:",
+    displayName,
+    "Fallback will be:",
+    displayName ?? "User",
+  );
+
+  const normalized = {
+    id: item.id ?? item.commentId ?? crypto.randomUUID(),
+    content: item.content ?? "",
+    createdAt: item.createdAt ?? new Date().toISOString(),
+    parentCommentId: item.parentCommentId,
+    displayName,
+    userName: pickString(item as Record<string, unknown>, [
+      "userName",
+      "UserName",
+    ]),
+  };
+
+  console.log("✅ [normalizeComment] Final normalized:", normalized);
+  return normalized;
+};
+
+const extractCommentItems = (raw: ProductCommentListRawResponse) => {
+  console.log(
+    "📦 [extractCommentItems] Raw response type:",
+    typeof raw,
+    "isArray:",
+    Array.isArray(raw),
+  );
+  console.log("📦 [extractCommentItems] Raw response:", raw);
+
+  if (Array.isArray(raw)) {
+    console.log(
+      "✅ [extractCommentItems] Response is array, length:",
+      raw.length,
+    );
+    return raw;
+  }
+
+  const items = raw.items ?? raw.data ?? raw.comments ?? [];
+  console.log(
+    "✅ [extractCommentItems] Extracted items from object, length:",
+    items.length,
+  );
+  return items;
 };
 
 const fetchSellerProfiles = async (sellerIds: string[]) => {
@@ -333,10 +433,48 @@ export const productService = createBaseService<
 });
 
 export const productCommentService = {
+  async getByProductId(productId: string): Promise<ProductComment[]> {
+    console.log(
+      "🚀 [productCommentService.getByProductId] Fetching comments for productId:",
+      productId,
+    );
+    const raw = (await apiClient.get(
+      API_ENDPOINTS.PRODUCT.COMMENTS(productId),
+    )) as ProductCommentListRawResponse;
+
+    console.log(
+      "📦 [productCommentService.getByProductId] Raw API response:",
+      raw,
+    );
+
+    const items = extractCommentItems(raw);
+    console.log(
+      "📋 [productCommentService.getByProductId] Extracted items:",
+      items,
+    );
+
+    const normalized = items.map(normalizeComment);
+    console.log(
+      "✅ [productCommentService.getByProductId] Normalized comments:",
+      normalized,
+    );
+
+    return normalized;
+  },
+
   async create(data: CreateProductCommentDto): Promise<ProductComment> {
-    return (await apiClient.post(
+    console.log("🚀 [productCommentService.create] Creating comment:", data);
+    const created = (await apiClient.post(
       API_ENDPOINTS.PRODUCT.COMMENT,
       data,
-    )) as ProductComment;
+    )) as ProductCommentApiItem;
+
+    console.log("📦 [productCommentService.create] Raw API response:", created);
+    const normalized = normalizeComment(created);
+    console.log(
+      "✅ [productCommentService.create] Normalized comment:",
+      normalized,
+    );
+    return normalized;
   },
 };

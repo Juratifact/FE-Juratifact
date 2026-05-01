@@ -150,8 +150,40 @@ export function useProductDetail(id: string) {
 }
 
 export function useCreateProductComment() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (data: CreateProductCommentDto) =>
       productCommentService.create(data),
+    onSuccess: (createdComment, variables) => {
+      queryClient.setQueryData(
+        QUERY_KEYS.PRODUCT_COMMENTS(variables.productId),
+        (current: unknown) => {
+          const existingComments = Array.isArray(current) ? current : [];
+          const nextComment = {
+            ...createdComment,
+            displayName:
+              createdComment.displayName ?? createdComment.userName ?? "Bạn",
+          };
+
+          return [nextComment, ...existingComments];
+        },
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.PRODUCT_COMMENTS(variables.productId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.PRODUCT_DETAIL(variables.productId),
+      });
+    },
+  });
+}
+
+export function useProductComments(productId: string) {
+  return useQuery({
+    queryKey: QUERY_KEYS.PRODUCT_COMMENTS(productId),
+    queryFn: () => productCommentService.getByProductId(productId),
+    enabled: !!productId,
   });
 }

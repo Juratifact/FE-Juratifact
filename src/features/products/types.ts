@@ -25,6 +25,7 @@ export interface ProductComment {
   content: string;
   createdAt: string;
   parentCommentId?: string;
+  displayName?: string;
   userName?: string;
 }
 
