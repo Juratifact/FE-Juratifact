@@ -26,6 +26,7 @@ export interface ProductComment {
   createdAt: string;
   parentCommentId?: string;
   userName?: string;
+  displayName?: string;
 }
 
 // ─── Filter params ───────────────────────────────────────

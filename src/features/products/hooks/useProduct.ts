@@ -150,8 +150,37 @@ export function useProductDetail(id: string) {
 }
 
 export function useCreateProductComment() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (data: CreateProductCommentDto) =>
       productCommentService.create(data),
+    onSuccess: (createdComment, variables) => {
+      queryClient.setQueryData(
+        QUERY_KEYS.PRODUCT_COMMENTS(variables.productId),
+        (current: unknown) => {
+          const existingComments = Array.isArray(current) ? current : [];
+          return [createdComment, ...existingComments];
+        },
+      );
+
+      // Refetch product detail only; keep the returned comment in cache so
+      // the UI preserves the author name/content from the create response.
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.PRODUCT_DETAIL(variables.productId),
+      });
+      toast.success("Comment posted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to post comment");
+    },
+  });
+}
+
+export function useProductComments(productId: string) {
+  return useQuery({
+    queryKey: QUERY_KEYS.PRODUCT_COMMENTS(productId),
+    queryFn: () => productCommentService.getByProductId(productId),
+    enabled: !!productId,
   });
 }

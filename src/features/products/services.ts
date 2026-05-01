@@ -42,6 +42,37 @@ type SellerApiItem = {
   profilePictureUrl?: string;
 };
 
+type ProductCommentApiItem = Partial<ProductComment> & {
+  id?: string;
+  commentId?: string;
+  content?: string;
+  createdAt?: string;
+  parentCommentId?: string;
+  userName?: string;
+  UserName?: string;
+  user_name?: string;
+  fullName?: string;
+  FullName?: string;
+  full_name?: string;
+  name?: string;
+  Name?: string;
+  displayName?: string;
+  DisplayName?: string;
+  display_name?: string;
+  createdByName?: string;
+  CreatedByName?: string;
+  created_by_name?: string;
+  author?: string;
+  Author?: string;
+  authorName?: string;
+  AuthorName?: string;
+  author_name?: string;
+  user?: Record<string, unknown>;
+  authorInfo?: Record<string, unknown>;
+  authorUser?: Record<string, unknown>;
+  createdBy?: Record<string, unknown>;
+};
+
 const sellerProfileCache = new Map<string, SellerApiItem>();
 
 const normalizeArray = (value: unknown): string[] => {
@@ -108,6 +139,96 @@ const normalizeSeller = (item: SellerApiItem | undefined) => {
       "profilePictureUrl",
     ]),
   };
+};
+
+const pickNestedString = (item: Record<string, unknown>, keys: string[]) => {
+  const visited = new Set<object>();
+
+  const search = (value: unknown): string | undefined => {
+    if (!value || typeof value !== "object") return undefined;
+    if (visited.has(value as object)) return undefined;
+    visited.add(value as object);
+
+    const record = value as Record<string, unknown>;
+
+    for (const key of keys) {
+      const directValue = record[key];
+      if (typeof directValue === "string" && directValue.length > 0) {
+        return directValue;
+      }
+    }
+
+    for (const nestedValue of Object.values(record)) {
+      const nested = search(nestedValue);
+      if (nested) return nested;
+    }
+
+    return undefined;
+  };
+
+  return search(item);
+};
+
+const pickCommentDisplayName = (item: ProductCommentApiItem) =>
+  pickNestedString(item as Record<string, unknown>, [
+    "userName",
+    "UserName",
+    "user_name",
+    "createdByName",
+    "CreatedByName",
+    "created_by_name",
+    "displayName",
+    "DisplayName",
+    "display_name",
+    "fullName",
+    "FullName",
+    "full_name",
+    "authorName",
+    "AuthorName",
+    "author_name",
+  ]);
+
+const normalizeComment = (item: ProductCommentApiItem): ProductComment => ({
+  id: item.id ?? item.commentId ?? crypto.randomUUID(),
+  content: item.content ?? "",
+  createdAt: item.createdAt ?? new Date().toISOString(),
+  parentCommentId: item.parentCommentId,
+  userName: pickNestedString(item as Record<string, unknown>, [
+    "userName",
+    "UserName",
+    "user_name",
+    "createdByName",
+    "CreatedByName",
+    "created_by_name",
+    "displayName",
+    "DisplayName",
+    "display_name",
+    "fullName",
+    "FullName",
+    "full_name",
+    "authorName",
+    "AuthorName",
+    "author_name",
+  ]),
+  displayName: pickCommentDisplayName(item),
+});
+
+const extractCommentItems = (raw: unknown): ProductCommentApiItem[] => {
+  if (Array.isArray(raw)) {
+    return raw as ProductCommentApiItem[];
+  }
+
+  if (raw && typeof raw === "object") {
+    const payload = raw as {
+      items?: ProductCommentApiItem[];
+      data?: ProductCommentApiItem[];
+      comments?: ProductCommentApiItem[];
+    };
+
+    return payload.items ?? payload.data ?? payload.comments ?? [];
+  }
+
+  return [];
 };
 
 const fetchSellerProfiles = async (sellerIds: string[]) => {
@@ -333,10 +454,13 @@ export const productService = createBaseService<
 });
 
 export const productCommentService = {
+  async getByProductId(productId: string): Promise<ProductComment[]> {
+    const raw = await apiClient.get(API_ENDPOINTS.PRODUCT.COMMENTS(productId));
+    return extractCommentItems(raw).map(normalizeComment);
+  },
+
   async create(data: CreateProductCommentDto): Promise<ProductComment> {
-    return (await apiClient.post(
-      API_ENDPOINTS.PRODUCT.COMMENT,
-      data,
-    )) as ProductComment;
+    const raw = await apiClient.post(API_ENDPOINTS.PRODUCT.COMMENT, data);
+    return normalizeComment(raw as ProductCommentApiItem);
   },
 };

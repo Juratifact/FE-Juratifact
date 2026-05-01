@@ -25,7 +25,11 @@ import {
   AvatarImage,
 } from "@/shared/components/ui/avatar";
 import { Separator } from "@/shared/components/ui/separator";
-import { useCreateProductComment } from "../hooks/useProduct";
+import { cn } from "@/lib/utils";
+import {
+  useCreateProductComment,
+  useProductComments,
+} from "../hooks/useProduct";
 import { useCreateProductReport } from "@/features/reports/hooks/useReports";
 import type { Product, ProductComment } from "../types";
 
@@ -43,16 +47,108 @@ const conditionVariant: Record<
   Good: "outline",
 };
 
+type CommentNode = ProductComment & { children: CommentNode[] };
+
+const buildCommentTree = (comments: ProductComment[]) => {
+  const commentMap = new Map<string, CommentNode>();
+  const roots: CommentNode[] = [];
+
+  comments.forEach((comment) => {
+    commentMap.set(comment.id, { ...comment, children: [] });
+  });
+
+  commentMap.forEach((comment) => {
+    if (comment.parentCommentId && commentMap.has(comment.parentCommentId)) {
+      commentMap.get(comment.parentCommentId)?.children.push(comment);
+    } else {
+      roots.push(comment);
+    }
+  });
+
+  return roots;
+};
+
+function CommentThreadNode({
+  node,
+  depth = 0,
+  onReply,
+}: {
+  node: CommentNode;
+  depth?: number;
+  onReply: (comment: ProductComment) => void;
+}) {
+  const displayName = node.displayName ?? node.userName ?? "User";
+
+  return (
+    <div className={cn("space-y-2", depth > 0 && "pl-4")}>
+      <div
+        className={cn(
+          "rounded-2xl border bg-background p-3 shadow-sm",
+          depth > 0 && "border-dashed bg-muted/20",
+        )}
+      >
+        <div className="flex items-start gap-3">
+          <Avatar className="h-8 w-8 shrink-0 border">
+            <AvatarFallback>
+              {displayName.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-3">
+              <p className="truncate text-sm font-semibold">{displayName}</p>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 rounded-full px-3 text-xs"
+                onClick={() => onReply(node)}
+              >
+                Reply
+              </Button>
+            </div>
+
+            <p className="mt-1 wrap-break-word text-sm text-muted-foreground">
+              {node.content}
+            </p>
+
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              {new Date(node.createdAt).toLocaleString("vi-VN")}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {node.children.length > 0 && (
+        <div className="space-y-2 border-l border-dashed border-muted-foreground/20 pl-3">
+          {node.children.map((child) => (
+            <CommentThreadNode
+              key={child.id}
+              node={child}
+              depth={depth + 1}
+              onReply={onReply}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const [commentText, setCommentText] = useState("");
   const [isActionOpen, setIsActionOpen] = useState(false);
+  const [isCommentsOpen, setIsCommentsOpen] = useState(false);
+  const [replyToComment, setReplyToComment] = useState<ProductComment | null>(
+    null,
+  );
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportDescription, setReportDescription] = useState("");
-  const [localComments, setLocalComments] = useState<ProductComment[]>(
-    product.comments ?? [],
-  );
   const createCommentMutation = useCreateProductComment();
+  const { data: serverComments = [] } = useProductComments(product.id);
+
   const createReportMutation = useCreateProductReport();
 
   const mainImage = useMemo(() => {
@@ -62,6 +158,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
     return undefined;
   }, [product.imageUrls]);
 
+  const commentTree = useMemo(
+    () => buildCommentTree(serverComments),
+    [serverComments],
+  );
+
   const handleCommentSubmit = () => {
     const content = commentText.trim();
     if (!content) return;
@@ -70,20 +171,12 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       {
         productId: product.id,
         content,
+        parentCommentId: replyToComment?.id,
       },
       {
-        onSuccess: (created) => {
-          setLocalComments((prev) => [
-            {
-              id: created?.id ?? crypto.randomUUID(),
-              content: created?.content ?? content,
-              createdAt: created?.createdAt ?? new Date().toISOString(),
-              userName: created?.userName ?? "Bạn",
-              parentCommentId: created?.parentCommentId,
-            },
-            ...prev,
-          ]);
+        onSuccess: () => {
           setCommentText("");
+          setReplyToComment(null);
         },
       },
     );
@@ -149,15 +242,27 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 <Badge variant="destructive">Sold</Badge>
               )}
 
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 rounded-full"
-                onClick={() => setIsActionOpen((prev) => !prev)}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 rounded-full"
+                  onClick={() => setIsCommentsOpen(true)}
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 rounded-full"
+                  onClick={() => setIsActionOpen((prev) => !prev)}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </div>
 
               {isActionOpen && (
                 <div className="absolute right-0 top-10 z-20 min-w-32 rounded-xl border bg-background p-1.5 shadow-lg">
@@ -232,7 +337,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
               <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1">
                 <MessageCircle className="h-3 w-3" />
-                {localComments.length}
+                {serverComments.length}
               </span>
             </div>
 
@@ -256,55 +361,188 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         <Separator />
 
         <CardContent className="space-y-3 bg-muted/30 pt-4">
-          <div>
-            <p className="mb-2 text-sm font-semibold">Comments</p>
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <p className="font-semibold">Comments</p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 rounded-full px-3"
+              onClick={() => setIsCommentsOpen(true)}
+            >
+              Open thread
+            </Button>
+          </div>
 
-            <div className="mb-3 flex gap-2">
-              <Input
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Write a comment..."
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleCommentSubmit();
-                  }
-                }}
-              />
-              <Button
-                type="button"
-                size="sm"
-                onClick={handleCommentSubmit}
-                disabled={
-                  createCommentMutation.isPending || !commentText.trim()
-                }
-              >
-                Send
-              </Button>
-            </div>
-
-            <div className="space-y-2">
-              {localComments.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No comments yet</p>
-              ) : (
-                localComments.slice(0, 3).map((comment) => (
-                  <div
-                    key={comment.id}
-                    className="rounded-lg border bg-background px-3 py-2"
-                  >
-                    <div className="text-xs font-medium">
-                      {comment.userName ?? "User"}
-                    </div>
-                    <div className="text-xs text-muted-foreground wrap-break-word">
-                      {comment.content}
-                    </div>
+          <div className="space-y-2">
+            {serverComments.length === 0 ? (
+              <p className="text-xs text-muted-foreground">No comments yet</p>
+            ) : (
+              serverComments.slice(0, 2).map((comment) => (
+                <div
+                  key={comment.id}
+                  className="rounded-lg border bg-background px-3 py-2"
+                >
+                  <div className="text-xs font-medium">
+                    {comment.displayName ?? comment.userName ?? "User"}
                   </div>
-                ))
-              )}
-            </div>
+                  <div className="wrap-break-word text-xs text-muted-foreground">
+                    {comment.content}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
+
+      {isCommentsOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 px-3 py-6 backdrop-blur-sm"
+          onClick={() => {
+            setIsCommentsOpen(false);
+            setReplyToComment(null);
+          }}
+        >
+          <div
+            className="flex max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-background shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="hidden w-[55%] bg-black md:block">
+              <div className="flex h-full items-center justify-center bg-muted">
+                {mainImage ? (
+                  <img
+                    src={mainImage}
+                    alt={product.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-muted">
+                    <ShoppingBag className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex w-full max-w-full flex-col md:w-[45%]">
+              <div className="flex items-center justify-between border-b px-4 py-3">
+                <div>
+                  <p className="text-sm font-semibold">Comments</p>
+                  <p className="text-xs text-muted-foreground">
+                    {serverComments.length} comments
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 rounded-full"
+                  onClick={() => {
+                    setIsCommentsOpen(false);
+                    setReplyToComment(null);
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-4 py-4">
+                <div className="mb-4 flex items-center gap-3 rounded-2xl border bg-muted/20 p-3">
+                  <Avatar className="h-10 w-10 border">
+                    <AvatarImage
+                      src={product.sellerProfilePicture}
+                      alt={product.sellerFullName ?? "Seller"}
+                    />
+                    <AvatarFallback>
+                      {(product.sellerFullName ?? "Seller")
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">
+                      {product.title}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {product.sellerFullName ?? "Người bán"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {commentTree.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No comments yet. Be the first to comment.
+                    </p>
+                  ) : (
+                    commentTree.map((node) => (
+                      <CommentThreadNode
+                        key={node.id}
+                        node={node}
+                        onReply={(comment) => {
+                          setReplyToComment(comment);
+                          setCommentText("");
+                        }}
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t bg-background p-4">
+                {replyToComment && (
+                  <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border bg-muted/30 px-3 py-2 text-xs">
+                    <span>
+                      Replying to{" "}
+                      {replyToComment.displayName ??
+                        replyToComment.userName ??
+                        "User"}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 rounded-full px-2"
+                      onClick={() => setReplyToComment(null)}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <Input
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder={
+                      replyToComment
+                        ? `Reply to ${replyToComment.displayName ?? replyToComment.userName ?? "user"}...`
+                        : "Add a comment..."
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleCommentSubmit();
+                      }
+                    }}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleCommentSubmit}
+                    disabled={
+                      createCommentMutation.isPending || !commentText.trim()
+                    }
+                  >
+                    Post
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isReportOpen && (
         <div
