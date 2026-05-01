@@ -111,7 +111,18 @@ function CommentThreadNode({
                 variant="ghost"
                 size="xs"
                 className="h-7 rounded-full px-2 text-xs"
-                onClick={() => onReply(node)}
+                onClick={() => {
+                  // Extract only the comment data without the children array
+                  const commentData: ProductComment = {
+                    id: node.id,
+                    content: node.content,
+                    createdAt: node.createdAt,
+                    parentCommentId: node.parentCommentId,
+                    displayName: node.displayName,
+                    userName: node.userName,
+                  };
+                  onReply(commentData);
+                }}
               >
                 Reply
               </Button>
@@ -174,19 +185,31 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
     const content = commentText.trim();
     if (!content) return;
 
-    createCommentMutation.mutate(
-      {
-        productId: product.id,
-        content,
-        parentCommentId: replyToComment?.id,
+    const payload = {
+      productId: product.id,
+      content,
+      parentCommentId: replyToComment?.id,
+    };
+    console.log("[DEBUG] Submitting comment:", {
+      ...payload,
+      replyToComment: replyToComment
+        ? {
+            id: replyToComment.id,
+            content: replyToComment.content,
+          }
+        : null,
+    });
+    createCommentMutation.mutate(payload, {
+      onSuccess: () => {
+        setCommentText("");
+        setReplyToComment(null);
       },
-      {
-        onSuccess: () => {
-          setCommentText("");
-          setReplyToComment(null);
-        },
+      onError: () => {
+        // Error is already handled by the hook and toast notification
+        // Clear reply state on error so user can try again
+        setReplyToComment(null);
       },
-    );
+    });
   };
 
   const handleReportSubmit = () => {

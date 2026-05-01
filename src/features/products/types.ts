@@ -29,6 +29,10 @@ export interface ProductComment {
   userName?: string;
 }
 
+export type ProductCommentResponse = ProductComment & {
+  productId?: string;
+};
+
 // ─── Filter params ───────────────────────────────────────
 export interface ProductFilterParams extends BaseFilterParams {
   title?: string;

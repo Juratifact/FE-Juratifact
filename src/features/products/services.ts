@@ -6,6 +6,7 @@ import type {
   Product,
   ProductFilterParams,
   ProductComment,
+  ProductCommentResponse,
   UpdateProductDto,
 } from "./types";
 import { API_ENDPOINTS } from "@/shared/constants";
@@ -42,7 +43,7 @@ type SellerApiItem = {
   profilePictureUrl?: string;
 };
 
-type ProductCommentApiItem = Partial<ProductComment> & {
+type ProductCommentApiItem = Partial<ProductCommentResponse> & {
   id?: string;
   commentId?: string;
   content?: string;
@@ -58,10 +59,10 @@ type ProductCommentApiItem = Partial<ProductComment> & {
   DisplayName?: string;
   createdByName?: string;
   CreatedByName?: string;
-  author?: string;
-  Author?: string;
-  authorName?: string;
-  AuthorName?: string;
+  user?: unknown;
+  author?: unknown;
+  createdBy?: unknown;
+  profile?: unknown;
 };
 
 type ProductCommentListRawResponse =
@@ -111,6 +112,34 @@ const pickString = (item: Record<string, unknown>, keys: string[]) => {
   return undefined;
 };
 
+const pickNestedString = (
+  value: unknown,
+  keys: string[],
+  depth = 2,
+): string | undefined => {
+  if (!value || depth < 0) return undefined;
+
+  if (typeof value === "string") {
+    return value.trim() ? value : undefined;
+  }
+
+  if (typeof value !== "object") {
+    return undefined;
+  }
+
+  const record = value as Record<string, unknown>;
+  const directValue = pickString(record, keys);
+  if (directValue) return directValue;
+
+  for (const nestedKey of ["user", "author", "createdBy", "profile"]) {
+    const nestedValue = record[nestedKey];
+    const nestedMatch = pickNestedString(nestedValue, keys, depth - 1);
+    if (nestedMatch) return nestedMatch;
+  }
+
+  return undefined;
+};
+
 const getSellerId = (item: ProductApiItem) =>
   pickString(item as Record<string, unknown>, ["sellerId", "SellerId"]);
 
@@ -141,73 +170,67 @@ const normalizeSeller = (item: SellerApiItem | undefined) => {
 };
 
 const normalizeComment = (item: ProductCommentApiItem): ProductComment => {
-  console.log("🔍 [normalizeComment] Raw API item:", item);
-  console.log("🔍 [normalizeComment] Item keys:", Object.keys(item));
-  console.log("🔍 [normalizeComment] All item entries:", Object.entries(item));
-
-  const displayName = pickString(item as Record<string, unknown>, [
-    "createdByName", // Move to top - this is what the API actually uses
-    "CreatedByName",
+  const displayName = pickNestedString(item, [
     "fullName",
     "FullName",
     "name",
     "Name",
     "displayName",
     "DisplayName",
+    "createdByName",
+    "CreatedByName",
     "userName",
     "UserName",
-    "author",
-    "Author",
-    "authorName",
-    "AuthorName",
   ]);
 
-  console.log(
-    "✅ [normalizeComment] Extracted displayName:",
-    displayName,
-    "Fallback will be:",
-    displayName ?? "User",
-  );
-
-  const normalized = {
+  return {
     id: item.id ?? item.commentId ?? crypto.randomUUID(),
     content: item.content ?? "",
     createdAt: item.createdAt ?? new Date().toISOString(),
     parentCommentId: item.parentCommentId,
     displayName,
-    userName: pickString(item as Record<string, unknown>, [
-      "userName",
-      "UserName",
-    ]),
+    userName: pickNestedString(item, ["userName", "UserName"]),
   };
-
-  console.log("✅ [normalizeComment] Final normalized:", normalized);
-  return normalized;
 };
 
-const extractCommentItems = (raw: ProductCommentListRawResponse) => {
-  console.log(
-    "📦 [extractCommentItems] Raw response type:",
-    typeof raw,
-    "isArray:",
-    Array.isArray(raw),
-  );
-  console.log("📦 [extractCommentItems] Raw response:", raw);
-
+const extractCommentItems = (
+  raw: ProductCommentListRawResponse | Record<string, unknown>,
+): ProductCommentApiItem[] => {
   if (Array.isArray(raw)) {
-    console.log(
-      "✅ [extractCommentItems] Response is array, length:",
-      raw.length,
-    );
     return raw;
   }
 
-  const items = raw.items ?? raw.data ?? raw.comments ?? [];
-  console.log(
-    "✅ [extractCommentItems] Extracted items from object, length:",
-    items.length,
-  );
-  return items;
+  if (!raw || typeof raw !== "object") {
+    return [];
+  }
+
+  const record = raw as Record<string, unknown>;
+  for (const key of ["items", "data", "comments"]) {
+    const value = record[key];
+    if (Array.isArray(value)) {
+      return value as ProductCommentApiItem[];
+    }
+    if (value && typeof value === "object") {
+      const nested = extractCommentItems(value as Record<string, unknown>);
+      if (nested.length > 0) {
+        return nested;
+      }
+    }
+  }
+
+  for (const nestedKey of ["data", "result", "payload"]) {
+    const nestedValue = record[nestedKey];
+    if (nestedValue && typeof nestedValue === "object") {
+      const nested = extractCommentItems(
+        nestedValue as Record<string, unknown>,
+      );
+      if (nested.length > 0) {
+        return nested;
+      }
+    }
+  }
+
+  return [];
 };
 
 const fetchSellerProfiles = async (sellerIds: string[]) => {
@@ -236,6 +259,9 @@ const normalizeProduct = (item: ProductApiItem): Product => {
   const seller = normalizeSeller(
     sellerId ? sellerProfileCache.get(sellerId) : undefined,
   );
+  const comments = Array.isArray(item.comments)
+    ? item.comments.map((comment) => normalizeComment(comment))
+    : [];
 
   return {
     id: item.id ?? item.productId ?? crypto.randomUUID(),
@@ -250,7 +276,7 @@ const normalizeProduct = (item: ProductApiItem): Product => {
     status: item.status === 1 ? 1 : 0,
     imageUrls: normalizeArray(item.imageUrls ?? item.imageUrl),
     videoUrls: normalizeArray(item.videoUrls ?? item.video),
-    comments: item.comments ?? [],
+    comments,
     createdAt: item.createdAt ?? new Date().toISOString(),
     updatedAt: item.updatedAt ?? item.createdAt ?? new Date().toISOString(),
   };
@@ -434,47 +460,40 @@ export const productService = createBaseService<
 
 export const productCommentService = {
   async getByProductId(productId: string): Promise<ProductComment[]> {
-    console.log(
-      "🚀 [productCommentService.getByProductId] Fetching comments for productId:",
-      productId,
-    );
     const raw = (await apiClient.get(
       API_ENDPOINTS.PRODUCT.COMMENTS(productId),
     )) as ProductCommentListRawResponse;
 
+    const comments = extractCommentItems(raw).map((item) => ({
+      ...normalizeComment(item),
+      parentCommentId:
+        normalizeComment(item).parentCommentId ??
+        item.parentCommentId ??
+        undefined,
+    }));
     console.log(
-      "📦 [productCommentService.getByProductId] Raw API response:",
-      raw,
+      "[DEBUG] Comments loaded:",
+      comments.map((c) => ({
+        id: c.id,
+        content: c.content,
+      })),
     );
-
-    const items = extractCommentItems(raw);
-    console.log(
-      "📋 [productCommentService.getByProductId] Extracted items:",
-      items,
-    );
-
-    const normalized = items.map(normalizeComment);
-    console.log(
-      "✅ [productCommentService.getByProductId] Normalized comments:",
-      normalized,
-    );
-
-    return normalized;
+    return comments;
   },
 
   async create(data: CreateProductCommentDto): Promise<ProductComment> {
-    console.log("🚀 [productCommentService.create] Creating comment:", data);
+    console.log("[DEBUG] Creating comment with payload:", { ...data });
     const created = (await apiClient.post(
       API_ENDPOINTS.PRODUCT.COMMENT,
       data,
     )) as ProductCommentApiItem;
 
-    console.log("📦 [productCommentService.create] Raw API response:", created);
-    const normalized = normalizeComment(created);
-    console.log(
-      "✅ [productCommentService.create] Normalized comment:",
-      normalized,
-    );
-    return normalized;
+    console.log("[DEBUG] Comment created response:", created);
+    const result = {
+      ...normalizeComment(created),
+      parentCommentId: created.parentCommentId ?? data.parentCommentId,
+    };
+    console.log("[DEBUG] Normalized comment result:", result);
+    return result;
   },
 };
