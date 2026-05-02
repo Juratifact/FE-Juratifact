@@ -22,6 +22,7 @@ export interface Product {
 
 export interface ProductComment {
   id: string;
+  commentId?: string;
   content: string;
   createdAt: string;
   parentCommentId?: string;

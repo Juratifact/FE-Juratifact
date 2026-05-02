@@ -44,19 +44,11 @@ type SellerApiItem = {
 };
 
 type ProductCommentApiItem = Partial<ProductCommentResponse> & {
-  id?: string;
   commentId?: string;
   content?: string;
   createdAt?: string;
   parentCommentId?: string;
   userName?: string;
-  UserName?: string;
-  fullName?: string;
-  FullName?: string;
-  name?: string;
-  Name?: string;
-  displayName?: string;
-  DisplayName?: string;
   createdByName?: string;
   CreatedByName?: string;
   user?: unknown;
@@ -170,6 +162,7 @@ const normalizeSeller = (item: SellerApiItem | undefined) => {
 };
 
 const normalizeComment = (item: ProductCommentApiItem): ProductComment => {
+  const commentId = item.commentId ?? item.id ?? crypto.randomUUID();
   const displayName = pickNestedString(item, [
     "fullName",
     "FullName",
@@ -184,7 +177,8 @@ const normalizeComment = (item: ProductCommentApiItem): ProductComment => {
   ]);
 
   return {
-    id: item.id ?? item.commentId ?? crypto.randomUUID(),
+    id: commentId,
+    commentId,
     content: item.content ?? "",
     createdAt: item.createdAt ?? new Date().toISOString(),
     parentCommentId: item.parentCommentId,
@@ -464,13 +458,9 @@ export const productCommentService = {
       API_ENDPOINTS.PRODUCT.COMMENTS(productId),
     )) as ProductCommentListRawResponse;
 
-    const comments = extractCommentItems(raw).map((item) => ({
-      ...normalizeComment(item),
-      parentCommentId:
-        normalizeComment(item).parentCommentId ??
-        item.parentCommentId ??
-        undefined,
-    }));
+    const comments = extractCommentItems(raw).map((item) =>
+      normalizeComment(item),
+    );
     console.log(
       "[DEBUG] Comments loaded:",
       comments.map((c) => ({
@@ -483,16 +473,19 @@ export const productCommentService = {
 
   async create(data: CreateProductCommentDto): Promise<ProductComment> {
     console.log("[DEBUG] Creating comment with payload:", { ...data });
-    const created = (await apiClient.post(
-      API_ENDPOINTS.PRODUCT.COMMENT,
-      data,
-    )) as ProductCommentApiItem;
 
-    console.log("[DEBUG] Comment created response:", created);
-    const result = {
-      ...normalizeComment(created),
-      parentCommentId: created.parentCommentId ?? data.parentCommentId,
-    };
+    const res = await apiClient.post(API_ENDPOINTS.PRODUCT.COMMENT, data);
+
+    console.log("[DEBUG] Raw response:", res);
+
+    // The axios wrapper (`apiClient`) already unwraps the response and
+    // returns the inner payload. Use `res` directly as the created item.
+    const created = res;
+
+    console.log("[DEBUG] Extracted comment:", created);
+
+    const result = normalizeComment(created as ProductCommentApiItem);
+
     console.log("[DEBUG] Normalized comment result:", result);
     return result;
   },

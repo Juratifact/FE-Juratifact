@@ -156,6 +156,7 @@ export function useCreateProductComment() {
     mutationFn: (data: CreateProductCommentDto) =>
       productCommentService.create(data),
     onSuccess: (createdComment, variables) => {
+      toast.success("Bình luận đã được gửi");
       queryClient.setQueryData(
         QUERY_KEYS.PRODUCT_COMMENTS(variables.productId),
         (current: unknown) => {
@@ -164,6 +165,7 @@ export function useCreateProductComment() {
             ...createdComment,
             displayName:
               createdComment.displayName ?? createdComment.userName ?? "Bạn",
+            parentCommentId: createdComment.parentCommentId,
           };
 
           return [nextComment, ...existingComments];
