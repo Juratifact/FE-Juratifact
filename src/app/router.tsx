@@ -116,22 +116,22 @@ export const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: "categories",
-        element: (
-          <ProtectedRoute allowedRoles={["Admin"]}>
-            <AdminCategoriesPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: "upgrade",
-        element: (
-          <ProtectedRoute allowedRoles={["Admin"]}>
-            <AdminUpgradePage />
-          </ProtectedRoute>
-        ),
-      },
+      // {
+      //   path: "categories",
+      //   element: (
+      //     <ProtectedRoute allowedRoles={["Admin"]}>
+      //       <AdminCategoriesPage />
+      //     </ProtectedRoute>
+      //   ),
+      // },
+      // {
+      //   path: "upgrade",
+      //   element: (
+      //     <ProtectedRoute allowedRoles={["Admin"]}>
+      //       <AdminUpgradePage />
+      //     </ProtectedRoute>
+      //   ),
+      // },
     ],
   },
 ]);

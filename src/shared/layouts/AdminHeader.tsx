@@ -1,111 +1,111 @@
 import { NavLink } from "react-router-dom";
+import { useLogoutMutation } from "@/features/auth/hooks/useAuthMutation";
+import { Button } from "@/shared/components/ui/button";
 import {
   LayoutDashboard,
   FlagTriangleRight,
   Users,
-  Layers3,
-  Sparkles,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
 const navItems = [
-  { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
-  { label: "Reports", to: "/admin/reports", icon: FlagTriangleRight },
-  { label: "Users", to: "/admin/users", icon: Users },
-  { label: "Categories", to: "/admin/categories", icon: Layers3 },
-  { label: "Upgrade", to: "/admin/upgrade", icon: Sparkles },
+  { label: "Bảng điều khiển", to: "/admin", icon: LayoutDashboard },
+  { label: "Báo cáo vi phạm", to: "/admin/reports", icon: FlagTriangleRight },
+  { label: "Người dùng", to: "/admin/users", icon: Users },
 ];
 
 export default function AdminHeader() {
+  const logoutMutation = useLogoutMutation();
   return (
-    <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:sticky lg:top-0 lg:h-screen bg-slate-950 text-slate-50 border-r border-white/10">
-      <div className="flex h-full flex-col p-5">
-        <div className="rounded-3xl bg-linear-to-br from-orange-500 via-orange-600 to-rose-600 p-5 shadow-2xl shadow-orange-950/30">
-          <div className="flex items-center gap-3">
-            <div className="grid size-12 place-items-center rounded-2xl bg-white/15 backdrop-blur-sm ring-1 ring-white/20">
-              <img
-                src="/juralogo.png"
-                alt="Juratifact Admin"
-                className="size-8 object-contain brightness-0 invert"
-              />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/75">
-                Admin Center
-              </p>
-              <h1 className="text-2xl font-black italic uppercase leading-none">
-                Juratifact
-              </h1>
-            </div>
+    <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:sticky lg:top-0 lg:h-screen bg-background border-r border-border/50">
+      <div className="flex h-full flex-col px-6 py-8">
+        {/* Logo Section - Clean & High-end */}
+        <div className="flex items-center gap-3 px-2 mb-10">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-primary shadow-sm ring-1 ring-primary">
+            <img
+              src="/juralogo.png"
+              alt="Juratifact Admin"
+              className="size-6 object-contain brightness-0 invert"
+            />
           </div>
-          <div className="mt-4 rounded-2xl bg-white/10 p-3 text-xs font-medium text-white/90">
-            Quản lý báo cáo, người dùng và danh mục theo phong cách marketplace.
+          <div className="flex flex-col">
+            <h1 className="text-lg font-bold tracking-tight leading-none">
+              Juratifact
+            </h1>
+            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground mt-1">
+              Management Suite
+            </span>
           </div>
         </div>
 
-        <nav className="mt-6 space-y-1.5">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === "/admin"}
-                className={({ isActive }) =>
-                  cn(
-                    "group flex items-center justify-between rounded-2xl px-4 py-3 transition-all duration-200",
-                    isActive
-                      ? "bg-white text-slate-950 shadow-lg shadow-orange-950/20"
-                      : "text-slate-300 hover:bg-white/5 hover:text-white",
-                  )
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <span className="flex items-center gap-3 font-semibold">
-                      <span
-                        className={cn(
-                          "grid size-9 place-items-center rounded-xl transition-colors",
-                          isActive
-                            ? "bg-orange-100 text-orange-600"
-                            : "bg-white/5 text-white/80",
-                        )}
-                      >
-                        <Icon className="size-4" />
-                      </span>
-                      <span className="text-sm">{item.label}</span>
-                    </span>
-                    <ChevronRight
+        {/* Navigation Section */}
+        <div className="space-y-1">
+          <p className="px-2 mb-4 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">
+            Menu chính
+          </p>
+          <nav className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.to === "/admin"}
+                  className={({ isActive }) =>
+                    cn(
+                      "group flex items-center justify-between rounded-xl px-3 py-2.5 transition-all duration-200 border border-transparent",
+                      isActive
+                        ? "bg-secondary text-secondary-foreground shadow-sm border-border/50"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )
+                  }
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon
                       className={cn(
-                        "size-4 transition-transform",
-                        isActive
-                          ? "text-orange-500"
-                          : "text-slate-500 group-hover:translate-x-1",
+                        "size-4.5 transition-colors",
+                        "group-hover:text-foreground",
                       )}
                     />
-                  </>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
+                    <span className="text-sm font-medium tracking-tight">
+                      {item.label}
+                    </span>
+                  </div>
+                  <ChevronRight
+                    className={cn(
+                      "size-3.5 transition-all duration-300 opacity-0 -translate-x-2",
+                      "group-hover:opacity-100 group-hover:translate-x-0",
+                    )}
+                  />
+                </NavLink>
+              );
+            })}
+          </nav>
+        </div>
 
-        <div className="mt-auto rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-                Growth mode
-              </p>
-              <p className="mt-1 text-sm font-semibold text-white">
-                Boost admin workflow
-              </p>
-            </div>
-            <Sparkles className="size-5 text-orange-400" />
+        {/* Footer info (Optional) */}
+        <div className="mt-auto">
+          <div className="mb-3 flex justify-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-colors duration-300"
+              onClick={() => logoutMutation.mutate()}
+            >
+              Đăng xuất
+            </Button>
           </div>
-          <button className="mt-4 w-full rounded-2xl bg-linear-to-r from-orange-500 to-rose-500 px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-lg shadow-orange-950/30 transition-transform hover:scale-[1.01]">
-            Upgrade tools
-          </button>
+          <div className="rounded-2xl bg-muted/40 p-4 border border-border/40">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[11px] font-medium text-muted-foreground">
+                Hệ thống trực tuyến
+              </span>
+            </div>
+            <p className="text-[11px] leading-relaxed text-muted-foreground/80">
+              Phiên bản v2.4.0 <br />© 2026 Juratifact Inc.
+            </p>
+          </div>
         </div>
       </div>
     </aside>
