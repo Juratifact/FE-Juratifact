@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
-import { Trash2 } from "lucide-react";
 import type { Report } from "../types";
 import { getStatusLabel, getStatusDisplay } from "../types";
 
@@ -35,8 +34,6 @@ export function ReportTable({
   reports,
   onApprove,
   onReject,
-  onDelete,
-  isDeleting,
   isLoading,
 }: ReportTableProps) {
   return (
@@ -99,28 +96,6 @@ export function ReportTable({
                         className="rounded-lg"
                       >
                         Reject
-                      </Button>
-                    )}
-                    {report.status === 0 && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        disabled={true}
-                        className="rounded-lg"
-                      >
-                        Dismiss
-                      </Button>
-                    )}
-                    {onDelete && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onDelete(report.id)}
-                        disabled={isDeleting}
-                        className="text-destructive"
-                        title="Xóa báo cáo"
-                      >
-                        <Trash2 className="w-4 h-4" />
                       </Button>
                     )}
                   </div>

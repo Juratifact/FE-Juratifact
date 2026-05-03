@@ -2,13 +2,34 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import type {
   CreateReportDto,
+  Report,
   ReportFilterParams,
+  ReportListResponse,
   UpdateReportDto,
 } from "../types";
 import { reportService, approveReport, rejectReport } from "../services";
 import { toast } from "sonner";
 import { QUERY_KEYS } from "@/shared/constants";
 import { useMemo } from "react";
+
+type ReportsCache = ReportListResponse | undefined;
+
+const updateReportStatusInCache = (
+  currentData: ReportsCache,
+  reportId: string,
+  status: number,
+) => {
+  if (!currentData?.data || !Array.isArray(currentData.data)) {
+    return currentData;
+  }
+
+  return {
+    ...currentData,
+    data: currentData.data.map((report: Report) =>
+      report.id === reportId ? { ...report, status } : report,
+    ),
+  };
+};
 
 export function useReports() {
   const [searchParams] = useSearchParams();
@@ -109,7 +130,12 @@ export function useApproveReport() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (reportId: string) => approveReport(reportId),
-    onSuccess: () => {
+    onSuccess: (_data, reportId) => {
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.REPORTS },
+        (currentData) =>
+          updateReportStatusInCache(currentData as ReportsCache, reportId, 1),
+      );
       toast.success("Duyệt báo cáo thành công!");
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
     },
@@ -123,7 +149,12 @@ export function useRejectReport() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (reportId: string) => rejectReport(reportId),
-    onSuccess: () => {
+    onSuccess: (_data, reportId) => {
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.REPORTS },
+        (currentData) =>
+          updateReportStatusInCache(currentData as ReportsCache, reportId, 2),
+      );
       toast.success("Từ chối báo cáo thành công!");
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
     },

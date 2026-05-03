@@ -122,8 +122,6 @@ function CommentThreadNode({
                     displayName: node.displayName,
                     userName: node.userName,
                   };
-                  console.log("comment dâta", commentData);
-
                   onReply(commentData);
                 }}
               >
@@ -187,22 +185,11 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const handleCommentSubmit = () => {
     const content = commentText.trim();
     if (!content) return;
-    console.log("replyToComment", replyToComment);
     const payload = {
       productId: product.id,
       content,
       parentCommentId: replyToComment?.commentId,
     };
-    console.log("[DEBUG] Submitting comment:", {
-      ...payload,
-      replyToComment: replyToComment
-        ? {
-            id: replyToComment.id,
-            parentCommentId: replyToComment.commentId,
-            content: replyToComment.content,
-          }
-        : null,
-    });
     createCommentMutation.mutate(payload, {
       onSuccess: () => {
         setCommentText("");

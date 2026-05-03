@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   Package,
   Users,
@@ -18,6 +17,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/shared/components/ui/card";
 import {
   Table,
@@ -34,156 +34,151 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { Badge } from "@/shared/components/ui/badge";
+import { Separator } from "@/shared/components/ui/separator";
 
 const stats = [
   {
     label: "Doanh thu",
     value: "$45,230",
     grow: "+12%",
-    icon: <ShoppingCart className="size-4" />,
+    icon: ShoppingCart,
   },
   {
     label: "Tin đăng",
     value: "1,240",
     grow: "+5%",
-    icon: <Package className="size-4" />,
+    icon: Package,
   },
   {
     label: "Người dùng",
     value: "862",
     grow: "+18%",
-    icon: <Users className="size-4" />,
+    icon: Users,
   },
   {
     label: "Truy cập",
     value: "12.4K",
     grow: "+22%",
-    icon: <LayoutDashboard className="size-4" />,
+    icon: LayoutDashboard,
   },
 ];
 
 const shortcuts = [
-  { label: "Reports", icon: FlagTriangleRight, href: "/admin/reports" },
-  { label: "Users", icon: Users, href: "/admin/users" },
-  { label: "Categories", icon: Layers3, href: "/admin/categories" },
-  { label: "Upgrade", icon: Sparkles, href: "/admin/upgrade" },
+  { label: "Báo cáo vi phạm", icon: FlagTriangleRight, href: "/admin/reports" },
+  { label: "Quản lý người dùng", icon: Users, href: "/admin/users" },
+  { label: "Danh mục sản phẩm", icon: Layers3, href: "/admin/categories" },
+  { label: "Nâng cấp hệ thống", icon: Sparkles, href: "/admin/upgrade" },
 ];
 
 export default function AdminPage() {
-  const summary = useMemo(
-    () => [
-      { label: "Pending reports", value: 18, tone: "amber" },
-      { label: "Active users", value: 862, tone: "emerald" },
-      { label: "Categories", value: 24, tone: "sky" },
-    ],
-    [],
-  );
-
   return (
-    <div className="space-y-6">
-      <section className="overflow-hidden rounded-3xl border border-orange-100 bg-linear-to-r from-orange-500 via-orange-400 to-rose-500 p-6 text-white shadow-xl shadow-orange-200/40">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <Badge className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-white hover:bg-white/15">
-              Marketplace control center
-            </Badge>
-            <h1 className="mt-4 text-3xl font-black italic uppercase tracking-tight sm:text-5xl">
-              Dashboard
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm text-white/85 sm:text-base">
-              Giám sát hoạt động theo phong cách chợ tốt / shopee: gọn, sáng,
-              nhiều điểm chạm hành động.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3 text-center">
-            {summary.map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-sm"
-              >
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/75">
-                  {item.label}
-                </p>
-                <p className="mt-1 text-2xl font-black">{item.value}</p>
-              </div>
-            ))}
-          </div>
+    <div className="container mx-auto p-6 space-y-8 max-w-7xl">
+      {/* Header Section */}
+      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            Tổng quan hệ thống
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Quản lý hoạt động marketplace và theo dõi chỉ số tăng trưởng thực
+            tế.
+          </p>
         </div>
-      </section>
+      </header>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      {/* Hero Stats */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, i) => (
-          <Card
-            key={i}
-            className="rounded-3xl border border-slate-200 bg-white shadow-sm"
-          >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-[10px] font-bold uppercase tracking-[0.28em] text-slate-500">
+          <Card key={i} className="border-none shadow-sm ring-1 ring-border">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+              <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 {stat.label}
               </CardTitle>
-              <div className="grid size-10 place-items-center rounded-2xl bg-orange-50 text-orange-600">
-                {stat.icon}
-              </div>
+              <stat.icon className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-black italic uppercase text-slate-950">
-                {stat.value}
+              <div className="text-2xl font-bold">{stat.value}</div>
+              <div className="flex items-center mt-1">
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] px-1.5 py-0 font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                >
+                  {stat.grow}
+                </Badge>
+                <span className="text-[10px] text-muted-foreground ml-2">
+                  so với tháng trước
+                </span>
               </div>
-              <p className="mt-1 flex items-center text-xs font-bold uppercase tracking-[0.2em] text-emerald-600">
-                {stat.grow} <ArrowUpRight className="ml-1 size-3" />
-              </p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-7">
-        <Card className="col-span-4 rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100">
-            <div>
-              <CardTitle className="text-2xl font-black italic uppercase">
-                Tin đăng mới
-              </CardTitle>
-              <p className="text-sm text-slate-500">
-                Dữ liệu mô phỏng theo kiểu marketplace dashboard
-              </p>
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Table Section */}
+        <Card className="lg:col-span-8 border-none shadow-sm ring-1 ring-border">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Tin đăng mới nhất</CardTitle>
+              <CardDescription>
+                Danh sách các sản phẩm vừa được cập nhật trên sàn.
+              </CardDescription>
             </div>
-            <Badge className="rounded-full bg-orange-100 px-3 py-2 text-xs font-bold text-orange-600 hover:bg-orange-100">
-              Live data
-            </Badge>
+            <Button variant="ghost" size="sm" className="text-xs font-medium">
+              Xem tất cả
+            </Button>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
-              <TableHeader>
-                <TableRow className="border-b border-slate-100 hover:bg-transparent">
-                  <TableHead className="font-black uppercase text-[10px] tracking-[0.2em] text-slate-500">
-                    Sản phẩm
-                  </TableHead>
-                  <TableHead className="font-black uppercase text-[10px] tracking-[0.2em] text-slate-500 text-right">
-                    Giá
-                  </TableHead>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="w-75">Sản phẩm</TableHead>
+                  <TableHead>Trạng thái</TableHead>
+                  <TableHead className="text-right">Giá trị</TableHead>
                   <TableHead className="w-12.5"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {[
-                  { name: "iPhone 13 128GB", status: "Active", price: "$450" },
-                  { name: "MacBook Air M1", status: "Pending", price: "$620" },
+                  {
+                    name: "iPhone 13 128GB Blue",
+                    status: "Active",
+                    price: "$450",
+                    sku: "IP13-128",
+                  },
+                  {
+                    name: "MacBook Air M1 Space Gray",
+                    status: "Pending",
+                    price: "$620",
+                    sku: "MBA-M1",
+                  },
+                  {
+                    name: "Sony WH-1000XM4",
+                    status: "Active",
+                    price: "$280",
+                    sku: "SNY-XM4",
+                  },
                 ].map((item) => (
-                  <TableRow
-                    key={item.name}
-                    className="group border-b border-slate-100 hover:bg-slate-50 transition-colors"
-                  >
-                    <TableCell className="py-4 text-xs font-black italic uppercase">
-                      <div>
-                        <div>{item.name}</div>
-                        <div className="mt-1 text-[10px] font-semibold text-slate-400">
-                          {item.status}
-                        </div>
+                  <TableRow key={item.sku} className="group transition-colors">
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{item.name}</span>
+                        <span className="text-[10px] text-muted-foreground tracking-tight">
+                          SKU: {item.sku}
+                        </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right font-bold text-sm text-slate-900">
+                    <TableCell>
+                      <Badge
+                        variant={
+                          item.status === "Active" ? "outline" : "secondary"
+                        }
+                        className="text-[10px] font-normal"
+                      >
+                        {item.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-semibold">
                       {item.price}
                     </TableCell>
                     <TableCell>
@@ -191,18 +186,18 @@ export default function AdminPage() {
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
-                            className="h-8 w-8 rounded-2xl p-0"
+                            size="icon"
+                            className="size-8"
                           >
-                            <MoreHorizontal className="h-4 w-4" />
+                            <MoreHorizontal className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="rounded-2xl border border-slate-200 font-bold uppercase text-[10px]"
-                        >
-                          <DropdownMenuItem>Sửa</DropdownMenuItem>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuItem>Chỉnh sửa</DropdownMenuItem>
+                          <DropdownMenuItem>Xem chi tiết</DropdownMenuItem>
+                          <Separator className="my-1" />
                           <DropdownMenuItem className="text-destructive">
-                            Xóa
+                            Gỡ tin
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -214,51 +209,54 @@ export default function AdminPage() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-3 rounded-3xl border border-slate-200 bg-slate-950 text-white shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-2xl font-black italic uppercase">
-              Quick search
-            </CardTitle>
-            <p className="text-sm text-slate-300">
-              Lọc nhanh dữ liệu theo SKU / ID / report
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                Nhập SKU hoặc ID
-              </label>
-              <Input
-                placeholder="SEARCH ID..."
-                className="h-11 rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-slate-400 focus-visible:ring-orange-400"
-              />
-            </div>
-            <Button className="w-full rounded-2xl bg-linear-to-r from-orange-500 to-rose-500 py-6 font-black italic uppercase text-white hover:opacity-95">
-              <Search className="mr-2 size-4" /> Lọc kết quả
-            </Button>
+        {/* Sidebar Actions */}
+        <div className="lg:col-span-4 space-y-6">
+          {/* Quick Search */}
+          <Card className="border-none shadow-sm ring-1 ring-border bg-primary text-primary-foreground">
+            <CardHeader>
+              <CardTitle className="text-lg">Tìm kiếm nhanh</CardTitle>
+              <CardDescription className="text-primary-foreground/70">
+                Tra cứu nhanh mã sản phẩm hoặc người dùng.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-primary-foreground/50" />
+                <Input
+                  placeholder="Nhập mã định danh..."
+                  className="bg-primary-foreground/10 border-none placeholder:text-primary-foreground/40 text-primary-foreground h-10 pl-10 focus-visible:ring-offset-0 focus-visible:ring-1 focus-visible:ring-primary-foreground/30"
+                />
+              </div>
+              <Button variant="secondary" className="w-full font-medium">
+                Tìm kiếm ngay
+              </Button>
+            </CardContent>
+          </Card>
 
-            <div className="grid gap-3 pt-2">
-              {shortcuts.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white/90 transition-colors hover:bg-white/10"
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="grid size-9 place-items-center rounded-xl bg-white/10">
-                        <Icon className="size-4" />
-                      </span>
-                      {item.label}
-                    </span>
-                    <ArrowUpRight className="size-4 text-white/50" />
-                  </a>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+          {/* Quick Links */}
+          <Card className="border-none shadow-sm ring-1 ring-border">
+            <CardHeader>
+              <CardTitle className="text-base">Lối tắt quản lý</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-2">
+              {shortcuts.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted transition-all group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-muted rounded-md group-hover:bg-background transition-colors">
+                      <item.icon className="size-4 text-foreground" />
+                    </div>
+                    <span className="text-sm font-medium">{item.label}</span>
+                  </div>
+                  <ArrowUpRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all" />
+                </a>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
