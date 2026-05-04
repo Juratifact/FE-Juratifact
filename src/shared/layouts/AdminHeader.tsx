@@ -6,11 +6,13 @@ import {
   FlagTriangleRight,
   Users,
   ChevronRight,
+  FileCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 const navItems = [
   { label: "Bảng điều khiển", to: "/admin", icon: LayoutDashboard },
   { label: "Báo cáo vi phạm", to: "/admin/reports", icon: FlagTriangleRight },
+  { label: "Xác minh tài liệu", to: "/admin/identify", icon: FileCheck },
   { label: "Người dùng", to: "/admin/users", icon: Users },
 ];
 

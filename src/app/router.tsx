@@ -2,9 +2,12 @@ import LoginPage from "@/features/auth/pages/LoginPage";
 import NotFoundPage from "@/features/auth/pages/NotFoundPage";
 import RegisterPage from "@/features/auth/pages/RegisterPage";
 import UnauthorizedPage from "@/features/auth/pages/UnauthorizedPage";
+import IdentifyCatalog from "@/features/identify/pages/IdentifyCatalog";
+import ManageIdentifyCreate from "@/features/identify/pages/ManageIdentifyCreate";
+import ManageIdentifyEdit from "@/features/identify/pages/ManageIdentifyEdit";
+import IdentifyDetailPage from "@/features/identify/pages/IdentifyDetailPage";
+import IdentifyList from "@/features/identify/pages/IdentifyList";
 import AdminPage from "@/features/landing/pages/AdminPage";
-import AdminCategoriesPage from "@/features/landing/pages/AdminCategoriesPage";
-import AdminUpgradePage from "@/features/landing/pages/AdminUpgradePage";
 import HomePage from "@/features/landing/pages/HomePage";
 import MapPage from "@/features/map/pages/MapPage";
 import ProductCatalog from "@/features/products/pages/ProductCatalog";
@@ -64,6 +67,30 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "identify",
+        element: (
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller"]}>
+            <IdentifyCatalog />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "identify/create",
+        element: (
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller"]}>
+            <ManageIdentifyCreate />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "identify/edit/:id",
+        element: (
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller"]}>
+            <ManageIdentifyEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "login",
         element: (
           <GuestRoute>
@@ -113,6 +140,22 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["Admin"]}>
             <ManageReportList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "identify",
+        element: (
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <IdentifyList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "identify/:id",
+        element: (
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <IdentifyDetailPage />
           </ProtectedRoute>
         ),
       },
