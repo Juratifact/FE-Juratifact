@@ -130,6 +130,22 @@ const Header = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                   )}
+                  {token && !isAdmin && (
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/identify"
+                          className={cn(
+                            menuTriggerClass,
+                            location.pathname.startsWith("/identify") &&
+                              activeClass,
+                          )}
+                        >
+                          Identify
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+                  )}
                 </NavigationMenuList>
               </NavigationMenu>
             </div>
