@@ -26,6 +26,7 @@ export interface ProductComment {
   content: string;
   createdAt: string;
   parentCommentId?: string;
+  replyCount?: number;
   displayName?: string;
   userName?: string;
 }
@@ -66,6 +67,16 @@ export interface CreateProductCommentDto {
 }
 
 export type UpdateProductDto = Partial<CreateProductDto>;
+
+export interface UpdateMyProductDto {
+  title?: string;
+  description?: string;
+  condition?: Product["condition"];
+  price?: number;
+  image?: File | null;
+  video?: File | null;
+  status?: Product["status"];
+}
 
 // ─── Form Props ──────────────────────────────────────────
 export interface ProductFormProps {

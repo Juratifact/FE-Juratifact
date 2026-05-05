@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Eye,
+  ChevronDown,
+  ChevronUp,
   MessageCircle,
   MoreHorizontal,
   ShoppingBag,
@@ -36,6 +38,9 @@ import type { Product, ProductComment } from "../types";
 interface ProductCardProps {
   product: Product;
   onAddToCart?: (product: Product) => void;
+  mode?: "default" | "owner";
+  onEdit?: (product: Product) => void;
+  onDelete?: (product: Product) => void;
 }
 
 const conditionVariant: Record<
@@ -80,12 +85,18 @@ const buildCommentTree = (comments: ProductComment[]) => {
   return roots;
 };
 
+const countCommentTree = (nodes: CommentNode[]): number =>
+  nodes.reduce((total, node) => total + 1 + countCommentTree(node.children), 0);
+
 function CommentThreadNode({
   node,
   depth = 0,
   onReply,
 }: CommentThreadNodeProps) {
+  const [isRepliesOpen, setIsRepliesOpen] = useState(depth > 0);
   const displayName = node.displayName ?? node.userName ?? "User";
+  const hasReplies = node.children.length > 0;
+  const repliesLabel = Math.max(node.replyCount ?? 0, node.children.length);
 
   return (
     <div className={cn("space-y-2", depth > 0 && "pl-4")}>
@@ -104,29 +115,12 @@ function CommentThreadNode({
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-3">
-              <p className="truncate text-sm font-semibold">{displayName}</p>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="xs"
-                className="h-7 rounded-full px-2 text-xs"
-                onClick={() => {
-                  // Extract only the comment data without the children array
-                  const commentData: ProductComment = {
-                    id: node.id,
-                    commentId: node.commentId ?? node.id,
-                    content: node.content,
-                    createdAt: node.createdAt,
-                    parentCommentId: node.id,
-                    displayName: node.displayName,
-                    userName: node.userName,
-                  };
-                  onReply(commentData);
-                }}
-              >
-                Reply
-              </Button>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{displayName}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">
+                  {new Date(node.createdAt).toLocaleString("vi-VN")}
+                </p>
+              </div>
             </div>
 
             <p className="mt-1 whitespace-pre-wrap wrap-break-word text-sm text-muted-foreground">
@@ -134,9 +128,44 @@ function CommentThreadNode({
             </p>
           </div>
         </div>
+
+        <div className={cn("mt-2", depth > 0 && "pl-11")}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            className="h-7 rounded-full px-2 text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => onReply(node)}
+          >
+            Reply
+          </Button>
+        </div>
+
+        {hasReplies && (
+          <button
+            type="button"
+            className={cn(
+              "mt-3 flex items-center gap-3 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
+              depth > 0 && "pl-11",
+            )}
+            onClick={() => setIsRepliesOpen((prev) => !prev)}
+          >
+            <span className="h-px w-8 bg-border" />
+            <span>
+              {isRepliesOpen
+                ? "Hide replies"
+                : `View replies (${repliesLabel})`}
+            </span>
+            {isRepliesOpen ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
+          </button>
+        )}
       </div>
 
-      {node.children.length > 0 && (
+      {hasReplies && isRepliesOpen && (
         <div className="space-y-2 border-l border-border/70 pl-4">
           {node.children.map((child) => (
             <CommentThreadNode
@@ -152,7 +181,13 @@ function CommentThreadNode({
   );
 }
 
-export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+export function ProductCard({
+  product,
+  onAddToCart,
+  mode = "default",
+  onEdit,
+  onDelete,
+}: ProductCardProps) {
   const [commentText, setCommentText] = useState("");
   const [replyToComment, setReplyToComment] = useState<ProductComment | null>(
     null,
@@ -173,6 +208,10 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
   const commentTree = useMemo(
     () => buildCommentTree(displayedComments),
     [displayedComments],
+  );
+  const totalCommentCount = useMemo(
+    () => countCommentTree(commentTree),
+    [commentTree],
   );
 
   const mainImage = useMemo(() => {
@@ -275,17 +314,44 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
 
               {isActionOpen && (
                 <div className="absolute right-0 top-10 z-20 min-w-32 rounded-xl border bg-background p-1.5 shadow-lg">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="h-8 w-full justify-start rounded-lg text-sm text-orange-600 hover:bg-orange-50 hover:text-orange-700"
-                    onClick={() => {
-                      setIsReportOpen(true);
-                      setIsActionOpen(false);
-                    }}
-                  >
-                    Report
-                  </Button>
+                  {mode === "owner" ? (
+                    <>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-8 w-full justify-start rounded-lg text-sm hover:bg-muted"
+                        onClick={() => {
+                          onEdit?.(product);
+                          setIsActionOpen(false);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="h-8 w-full justify-start rounded-lg text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => {
+                          onDelete?.(product);
+                          setIsActionOpen(false);
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-8 w-full justify-start rounded-lg text-sm text-orange-600 hover:bg-orange-50 hover:text-orange-700"
+                      onClick={() => {
+                        setIsReportOpen(true);
+                        setIsActionOpen(false);
+                      }}
+                    >
+                      Report
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -365,7 +431,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             )}
             <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1">
               <MessageCircle className="h-3 w-3" />
-              {displayedComments.length} comments
+              {totalCommentCount} comments
             </span>
           </div>
 
@@ -511,7 +577,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
                 <div>
                   <p className="text-sm font-semibold">Comments</p>
                   <p className="text-xs text-muted-foreground">
-                    {displayedComments.length} comments
+                    {totalCommentCount} comments
                   </p>
                 </div>
 
@@ -609,7 +675,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
         </div>
       )}
 
-      {isReportOpen && (
+      {mode !== "owner" && isReportOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-[2px]"
           onClick={() => setIsReportOpen(false)}
