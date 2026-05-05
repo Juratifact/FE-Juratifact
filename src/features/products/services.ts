@@ -7,6 +7,7 @@ import type {
   ProductFilterParams,
   ProductComment,
   ProductCommentResponse,
+  UpdateMyProductDto,
   UpdateProductDto,
 } from "./types";
 import { API_ENDPOINTS } from "@/shared/constants";
@@ -48,6 +49,8 @@ type ProductCommentApiItem = Partial<ProductCommentResponse> & {
   content?: string;
   createdAt?: string;
   parentCommentId?: string;
+  replyCount?: number;
+  replies?: ProductCommentApiItem[];
   userName?: string;
   createdByName?: string;
   CreatedByName?: string;
@@ -161,7 +164,10 @@ const normalizeSeller = (item: SellerApiItem | undefined) => {
   };
 };
 
-const normalizeComment = (item: ProductCommentApiItem): ProductComment => {
+const normalizeComment = (
+  item: ProductCommentApiItem,
+  fallbackParentCommentId?: string,
+): ProductComment => {
   const commentId = item.commentId ?? item.id ?? crypto.randomUUID();
   const displayName = pickNestedString(item, [
     "fullName",
@@ -181,11 +187,25 @@ const normalizeComment = (item: ProductCommentApiItem): ProductComment => {
     commentId,
     content: item.content ?? "",
     createdAt: item.createdAt ?? new Date().toISOString(),
-    parentCommentId: item.parentCommentId,
+    parentCommentId: item.parentCommentId ?? fallbackParentCommentId,
+    replyCount: item.replyCount,
     displayName,
     userName: pickNestedString(item, ["userName", "UserName"]),
   };
 };
+
+const flattenCommentItems = (
+  items: ProductCommentApiItem[],
+  parentCommentId?: string,
+): ProductComment[] =>
+  items.flatMap((item) => {
+    const normalized = normalizeComment(item, parentCommentId);
+    const replies = Array.isArray(item.replies)
+      ? flattenCommentItems(item.replies, normalized.commentId)
+      : [];
+
+    return [normalized, ...replies];
+  });
 
 const extractCommentItems = (
   raw: ProductCommentListRawResponse | Record<string, unknown>,
@@ -301,19 +321,75 @@ type ProductListRawResponse = {
   hasNextPage?: boolean;
 };
 
+const normalizeProductList = async (
+  raw: ProductListRawResponse,
+  fallbackPage: number,
+  fallbackLimit: number,
+) => {
+  const rawItems = (raw.items ?? raw.data ?? []) as ProductApiItem[];
+
+  await fetchSellerProfiles(rawItems.map((item) => getSellerId(item) ?? ""));
+
+  const items = rawItems.map(normalizeProduct);
+
+  const currentPage =
+    raw.meta?.currentPage ??
+    raw.meta?.pageIndex ??
+    raw.currentPage ??
+    raw.pageIndex ??
+    fallbackPage;
+  const itemsPerPage =
+    raw.meta?.itemsPerPage ??
+    raw.meta?.pageSize ??
+    raw.itemsPerPage ??
+    raw.pageSize ??
+    fallbackLimit;
+
+  const totalItems =
+    raw.meta?.totalItems ??
+    raw.meta?.totalCount ??
+    raw.totalItems ??
+    raw.totalCount;
+
+  const totalPages =
+    raw.meta?.totalPages ??
+    raw.totalPages ??
+    (typeof totalItems === "number" && itemsPerPage > 0
+      ? Math.max(1, Math.ceil(totalItems / itemsPerPage))
+      : currentPage + (items.length >= itemsPerPage ? 1 : 0));
+
+  const hasNextPage =
+    raw.meta?.hasNextPage ??
+    raw.hasNextPage ??
+    (typeof totalItems === "number"
+      ? currentPage < totalPages
+      : items.length >= itemsPerPage);
+
+  const hasPreviousPage =
+    raw.meta?.hasPreviousPage ?? raw.hasPreviousPage ?? currentPage > 1;
+
+  return {
+    data: items,
+    meta: {
+      totalItems:
+        typeof totalItems === "number"
+          ? totalItems
+          : (currentPage - 1) * itemsPerPage + items.length,
+      totalPages,
+      itemsPerPage,
+      currentPage,
+      hasPreviousPage,
+      hasNextPage,
+    },
+  } satisfies ProductListResponse;
+};
+
 const toTrimmed = (value?: string) => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
 };
 
-const matchesCondition = (product: Product, condition?: string) => {
-  if (!condition) return true;
-  return (
-    normalizeCondition(product.condition) === normalizeCondition(condition)
-  );
-};
-
-export const productService = createBaseService<
+const productBaseService = createBaseService<
   Product,
   CreateProductDto,
   UpdateProductDto,
@@ -389,66 +465,73 @@ export const productService = createBaseService<
       params: requestParams,
     })) as ProductListRawResponse;
 
-    const rawItems = (raw.items ?? raw.data ?? []) as ProductApiItem[];
+    return normalizeProductList(raw, page, limit);
+  },
+});
 
-    await fetchSellerProfiles(rawItems.map((item) => getSellerId(item) ?? ""));
+export const productService = Object.assign(productBaseService, {
+  async getMyProducts(params?: ProductFilterParams) {
+    const page = params?.page ?? 1;
+    const limit = params?.limit ?? 6;
+    const title = toTrimmed(params?.title);
 
-    let items = rawItems.map(normalizeProduct);
+    const raw = (await apiClient.get(API_ENDPOINTS.PRODUCT.MY_PRODUCTS, {
+      params: {
+        pageIndex: page,
+        pageSize: limit,
+        searchTerm: title,
+      },
+    })) as ProductListRawResponse;
 
-    if (condition) {
-      items = items.filter((item) => matchesCondition(item, condition));
+    return normalizeProductList(raw, page, limit);
+  },
+
+  async updateMyProduct(id: string, data: UpdateMyProductDto) {
+    const formData = new FormData();
+
+    if (typeof data.title === "string" && data.title.trim()) {
+      formData.append("Title", data.title.trim());
     }
 
-    const currentPage =
-      raw.meta?.currentPage ??
-      raw.meta?.pageIndex ??
-      raw.currentPage ??
-      raw.pageIndex ??
-      page;
-    const itemsPerPage =
-      raw.meta?.itemsPerPage ??
-      raw.meta?.pageSize ??
-      raw.itemsPerPage ??
-      raw.pageSize ??
-      limit;
+    if (typeof data.description === "string") {
+      formData.append("Description", data.description);
+    }
 
-    const totalItems =
-      raw.meta?.totalItems ??
-      raw.meta?.totalCount ??
-      raw.totalItems ??
-      raw.totalCount;
+    if (typeof data.condition === "string") {
+      formData.append("Condition", data.condition);
+    }
 
-    const totalPages =
-      raw.meta?.totalPages ??
-      raw.totalPages ??
-      (typeof totalItems === "number" && itemsPerPage > 0
-        ? Math.max(1, Math.ceil(totalItems / itemsPerPage))
-        : currentPage + (items.length >= itemsPerPage ? 1 : 0));
+    if (typeof data.price === "number") {
+      formData.append("Price", String(data.price));
+    }
 
-    const hasNextPage =
-      raw.meta?.hasNextPage ??
-      raw.hasNextPage ??
-      (typeof totalItems === "number"
-        ? currentPage < totalPages
-        : items.length >= itemsPerPage);
+    if (typeof data.status === "number") {
+      formData.append("Status", String(data.status));
+    }
 
-    const hasPreviousPage =
-      raw.meta?.hasPreviousPage ?? raw.hasPreviousPage ?? currentPage > 1;
+    if (data.image instanceof File) {
+      formData.append("Image", data.image);
+    }
 
-    return {
-      data: items,
-      meta: {
-        totalItems:
-          typeof totalItems === "number"
-            ? totalItems
-            : (currentPage - 1) * itemsPerPage + items.length,
-        totalPages,
-        itemsPerPage,
-        currentPage,
-        hasPreviousPage,
-        hasNextPage,
+    if (data.video instanceof File) {
+      formData.append("Video", data.video);
+    }
+
+    const updated = (await apiClient.put(
+      `${API_ENDPOINTS.PRODUCT.POST}/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
-    } satisfies ProductListResponse;
+    )) as ProductApiItem;
+
+    return normalizeProduct(updated);
+  },
+
+  async deleteMyProduct(id: string) {
+    await apiClient.delete(`${API_ENDPOINTS.PRODUCT.POST}/${id}`);
   },
 });
 
@@ -458,9 +541,7 @@ export const productCommentService = {
       API_ENDPOINTS.PRODUCT.COMMENTS(productId),
     )) as ProductCommentListRawResponse;
 
-    const comments = extractCommentItems(raw).map((item) =>
-      normalizeComment(item),
-    );
+    const comments = flattenCommentItems(extractCommentItems(raw));
     console.log(
       "[DEBUG] Comments loaded:",
       comments.map((c) => ({

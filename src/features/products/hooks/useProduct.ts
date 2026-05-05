@@ -9,6 +9,7 @@ import type {
   CreateProductCommentDto,
   CreateProductDto,
   ProductFilterParams,
+  UpdateMyProductDto,
   UpdateProductDto,
 } from "../types";
 import { productCommentService, productService } from "../services";
@@ -34,6 +35,34 @@ export function useProducts() {
   const query = useQuery({
     queryKey: [QUERY_KEYS.PRODUCTS, filter],
     queryFn: () => productService.getAll(filter),
+    placeholderData: (prev) => prev,
+  });
+
+  return {
+    products: query.data?.data ?? [],
+    pagination: query.data?.meta,
+    isLoading: query.isLoading,
+    error: query.error,
+  };
+}
+
+export function useMyProducts(params?: {
+  page?: number;
+  limit?: number;
+  title?: string;
+}) {
+  const filter = useMemo(
+    () => ({
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 6,
+      title: params?.title || undefined,
+    }),
+    [params?.limit, params?.page, params?.title],
+  );
+
+  const query = useQuery({
+    queryKey: [QUERY_KEYS.MY_PRODUCTS, filter],
+    queryFn: () => productService.getMyProducts(filter),
     placeholderData: (prev) => prev,
   });
 
@@ -106,6 +135,7 @@ export function useCreateProduct() {
     onSuccess: () => {
       toast.success("Product created successfully");
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
       navigate("/products");
     },
   });
@@ -121,6 +151,7 @@ export function useUpdateProduct() {
     onSuccess: (_data, variables) => {
       toast.success("Product updated successfully");
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.PRODUCT_DETAIL(variables.id),
       });
@@ -136,6 +167,34 @@ export function useDeleteProduct() {
     mutationFn: (id: string) => productService.remove(id),
     onSuccess: () => {
       toast.success("Product deleted successfully");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
+    },
+  });
+}
+
+export function useUpdateMyProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdateMyProductDto }) =>
+      productService.updateMyProduct(id, data),
+    onSuccess: () => {
+      toast.success("Cập nhật sản phẩm thành công");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+    },
+  });
+}
+
+export function useDeleteMyProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => productService.deleteMyProduct(id),
+    onSuccess: () => {
+      toast.success("Đã xoá sản phẩm");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
     },
   });

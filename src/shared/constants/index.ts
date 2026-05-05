@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
   PRODUCT: {
     BASE: "/api/Product",
     POST: "/api/Product/Post",
+    MY_PRODUCTS: "/api/Product/MyProducts",
     TITLE: "/api/Product/Title",
     CONDITION: "/api/Product/Condition",
     COMMENT: "/api/Product/Comment",
@@ -42,6 +43,7 @@ export const QUERY_KEYS = {
   PRODUCTS: ["products"] as const,
   PRODUCT_DETAIL: (id: string) => ["products", id] as const,
   PRODUCT_COMMENTS: (id: string) => ["products", id, "comments"] as const,
+  MY_PRODUCTS: ["products", "my-products"] as const,
   USERS: ["users"] as const,
   MY_PROFILE: (id: string) => ["users", "my-profile", id] as const,
   USER_BY_NAME: (userName: string) => ["users", "name", userName] as const,
