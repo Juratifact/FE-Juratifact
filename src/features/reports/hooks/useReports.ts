@@ -33,19 +33,17 @@ const updateReportStatusInCache = (
 
 export function useReports() {
   const [searchParams] = useSearchParams();
+  const queryString = searchParams.toString();
+
   const filter = useMemo<ReportFilterParams>(() => {
+    const params = new URLSearchParams(queryString);
     return {
-      page: Number(searchParams.get("page")) || 1,
-      limit: Number(searchParams.get("limit")) || 10,
-      search: searchParams.get("search") || undefined,
-      status:
-        (searchParams.get("status") as
-          | "pending"
-          | "approved"
-          | "rejected"
-          | undefined) || undefined,
+      page: Number(params.get("page")) || 1,
+      limit: Number(params.get("limit")) || 10,
+      search: params.get("search") || undefined,
+      // status removed: backend does not support filtering by status
     };
-  }, [searchParams]);
+  }, [queryString]);
 
   const query = useQuery({
     queryKey: [QUERY_KEYS.REPORTS, filter],
@@ -137,7 +135,10 @@ export function useApproveReport() {
           updateReportStatusInCache(currentData as ReportsCache, reportId, 1),
       );
       toast.success("Duyệt báo cáo thành công!");
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.REPORTS],
+        type: "active",
+      });
     },
     onError: () => {
       toast.error("Không thể duyệt báo cáo");
@@ -156,7 +157,10 @@ export function useRejectReport() {
           updateReportStatusInCache(currentData as ReportsCache, reportId, 2),
       );
       toast.success("Từ chối báo cáo thành công!");
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.REPORTS });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.REPORTS],
+        type: "active",
+      });
     },
     onError: () => {
       toast.error("Không thể từ chối báo cáo");

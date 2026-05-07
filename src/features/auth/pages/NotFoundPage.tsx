@@ -9,7 +9,6 @@ export default function NotFoundPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-linear-to-b from-background to-secondary/20 px-4">
       <div className="relative w-full max-w-lg">
-        {/* Đổi các Blobs sang tông xám/primary để đồng bộ */}
         <div className="absolute inset-0 -top-20 -left-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute inset-0 -bottom-20 -right-20 w-72 h-72 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -17,7 +16,6 @@ export default function NotFoundPage() {
           <div className="relative p-10 sm:p-14 text-center space-y-8">
             
             <div className="relative z-10 space-y-6">
-              {/* 404 Text - Đổi sang font black giống logo */}
               <div className="space-y-2">
                 <h1 className="text-8xl sm:text-9xl font-black tracking-tighter text-primary/20">
                   404
@@ -28,8 +26,6 @@ export default function NotFoundPage() {
                    </div>
                 </div>
               </div>
-
-              {/* Description - Việt hóa nội dung cho thân thiện */}
               <div className="space-y-3">
                 <h2 className="text-2xl font-bold tracking-tight">Món đồ này không tồn tại!</h2>
                 <p className="text-muted-foreground">
@@ -37,7 +33,7 @@ export default function NotFoundPage() {
                 </p>
               </div>
 
-              {/* Actions - Đồng bộ style nút */}
+              {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-3 pt-6">
                 <Button
                   variant="outline"

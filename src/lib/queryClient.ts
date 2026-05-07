@@ -18,7 +18,7 @@ export const queryClient = new QueryClient({
       //Production: 2-3 la hop ly
 
       //3.Stale time: tgian ma data dc xem la moi
-      staleTime: 1000 * 60 * 0,
+      staleTime: 0,
       //mac dinh la 0 (data ngay lap tuc cu) data cu la data kh dung dc nx
       //Production: 30s-5p tuy data
 

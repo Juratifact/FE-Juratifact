@@ -13,7 +13,7 @@ export interface IdentifyDocument {
   idCardFrontUrl: string;
   idCardBackUrl: string;
   selfieUrl: string;
-  status: number; // 0=Processing, 1=Approved, 2=Rejected, 3=Pending
+  status: number; 
   note?: string | null;
   message?: string;
   verifiedAt?: string | null;

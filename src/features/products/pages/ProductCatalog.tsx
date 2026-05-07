@@ -21,7 +21,6 @@ export default function ProductCatalog() {
     endIndex: 10,
   });
 
-  // Data hook - infinite query
   const {
     products,
     hasMore,

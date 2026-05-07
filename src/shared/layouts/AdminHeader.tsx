@@ -21,7 +21,7 @@ export default function AdminHeader() {
   return (
     <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:sticky lg:top-0 lg:h-screen bg-background border-r border-border/50">
       <div className="flex h-full flex-col px-6 py-8">
-        {/* Logo Section - Clean & High-end */}
+        {/* Logo Section*/}
         <div className="flex items-center gap-3 px-2 mb-10">
           <div className="flex size-10 items-center justify-center rounded-xl bg-primary shadow-sm ring-1 ring-primary">
             <img
@@ -85,7 +85,7 @@ export default function AdminHeader() {
           </nav>
         </div>
 
-        {/* Footer info (Optional) */}
+        {/* Footer info */}
         <div className="mt-auto">
           <div className="mb-3 flex justify-center">
             <Button

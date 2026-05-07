@@ -542,32 +542,13 @@ export const productCommentService = {
     )) as ProductCommentListRawResponse;
 
     const comments = flattenCommentItems(extractCommentItems(raw));
-    console.log(
-      "[DEBUG] Comments loaded:",
-      comments.map((c) => ({
-        id: c.id,
-        content: c.content,
-      })),
-    );
     return comments;
   },
 
   async create(data: CreateProductCommentDto): Promise<ProductComment> {
-    console.log("[DEBUG] Creating comment with payload:", { ...data });
-
     const res = await apiClient.post(API_ENDPOINTS.PRODUCT.COMMENT, data);
-
-    console.log("[DEBUG] Raw response:", res);
-
-    // The axios wrapper (`apiClient`) already unwraps the response and
-    // returns the inner payload. Use `res` directly as the created item.
     const created = res;
-
-    console.log("[DEBUG] Extracted comment:", created);
-
     const result = normalizeComment(created as ProductCommentApiItem);
-
-    console.log("[DEBUG] Normalized comment result:", result);
     return result;
   },
 };

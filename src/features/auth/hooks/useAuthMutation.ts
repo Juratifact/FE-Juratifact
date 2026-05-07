@@ -127,7 +127,14 @@ export const useLogoutMutation = () => {
       // 2. xoá toàn bộ cache react-query
       queryClient.clear();
 
-      // 3. redirect về login
+      // 3. scroll to top then redirect về login
+      if (typeof window !== "undefined") {
+        try {
+          window.scrollTo({ top: 0, left: 0 });
+        } catch {
+          // ignore
+        }
+      }
       navigate("/login");
       toast.info("Đăng xuất thành công");
     },
@@ -136,6 +143,13 @@ export const useLogoutMutation = () => {
       // Dù API lỗi vẫn logout để đảm bảo UX
       clearAuth();
       queryClient.clear();
+      if (typeof window !== "undefined") {
+        try {
+          window.scrollTo({ top: 0, left: 0 });
+        } catch {
+          // ignore
+        }
+      }
       navigate("/login");
     },
   });

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -37,11 +37,23 @@ export function IdentifyForm({
   const [frontFile, setFrontFile] = useState<File | null>(null);
   const [backFile, setBackFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [frontPreview, setFrontPreview] = useState<string | null>(null);
+  const [backPreview, setBackPreview] = useState<string | null>(null);
+  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    return () => {
+      if (frontPreview) URL.revokeObjectURL(frontPreview);
+      if (backPreview) URL.revokeObjectURL(backPreview);
+      if (selfiePreview) URL.revokeObjectURL(selfiePreview);
+    };
+  }, [backPreview, frontPreview, selfiePreview]);
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     setFile: (file: File | null) => void,
+    setPreview: (preview: string | null) => void,
     fieldName: string,
   ) => {
     const file = e.target.files?.[0];
@@ -59,6 +71,7 @@ export function IdentifyForm({
 
     setErrors(newErrors);
     setFile(file);
+    setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -89,7 +102,9 @@ export function IdentifyForm({
     fieldName: string,
     ref: React.RefObject<HTMLInputElement | null>,
     file: File | null,
+    preview: string | null,
     setFile: (file: File | null) => void,
+    setPreview: (preview: string | null) => void,
   ) => (
     <div className="space-y-2">
       <Label htmlFor={fieldName}>
@@ -101,16 +116,22 @@ export function IdentifyForm({
         type="file"
         accept="image/jpeg,image/png,image/webp"
         className="hidden"
-        onChange={(e) => handleFileChange(e, setFile, fieldName)}
+        onChange={(e) => handleFileChange(e, setFile, setPreview, fieldName)}
       />
       <label
         htmlFor={fieldName}
-        className="flex cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 p-6 transition-colors hover:border-muted-foreground/50 hover:bg-muted/50"
+        className="flex cursor-pointer items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 p-3 transition-colors hover:border-muted-foreground/50 hover:bg-muted/50"
       >
-        {file ? (
-          <div className="text-center">
-            <Upload className="mx-auto mb-2 h-6 w-6 text-muted-foreground" />
-            <p className="text-sm font-medium">{file.name}</p>
+        {preview ? (
+          <div className="flex w-full flex-col items-center gap-3">
+            <img
+              src={preview}
+              alt={file?.name ?? label}
+              className="max-h-56 w-full rounded-md object-contain"
+            />
+            <p className="text-center text-xs font-medium text-muted-foreground">
+              {file?.name}
+            </p>
           </div>
         ) : (
           <div className="text-center">
@@ -143,21 +164,27 @@ export function IdentifyForm({
             "front",
             frontRef,
             frontFile,
+            frontPreview,
             setFrontFile,
+            setFrontPreview,
           )}
           {renderFileInput(
             "Ảnh CMND mặt sau",
             "back",
             backRef,
             backFile,
+            backPreview,
             setBackFile,
+            setBackPreview,
           )}
           {renderFileInput(
             "Ảnh selfie",
             "selfie",
             selfieRef,
             selfieFile,
+            selfiePreview,
             setSelfieFile,
+            setSelfiePreview,
           )}
         </CardContent>
 

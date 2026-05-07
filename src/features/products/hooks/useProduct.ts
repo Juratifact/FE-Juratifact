@@ -16,6 +16,40 @@ import { productCommentService, productService } from "../services";
 import { toast } from "sonner";
 import { QUERY_KEYS } from "@/shared/constants";
 import { useMemo } from "react";
+import type { ProductListResponse, Product } from "../types";
+
+type ProductCache = ProductListResponse | undefined;
+
+const patchProductInList = (
+  currentData: ProductCache,
+  productId: string,
+  updates: Partial<Product>,
+): ProductCache => {
+  if (!currentData?.data || !Array.isArray(currentData.data)) {
+    return currentData;
+  }
+
+  return {
+    ...currentData,
+    data: currentData.data.map((product) =>
+      product.id === productId ? { ...product, ...updates } : product,
+    ),
+  };
+};
+
+const removeProductFromList = (
+  currentData: ProductCache,
+  productId: string,
+): ProductCache => {
+  if (!currentData?.data || !Array.isArray(currentData.data)) {
+    return currentData;
+  }
+
+  return {
+    ...currentData,
+    data: currentData.data.filter((product) => product.id !== productId),
+  };
+};
 
 export function useProducts() {
   const [searchParams] = useSearchParams();
@@ -91,14 +125,12 @@ export function useInfiniteProducts() {
 
   const query = useInfiniteQuery({
     queryKey: [QUERY_KEYS.PRODUCTS, "infinite", filter],
-    // queryFn nhận {pageParam} từ React Query
     queryFn: async ({ pageParam = 1 }) => {
       return productService.getAll({
         ...filter,
         page: pageParam,
       });
     },
-    // Tính page tiếp theo dựa trên meta
     getNextPageParam: (lastPage) => {
       const meta = lastPage?.meta;
       if (meta?.hasNextPage) {
@@ -109,7 +141,6 @@ export function useInfiniteProducts() {
     initialPageParam: 1,
   });
 
-  // Flatten tất cả pages thành 1 array
   const allProducts = query.data?.pages.flatMap((page) => page.data) ?? [];
   const hasMore = query.hasNextPage ?? false;
 
@@ -123,9 +154,7 @@ export function useInfiniteProducts() {
   };
 }
 
-/**
- * MUTATIONS
- */
+
 export function useCreateProduct() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -148,12 +177,36 @@ export function useUpdateProduct() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateProductDto }) =>
       productService.update(id, data),
-    onSuccess: (_data, variables) => {
+    onSuccess: (updatedProduct, variables) => {
       toast.success("Product updated successfully");
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.PRODUCTS },
+        (currentData) =>
+          patchProductInList(
+            currentData as ProductCache,
+            variables.id,
+            updatedProduct as Partial<Product>,
+          ),
+      );
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.MY_PRODUCTS },
+        (currentData) =>
+          patchProductInList(
+            currentData as ProductCache,
+            variables.id,
+            updatedProduct as Partial<Product>,
+          ),
+      );
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.PRODUCT_DETAIL(variables.id),
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.PRODUCTS],
+        type: "active",
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.MY_PRODUCTS],
+        type: "active",
       });
       navigate("/products");
     },
@@ -165,10 +218,26 @@ export function useDeleteProduct() {
 
   return useMutation({
     mutationFn: (id: string) => productService.remove(id),
-    onSuccess: () => {
+    onSuccess: (_data, productId) => {
       toast.success("Product deleted successfully");
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.PRODUCTS },
+        (currentData) =>
+          removeProductFromList(currentData as ProductCache, productId),
+      );
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.MY_PRODUCTS },
+        (currentData) =>
+          removeProductFromList(currentData as ProductCache, productId),
+      );
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.PRODUCTS],
+        type: "active",
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.MY_PRODUCTS],
+        type: "active",
+      });
     },
   });
 }
@@ -179,10 +248,34 @@ export function useUpdateMyProduct() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateMyProductDto }) =>
       productService.updateMyProduct(id, data),
-    onSuccess: () => {
+    onSuccess: (updatedProduct, variables) => {
       toast.success("Cập nhật sản phẩm thành công");
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.MY_PRODUCTS },
+        (currentData) =>
+          patchProductInList(
+            currentData as ProductCache,
+            variables.id,
+            updatedProduct as Partial<Product>,
+          ),
+      );
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.PRODUCTS },
+        (currentData) =>
+          patchProductInList(
+            currentData as ProductCache,
+            variables.id,
+            updatedProduct as Partial<Product>,
+          ),
+      );
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.MY_PRODUCTS],
+        type: "active",
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.PRODUCTS],
+        type: "active",
+      });
     },
   });
 }
@@ -192,10 +285,26 @@ export function useDeleteMyProduct() {
 
   return useMutation({
     mutationFn: (id: string) => productService.deleteMyProduct(id),
-    onSuccess: () => {
+    onSuccess: (_data, productId) => {
       toast.success("Đã xoá sản phẩm");
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.MY_PRODUCTS },
+        (currentData) =>
+          removeProductFromList(currentData as ProductCache, productId),
+      );
+      queryClient.setQueriesData(
+        { queryKey: QUERY_KEYS.PRODUCTS },
+        (currentData) =>
+          removeProductFromList(currentData as ProductCache, productId),
+      );
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.MY_PRODUCTS],
+        type: "active",
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.PRODUCTS],
+        type: "active",
+      });
     },
   });
 }

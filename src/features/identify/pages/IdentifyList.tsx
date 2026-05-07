@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Plus } from "lucide-react";
-
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 import { EmptyState } from "@/shared/components/common/EmptyState";
@@ -30,7 +27,7 @@ export default function IdentifyList() {
       params.set("page", "1");
       setSearchParams(params);
     }
-  }, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
 
   const handleFilterChange = useCallback(
     (key: string, value: string | undefined) => {

@@ -26,7 +26,6 @@ export default function ManageProductCreate() {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-8 px-6 pb-20 pt-6">
-      {/* Top Navigation - Clean & Minimal */}
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
@@ -41,7 +40,7 @@ export default function ManageProductCreate() {
         </Button>
       </div>
 
-      {/* Header Section - Typography focused */}
+      {/* Header Section */}
       <header className="space-y-4">
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
@@ -60,9 +59,8 @@ export default function ManageProductCreate() {
 
       <Separator className="bg-border/50" />
 
-      {/* Form Container - Modern Glassmorphism */}
+      {/* Form Container*/}
       <div className="relative group">
-        {/* Subtle Glow Effect behind the card */}
         <div className="absolute -inset-1 bg-linear-to-r from-primary/20 via-fuchsia-500/10 to-blue-500/20 rounded-4xl blur-xl opacity-50 transition duration-1000 group-hover:opacity-100" />
 
         <Card className="relative overflow-hidden border-border/50 bg-background/60 shadow-2xl backdrop-blur-2xl rounded-3xl">
@@ -79,7 +77,7 @@ export default function ManageProductCreate() {
         </Card>
       </div>
 
-      {/* Footer hint */}
+      {/* Footer*/}
       <footer className="text-center">
         <p className="text-xs text-muted-foreground/60 uppercase tracking-widest">
           Secure Cloud Storage Powered by Studio Engine

@@ -45,7 +45,6 @@ export function ReportTable({
             <TableHead>Sản phẩm</TableHead>
             <TableHead>Mô tả</TableHead>
             <TableHead>Trạng thái</TableHead>
-            <TableHead>Ngày tạo</TableHead>
             <TableHead className="text-right">Thao tác</TableHead>
           </TableRow>
         </TableHeader>
@@ -53,15 +52,11 @@ export function ReportTable({
           {reports.map((report) => {
             const displayStatus = getStatusDisplay(report.status);
             const statusText = getStatusLabel(report.status);
-            const createdDate = report.createdAt
-              ? new Date(report.createdAt).toLocaleDateString("vi-VN")
-              : "-";
-
             return (
               <TableRow key={report.id}>
                 <TableCell className="font-medium">{report.reason}</TableCell>
                 <TableCell className="text-muted-foreground">
-                  {report.reportedProduct?.title || "N/A"}
+                  {report.productId || "N/A"}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground truncate max-w-xs">
                   {report.description || "-"}
@@ -70,9 +65,6 @@ export function ReportTable({
                   <Badge variant={statusVariant[displayStatus]}>
                     {statusText}
                   </Badge>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {createdDate}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">

@@ -7,7 +7,6 @@ export const registerSchema = z
       .min(1, { message: "FullName là bắt buộc" })
       .min(3, { message: "FullName phải có ít nhất 3 ký tự" }),
 
-    // Thêm userName
     userName: z
       .string()
       .min(1, { message: "UserName là bắt buộc" })
@@ -20,7 +19,6 @@ export const registerSchema = z
       .email({ message: "Email không đúng định dạng" })
       .min(1, { message: "Email là bắt buộc" }),
 
-    // Thêm phone (định dạng số điện thoại VN)
     phoneNumber: z
       .string()
       .min(1, { message: "Số điện thoại là bắt buộc" })
