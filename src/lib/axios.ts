@@ -55,11 +55,12 @@ apiClient.interceptors.response.use(
   //
   async (error) => {
     const originalRequest = error.config;
+    const hasAccessToken = !!useAuthStore.getState().access_token;
     const notAuthReqs = !originalRequest.url?.includes("auth");
     const is401 = error.response?.status === 401;
     const notRetriedYet = !originalRequest._retry;
     // tránh loop vô hạn
-    if (is401 && notAuthReqs && notRetriedYet) {
+    if (is401 && hasAccessToken && notAuthReqs && notRetriedYet) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           //Luu resolve va reject vao queue de cho

@@ -1,5 +1,5 @@
 import { useRef, useEffect } from "react";
-import vietmapgl from "@vietmap/vietmap-gl-js";
+import vietmapgl from "@vietmap/vietmap-gl-js/dist/vietmap-gl";
 import "@vietmap/vietmap-gl-js/dist/vietmap-gl.css";
 import { useUserLocationQuery } from "../hooks/useUserLocation";
 import { toast } from "sonner";
