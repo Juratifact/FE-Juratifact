@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Eye,
   ChevronDown,
@@ -33,6 +33,7 @@ import {
   useProductComments,
 } from "../hooks/useProduct";
 import { useCreateProductReport } from "@/features/reports/hooks/useReports";
+import { useAuthStore } from "@/features/auth/store";
 import type { Product, ProductComment } from "../types";
 
 interface ProductCardProps {
@@ -133,7 +134,7 @@ function CommentThreadNode({
           <Button
             type="button"
             variant="ghost"
-            size="xs"
+            size="sm"
             className="h-7 rounded-full px-2 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => onReply(node)}
           >
@@ -188,6 +189,9 @@ export function ProductCard({
   onEdit,
   onDelete,
 }: ProductCardProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const accessToken = useAuthStore((state) => state.access_token);
   const [commentText, setCommentText] = useState("");
   const [replyToComment, setReplyToComment] = useState<ProductComment | null>(
     null,
@@ -221,7 +225,22 @@ export function ProductCard({
     return undefined;
   }, [product.imageUrls]);
 
+  const goToLogin = () => {
+    window.scrollTo(0, 0);
+    navigate("/login", { state: { from: location } });
+  };
+
+  const requireAuth = () => {
+    if (!accessToken) {
+      goToLogin();
+      return false;
+    }
+    return true;
+  };
+
   const handleCommentSubmit = () => {
+    if (!requireAuth()) return;
+
     const content = commentText.trim();
     if (!content) return;
     const payload = {
@@ -240,7 +259,20 @@ export function ProductCard({
     });
   };
 
+  const handleOpenComments = () => {
+    if (!requireAuth()) return;
+    setIsCommentsOpen(true);
+  };
+
+  const handleOpenReport = () => {
+    if (!requireAuth()) return;
+    setIsReportOpen(true);
+    setIsActionOpen(false);
+  };
+
   const handleReportSubmit = () => {
+    if (!requireAuth()) return;
+
     const reason = reportReason.trim();
     if (!reason) return;
 
@@ -342,10 +374,7 @@ export function ProductCard({
                       type="button"
                       variant="ghost"
                       className="h-8 w-full justify-start rounded-lg text-sm text-orange-600 hover:bg-orange-50 hover:text-orange-700"
-                      onClick={() => {
-                        setIsReportOpen(true);
-                        setIsActionOpen(false);
-                      }}
+                      onClick={handleOpenReport}
                     >
                       Report
                     </Button>
@@ -456,7 +485,7 @@ export function ProductCard({
               size="sm"
               variant="outline"
               className="w-full md:w-auto"
-              onClick={() => setIsCommentsOpen(true)}
+              onClick={handleOpenComments}
             >
               <MessageCircle className="mr-1 h-4 w-4" />
               {totalCommentCount > 0
@@ -666,7 +695,7 @@ export function ProductCard({
                     <Button
                       type="button"
                       variant="ghost"
-                      size="xs"
+                      size="sm"
                       className="h-7 rounded-full px-2"
                       onClick={() => setReplyToComment(null)}
                     >

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
@@ -8,27 +8,10 @@ import { Pagination } from "@/shared/components/common/Pagination";
 import { useIdentifyList } from "@/features/identify/hooks/useIdentifyList";
 import { IdentifyTable } from "@/features/identify/components/IdentifyTable";
 import { REPORT_STATUS_OPTIONS } from "@/shared/constants";
-import { useDebounce } from "@/shared/hooks/useDebounce";
 
 export default function IdentifyList() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchInput, setSearchInput] = useState(
-    searchParams.get("search") || "",
-  );
-  const debouncedSearch = useDebounce(searchInput, 500);
-
   const { documents, pagination, isLoading } = useIdentifyList();
-
-  useEffect(() => {
-    if (debouncedSearch !== searchParams.get("search")) {
-      const params = new URLSearchParams(searchParams);
-      if (debouncedSearch) params.set("search", debouncedSearch);
-      else params.delete("search");
-      params.set("page", "1");
-      setSearchParams(params);
-    }
-  }, [debouncedSearch]);
-
   const handleFilterChange = useCallback(
     (key: string, value: string | undefined) => {
       const params = new URLSearchParams(searchParams);
