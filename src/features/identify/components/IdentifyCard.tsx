@@ -45,9 +45,6 @@ const statusConfig: Record<
   },
 };
 
-/**
- * Card hiển thị thông tin xác minh tài liệu.
- */
 export function IdentifyCard({ document }: IdentifyCardProps) {
   const statusInfo = statusConfig[document.status] || statusConfig[0];
   const createdDate = document.createdAt

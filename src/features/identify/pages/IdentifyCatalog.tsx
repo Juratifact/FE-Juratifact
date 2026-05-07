@@ -7,10 +7,6 @@ import { EmptyState } from "@/shared/components/common/EmptyState";
 import { useGetMyIdentifyDocument } from "../hooks/useIdentify";
 import { IdentifyCard } from "../components/IdentifyCard";
 
-/**
- * Trang xem tài liệu xác minh của user.
- * Hiển thị status và cho phép re-submit nếu bị reject.
- */
 export default function IdentifyCatalog() {
   const { data: document, isLoading } = useGetMyIdentifyDocument();
 

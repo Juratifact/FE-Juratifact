@@ -11,9 +11,27 @@ import apiClient from "@/lib/axios";
 
 type ReportListApiWrapper = {
   items?: Report[];
+  data?: Report[];
   totalItems?: number;
+  totalCount?: number;
+  totalPages?: number;
+  currentPage?: number;
   pageSize?: number;
   pageIndex?: number;
+  itemsPerPage?: number;
+  hasPreviousPage?: boolean;
+  hasNextPage?: boolean;
+  meta?: {
+    totalItems?: number;
+    totalCount?: number;
+    totalPages?: number;
+    currentPage?: number;
+    pageIndex?: number;
+    pageSize?: number;
+    itemsPerPage?: number;
+    hasPreviousPage?: boolean;
+    hasNextPage?: boolean;
+  };
 };
 
 export const reportService = createBaseService<
@@ -47,21 +65,61 @@ export const reportService = createBaseService<
     );
 
     const data = response as unknown as ReportListApiWrapper;
-    const items = data.items ?? [];
-    const totalItems = data.totalItems ?? items.length;
-    const itemsPerPage = data.pageSize ?? params?.limit ?? 10;
-    const currentPage = data.pageIndex ?? params?.page ?? 1;
-    const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+    const items = data.items ?? data.data ?? [];
+    const currentPage =
+      data.meta?.currentPage ??
+      data.meta?.pageIndex ??
+      data.currentPage ??
+      data.pageIndex ??
+      params?.page ??
+      1;
+    const itemsPerPage =
+      data.meta?.itemsPerPage ??
+      data.meta?.pageSize ??
+      data.itemsPerPage ??
+      data.pageSize ??
+      params?.limit ??
+      10;
+    const totalItems =
+      data.meta?.totalItems ??
+      data.meta?.totalCount ??
+      data.totalItems ??
+      data.totalCount;
+    const fallbackTotalItems = (currentPage - 1) * itemsPerPage + items.length;
+    const looksLikeLastPage = items.length < itemsPerPage;
+    const inferredHasNextPage =
+      data.meta?.hasNextPage ??
+      data.hasNextPage ??
+      (!looksLikeLastPage && items.length === itemsPerPage);
+    const totalPages =
+      data.meta?.totalPages ??
+      data.totalPages ??
+      (typeof totalItems === "number" && itemsPerPage > 0
+        ? Math.max(
+            Math.ceil(Math.max(totalItems, fallbackTotalItems) / itemsPerPage),
+            inferredHasNextPage ? currentPage + 1 : currentPage,
+          )
+        : currentPage + (inferredHasNextPage ? 1 : 0));
+    const hasNextPage =
+      inferredHasNextPage ??
+      (typeof totalItems === "number"
+        ? currentPage < totalPages
+        : items.length >= itemsPerPage);
+    const hasPreviousPage =
+      data.meta?.hasPreviousPage ?? data.hasPreviousPage ?? currentPage > 1;
 
     return {
       data: items,
       meta: {
-        totalItems,
+        totalItems:
+          typeof totalItems === "number"
+            ? Math.max(totalItems, fallbackTotalItems)
+            : fallbackTotalItems,
         totalPages,
         itemsPerPage,
         currentPage,
-        hasPreviousPage: currentPage > 1,
-        hasNextPage: currentPage < totalPages,
+        hasPreviousPage,
+        hasNextPage,
       },
     } satisfies ReportListResponse;
   },

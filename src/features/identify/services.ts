@@ -67,7 +67,6 @@ export const identifyService = createBaseService<
   },
 });
 
-// ─── Document submission/re-submission helpers ─────────────
 export const submitIdentifyDocument = async (
   formData: FormData,
   onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
@@ -96,7 +95,6 @@ export const reSubmitIdentifyDocument = async (
   const formData = new FormData();
   formData.append("documentId", data.documentId);
 
-  // Thêm file nếu có (chỉ những cái được cập nhật)
   if (data.idCardFrontUrl instanceof File) {
     formData.append("idCardFrontUrl", data.idCardFrontUrl);
   }

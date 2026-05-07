@@ -9,9 +9,6 @@ import {
   useReSubmitIdentifyDocument,
 } from "../hooks/useIdentify";
 
-/**
- * Trang gửi lại tài liệu xác minh (khi bị reject).
- */
 export default function ManageIdentifyEdit() {
   const { data: document, isLoading } = useGetMyIdentifyDocument();
   const { mutate: reSubmitIdentify, isPending } = useReSubmitIdentifyDocument();

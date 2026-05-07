@@ -235,8 +235,6 @@ export function ProductCard({
         setReplyToComment(null);
       },
       onError: () => {
-        // Error is already handled by the hook and toast notification
-        // Clear reply state on error so user can try again
         setReplyToComment(null);
       },
     });
@@ -421,6 +419,8 @@ export function ProductCard({
 
         <Separator />
 
+        <Separator />
+
         <CardContent className="flex flex-col gap-3 bg-muted/30 pt-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             {product.videoUrls && product.videoUrls.length > 0 && (
@@ -459,10 +459,48 @@ export function ProductCard({
               onClick={() => setIsCommentsOpen(true)}
             >
               <MessageCircle className="mr-1 h-4 w-4" />
-              Open comments
+              {totalCommentCount > 0
+                ? `Comments (${totalCommentCount})`
+                : "View comments"}
             </Button>
           </div>
         </CardContent>
+        {/* Comments Preview */}
+        {commentTree.length > 0 && (
+          <CardContent className="space-y-3 bg-muted/10 pt-4">
+            {commentTree.slice(0, 2).map((node) => {
+              const displayName = node.displayName ?? node.userName ?? "User";
+              return (
+                <div
+                  key={node.id}
+                  className="rounded-lg border border-border/50 bg-background p-3 text-sm"
+                >
+                  <div className="flex items-start gap-2">
+                    <Avatar className="h-7 w-7 shrink-0 border">
+                      <AvatarFallback>
+                        {displayName.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold text-sm">
+                        {displayName}
+                      </p>
+                      <p className="line-clamp-2 text-xs text-muted-foreground">
+                        {node.content}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {commentTree.length > 2 && (
+              <p className="text-xs text-muted-foreground text-center">
+                +{commentTree.length - 2} more comment
+                {commentTree.length - 2 > 1 ? "s" : ""}
+              </p>
+            )}
+          </CardContent>
+        )}
       </Card>
 
       {isCommentsOpen && (

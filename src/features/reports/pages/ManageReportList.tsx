@@ -19,13 +19,6 @@ import { ReportTable } from "../components/ReportTable";
 import { REPORT_STATUS_MAP } from "../types";
 import { Separator } from "@/shared/components/ui/separator";
 
-const STATUS_OPTIONS = [
-  { value: String(REPORT_STATUS_MAP.PROCESSING), label: "Chờ xử lý" },
-  { value: String(REPORT_STATUS_MAP.APPROVED), label: "Đã duyệt" },
-  { value: String(REPORT_STATUS_MAP.REJECTED), label: "Bị từ chối" },
-  { value: String(REPORT_STATUS_MAP.DISMISSED), label: "Bỏ qua" },
-];
-
 export default function ManageReportList() {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -41,33 +34,32 @@ export default function ManageReportList() {
 
   const updateSearchParam = useCallback(
     (value: string) => {
-      const params = new URLSearchParams(searchParams);
-      if (value) params.set("search", value);
-      else params.delete("search");
-      params.set("page", "1");
-      setSearchParams(params);
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        if (value) params.set("search", value);
+        else params.delete("search");
+        params.set("page", "1");
+        return params;
+      });
     },
-    [searchParams, setSearchParams],
+    [setSearchParams],
   );
 
   useEffect(() => {
-    if (debouncedSearch !== searchParams.get("search")) {
+    const currentSearch = searchParams.get("search") ?? "";
+    if (debouncedSearch !== currentSearch) {
       updateSearchParam(debouncedSearch);
     }
-  }, [debouncedSearch]);
+  }, [debouncedSearch, searchParams, updateSearchParam]);
 
-  const handleFilterChange = (key: string, value: string | undefined) => {
-    const params = new URLSearchParams(searchParams);
-    if (value) params.set(key, value);
-    else params.delete(key);
-    params.set("page", "1");
-    setSearchParams(params);
-  };
+  // status filter removed because API doesn't support filtering by status
 
   const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("page", String(page));
-    setSearchParams(params);
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set("page", String(page));
+      return params;
+    });
   };
 
   const handleDelete = (id: string) => {
@@ -141,20 +133,7 @@ export default function ManageReportList() {
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <select
-                value={searchParams.get("status") || ""}
-                onChange={(e) => handleFilterChange("status", e.target.value)}
-                className="h-10 rounded-md border border-input bg-background px-4 text-sm font-medium transition-colors hover:bg-accent focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                <option value="">Mọi trạng thái</option>
-                {STATUS_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* status dropdown removed - keep search only */}
           </div>
         </CardContent>
       </Card>

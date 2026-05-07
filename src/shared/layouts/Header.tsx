@@ -100,6 +100,20 @@ const Header = () => {
                     </NavigationMenuItem>
                   )}
 
+                  <NavigationMenuItem>
+                    <NavigationMenuLink asChild>
+                      <Link
+                        to="/products"
+                        className={cn(
+                          menuTriggerClass,
+                          location.pathname === "/products" && activeClass,
+                        )}
+                      >
+                        Products
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+
                   {token && (
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
@@ -111,21 +125,6 @@ const Header = () => {
                           )}
                         >
                           Profile
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-                  )}
-                  {token && (
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/products"
-                          className={cn(
-                            menuTriggerClass,
-                            location.pathname === "/products" && activeClass,
-                          )}
-                        >
-                          Products
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>

@@ -5,9 +5,7 @@ import { Button } from "@/shared/components/ui/button";
 import { IdentifyForm } from "../components/IdentifyForm";
 import { useSubmitIdentifyDocument } from "../hooks/useIdentify";
 
-/**
- * Trang submit tài liệu xác minh lần đầu.
- */
+
 export default function ManageIdentifyCreate() {
   const { mutate: submitIdentify, isPending } = useSubmitIdentifyDocument();
 
@@ -24,7 +22,6 @@ export default function ManageIdentifyCreate() {
     submitIdentify({
       formData,
       onUploadProgress: (event) => {
-        // Có thể dùng để hiển thị progress bar nếu cần
         console.log("Upload progress:", event);
       },
     });

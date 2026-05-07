@@ -7,7 +7,6 @@ export default function UnauthorizedPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-linear-to-b from-background to-secondary/20 px-4">
       <div className="relative w-full max-w-lg">
-        {/* Gradient Blobs tông Primary/Gray */}
         <div className="absolute inset-0 -top-20 -left-20 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute inset-0 -bottom-20 -right-20 w-72 h-72 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -34,7 +33,7 @@ export default function UnauthorizedPage() {
                 </p>
               </div>
 
-              {/* Actions - Đồng bộ nút rounded-xl */}
+              {/* Actions  */}
               <div className="flex flex-col sm:flex-row gap-3 pt-6">
                 <Link to="/" className="flex-1">
                   <Button
