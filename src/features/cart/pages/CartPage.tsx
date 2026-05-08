@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { ShoppingBag, Trash2, ArrowLeft } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -11,14 +12,41 @@ import {
 import { EmptyState } from "@/shared/components/common/EmptyState";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 import { useClearCart, useMyCart, useRemoveCartItem } from "../hooks/useCart";
+import { useCreateOrder } from "@/features/orders/hooks/useOrders";
+import { CheckoutDialog } from "@/features/orders/components/CheckoutDialog";
 
 export default function CartPage() {
+  const navigate = useNavigate();
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { data: cart, isLoading, error } = useMyCart();
   const removeCartItemMutation = useRemoveCartItem();
   const clearCartMutation = useClearCart();
+  const createOrderMutation = useCreateOrder();
 
   const items = cart?.items ?? [];
   const total = cart?.total ?? 0;
+
+  const handleCheckoutSubmit = (address: string, note?: string) => {
+    const orderItems = items.map((item) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+    }));
+
+    createOrderMutation.mutate(
+      {
+        shippingAddress: address,
+        items: orderItems,
+        note,
+      },
+      {
+        onSuccess: (paymentInfo) => {
+          setIsCheckoutOpen(false);
+          // Navigate to payment confirmation with QR code
+          navigate("/payment-confirmation", { state: { paymentInfo } });
+        },
+      },
+    );
+  };
 
   return (
     <div className="container mx-auto max-w-5xl px-4 py-6 md:py-8">
@@ -86,34 +114,23 @@ export default function CartPage() {
                         >
                           {item.title}
                         </Link>
-                        <p className="text-sm text-muted-foreground">
-                          Số lượng: {item.quantity}
-                        </p>
                       </div>
                       <p className="font-bold text-primary">
                         {(item.price ?? 0).toLocaleString("vi-VN")} đ
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm text-muted-foreground">
-                        Thành tiền:{" "}
-                        {(
-                          Number(item.price ?? 0) * item.quantity
-                        ).toLocaleString("vi-VN")}{" "}
-                        đ
-                      </p>
-
+                    <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 rounded-full px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                        className="ml-auto h-8 rounded-full border border-destructive/20 px-3 text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={() =>
                           removeCartItemMutation.mutate(item.productId)
                         }
                         disabled={removeCartItemMutation.isPending}
                       >
-                        <Trash2 className="mr-2 h-4 w-4" />
+                        <Trash2 className="mr-1.5 h-4 w-4" />
                         Xóa
                       </Button>
                     </div>
@@ -139,22 +156,25 @@ export default function CartPage() {
                 </span>
               </div>
 
-              <Button className="w-full rounded-full" size="lg">
-                Thanh toán
-              </Button>
-
               <Button
-                variant="outline"
                 className="w-full rounded-full"
-                onClick={() => clearCartMutation.mutate()}
-                disabled={clearCartMutation.isPending}
+                size="lg"
+                onClick={() => setIsCheckoutOpen(true)}
+                disabled={createOrderMutation.isPending}
               >
-                Xóa toàn bộ giỏ hàng
+                {createOrderMutation.isPending ? "Đang xử lý..." : "Thanh toán"}
               </Button>
             </CardContent>
           </Card>
         </div>
       )}
+
+      <CheckoutDialog
+        isOpen={isCheckoutOpen}
+        onOpenChange={setIsCheckoutOpen}
+        onSubmit={handleCheckoutSubmit}
+        isLoading={createOrderMutation.isPending}
+      />
     </div>
   );
 }
