@@ -68,9 +68,6 @@ export const QUERY_KEYS = {
   USER_LOCATION: ["user-location"] as const,
   REPORTS: ["reports"] as const,
   REPORT_DETAIL: (id: string) => ["reports", id] as const,
-  RITUALS: ["rituals"] as const,
-  RITUAL_DETAIL: (id: string) => ["rituals", id] as const,
-  RITUAL_CATEGORIES: ["ritual-categories"] as const,
   ORDERS: ["orders"] as const,
   ORDER_DETAIL: (id: string) => ["orders", id] as const,
   MY_ORDERS: ["orders", "my"] as const,
@@ -84,13 +81,6 @@ export const PRODUCT_CONDITIONS = [
   { value: "New", label: "New" },
   { value: "Like new", label: "Like new" },
   { value: "Good", label: "Good" },
-];
-
-export const DIFFICULTY_LEVELS = [
-  { value: "dễ", label: "Dễ" },
-  { value: "trung bình", label: "Trung bình" },
-  { value: "khó", label: "Khó" },
-  { value: "rất khó", label: "Rất khó" },
 ];
 
 export const REPORT_STATUS_OPTIONS = [
