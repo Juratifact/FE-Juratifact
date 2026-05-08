@@ -1,70 +1,129 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { cartService } from "../services";
-import type { AddToCartDto, Cart, CartItem, AddToCartResponse } from "../types";
-import { useMemo } from "react";
+import {
+  getMyCart,
+  addProductToCart,
+  updateCartItem,
+  removeCartItem,
+  clearCart,
+} from "../services";
+import type { AddToCartDto, UpdateCartItemDto } from "../types";
+import { QUERY_KEYS } from "@/shared/constants";
+import { useAuthStore } from "@/features/auth/store";
+import type { CartItem } from "../types";
 
-const CART_QUERY_KEY = ["cart", "my-cart"] as const;
+const CART_QUERY_KEY = QUERY_KEYS.CART || ["cart"];
 
-const patchCartWithAddedItem = (
-  current: Cart | undefined,
-  added: CartItem,
-): Cart => {
-  if (!current) return { items: [added], total: added.price ?? 0 };
-
-  const existing = current.items.find((i) => i.productId === added.productId);
-  if (existing) {
+const normalizeCart = (response: unknown) => {
+  if (Array.isArray(response)) {
+    const items = response as CartItem[];
     return {
-      ...current,
-      items: current.items.map((i) =>
-        i.productId === added.productId
-          ? { ...i, quantity: (i.quantity ?? 0) + (added.quantity ?? 0) }
-          : i,
+      items,
+      total: items.reduce(
+        (sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1),
+        0,
       ),
+      itemCount: items.length,
     };
   }
 
-  return { ...current, items: [added, ...current.items] };
+  if (response && typeof response === "object") {
+    const cart = response as Record<string, unknown>;
+    const items = Array.isArray(cart.items) ? (cart.items as CartItem[]) : [];
+
+    return {
+      ...cart,
+      items,
+      total: typeof cart.total === "number" ? cart.total : 0,
+      itemCount:
+        typeof cart.itemCount === "number" ? cart.itemCount : items.length,
+    };
+  }
+
+  return { items: [], total: 0, itemCount: 0 };
 };
 
+// ─── Get My Cart ────────────────────────────────────────
 export function useMyCart() {
-  const query = useQuery({
+  return useQuery({
     queryKey: CART_QUERY_KEY,
-    queryFn: () => cartService.getMyCart(),
+    queryFn: async () => normalizeCart(await getMyCart()),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
   });
-
-  const cart = useMemo(() => query.data ?? { items: [] }, [query.data]);
-
-  return {
-    cart: cart as Cart,
-    isLoading: query.isLoading,
-    error: query.error,
-    refetch: query.refetch,
-  };
 }
 
+// ─── Add to Cart ────────────────────────────────────────
 export function useAddProductToCart() {
   const queryClient = useQueryClient();
+  const { userId } = useAuthStore();
 
   return useMutation({
-    mutationFn: ({ userId, data }: { userId?: string; data: AddToCartDto }) =>
-      cartService.addProductToCart(userId, data),
-    onSuccess: (res: AddToCartResponse) => {
-      toast.success("Added to cart");
-
-      // Try to patch cache optimistically if backend returns the created cart item
-      const maybeItem = res.data as CartItem | undefined;
-
-      if (maybeItem) {
-        queryClient.setQueryData(CART_QUERY_KEY, (current: unknown) =>
-          patchCartWithAddedItem(current as Cart | undefined, maybeItem),
-        );
-      }
-
-      // ensure backend sync
-      queryClient.refetchQueries({ queryKey: CART_QUERY_KEY, type: "active" });
+    mutationFn: (data: AddToCartDto) =>
+      addProductToCart(userId ?? undefined, data),
+    onSuccess: (response) => {
+      toast.success("Thêm vào giỏ hàng thành công");
+      queryClient.setQueryData(CART_QUERY_KEY, normalizeCart(response));
+      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+    },
+    onError: () => {
+      toast.error("Không thể thêm vào giỏ hàng");
     },
   });
 }
 
-export default useMyCart;
+// ─── Update Cart Item ───────────────────────────────────
+export function useUpdateCartItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      itemId,
+      data,
+    }: {
+      itemId: string;
+      data: UpdateCartItemDto;
+    }) => updateCartItem(itemId, data),
+    onSuccess: (response) => {
+      toast.success("Cập nhật giỏ hàng thành công");
+      queryClient.setQueryData(CART_QUERY_KEY, normalizeCart(response));
+    },
+    onError: () => {
+      toast.error("Không thể cập nhật giỏ hàng");
+    },
+  });
+}
+
+// ─── Remove from Cart ───────────────────────────────────
+export function useRemoveCartItem() {
+  const queryClient = useQueryClient();
+  const { userId } = useAuthStore();
+
+  return useMutation({
+    mutationFn: (productId: string) =>
+      removeCartItem(userId ?? undefined, productId),
+    onSuccess: async () => {
+      toast.success("Xóa khỏi giỏ hàng thành công");
+      await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+    },
+    onError: () => {
+      toast.error("Không thể xóa khỏi giỏ hàng");
+    },
+  });
+}
+
+// ─── Clear Cart ─────────────────────────────────────────
+export function useClearCart() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: clearCart,
+    onSuccess: async () => {
+      toast.success("Xóa toàn bộ giỏ hàng thành công");
+      await queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+    },
+    onError: () => {
+      toast.error("Không thể xóa giỏ hàng");
+    },
+  });
+}

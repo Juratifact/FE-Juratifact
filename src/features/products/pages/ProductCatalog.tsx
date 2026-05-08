@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Filter, X, Loader2 } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -10,8 +10,15 @@ import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 import { PRODUCT_CONDITIONS } from "@/shared/constants";
 import { useInfiniteProducts } from "../hooks/useProduct";
 import { ProductCard } from "../components/ProductCard";
+import { useAddProductToCart } from "@/features/cart/hooks/useCart";
+import { useAuthStore } from "@/features/auth/store";
+import type { Product } from "../types";
 
 export default function ProductCatalog() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const accessToken = useAuthStore((state) => state.access_token);
+  const addToCartMutation = useAddProductToCart();
   const [searchParams, setSearchParams] = useSearchParams();
   const ITEM_HEIGHT = 560;
   const OVERSCAN = 4;
@@ -122,6 +129,19 @@ export default function ProductCatalog() {
 
   const titleQuery = searchParams.get("title") || "";
 
+  const handleAddToCart = (product: Product) => {
+    if (!accessToken) {
+      window.scrollTo(0, 0);
+      navigate("/login", { state: { from: location } });
+      return;
+    }
+
+    addToCartMutation.mutate({
+      productId: product.id,
+      quantity: 1,
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
       <div className="mx-auto mb-6 w-full max-w-4xl rounded-2xl border bg-card p-6 shadow-sm md:p-7">
@@ -227,7 +247,10 @@ export default function ProductCatalog() {
             <div style={{ paddingTop, paddingBottom }} className="space-y-5">
               {virtualItems.map((product, index) => (
                 <div key={product.id ?? `${startIndex}-${index}`}>
-                  <ProductCard product={product} />
+                  <ProductCard
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                  />
                 </div>
               ))}
             </div>

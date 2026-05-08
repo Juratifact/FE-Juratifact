@@ -38,6 +38,13 @@ export const API_ENDPOINTS = {
     APPROVE: "/api/IdentifyDocument/Approve",
     REJECT: "/api/IdentifyDocument/Reject",
   },
+  CART: {
+    MY_CART: "/api/Cart/my-cart",
+    ADD_PRODUCT: "/api/Cart/api/add-product-to-cart",
+    UPDATE_ITEM: "/api/Cart/update-item",
+    REMOVE_ITEM: "/api/Cart/api/carts/items",
+    CLEAR: "/api/Cart/clear",
+  },
 };
 export const QUERY_KEYS = {
   PRODUCTS: ["products"] as const,
@@ -55,6 +62,7 @@ export const QUERY_KEYS = {
   RITUAL_CATEGORIES: ["ritual-categories"] as const,
   IDENTIFY_MY_DOCUMENT: ["identify", "my-document"] as const,
   IDENTIFY_DOCUMENTS: ["identify", "documents"] as const,
+  CART: ["cart"] as const,
 };
 
 export const PRODUCT_CONDITIONS = [
