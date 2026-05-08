@@ -11,7 +11,7 @@ import {
 } from "@/shared/components/ui/card";
 import { EmptyState } from "@/shared/components/common/EmptyState";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
-import { useClearCart, useMyCart, useRemoveCartItem } from "../hooks/useCart";
+import { useMyCart, useRemoveCartItem } from "../hooks/useCart";
 import { useCreateOrder } from "@/features/orders/hooks/useOrders";
 import { CheckoutDialog } from "@/features/orders/components/CheckoutDialog";
 
@@ -20,7 +20,6 @@ export default function CartPage() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { data: cart, isLoading, error } = useMyCart();
   const removeCartItemMutation = useRemoveCartItem();
-  const clearCartMutation = useClearCart();
   const createOrderMutation = useCreateOrder();
 
   const items = cart?.items ?? [];
