@@ -8,11 +8,12 @@ import {
 } from "@/shared/components/ui/navigation-menu";
 import { navigationMenuTriggerStyle } from "@/shared/components/ui/navigation-menu-trigger-style";
 import { Input } from "@/shared/components/ui/input";
-import { Search, Moon, Sun } from "lucide-react";
+import { Search, Moon, Sun, ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/features/auth/store";
 import { useLogoutMutation } from "@/features/auth/hooks/useAuthMutation";
 import { Button } from "@/shared/components/ui/button";
+import { useMyCart } from "@/features/cart/hooks/useCart";
 
 const Header = () => {
   const location = useLocation();
@@ -21,6 +22,7 @@ const Header = () => {
   const token = useAuthStore((state) => state.access_token);
   const role = useAuthStore((state) => state.role);
   const isAdmin = role === "Admin";
+  const { data: cart } = useMyCart();
   const isProductsPage = location.pathname === "/products";
   const searchInputRef = useRef<HTMLInputElement>(null);
   const currentTitleSearch =
@@ -50,125 +52,131 @@ const Header = () => {
       html.classList.add("dark");
     }
   };
+
   const menuTriggerClass = cn(
     navigationMenuTriggerStyle(),
-    "h-8 px-4 text-xs sm:text-sm font-medium tracking-wide transition-all duration-300 rounded-full bg-transparent hover:bg-muted/50 focus:bg-muted/50",
+    "h-8 px-3 sm:px-4 text-xs sm:text-sm font-medium tracking-wide transition-all duration-300 rounded-full bg-transparent hover:bg-muted/50 focus:bg-muted/50",
   );
 
   const activeClass =
     "!bg-secondary/80 text-secondary-foreground shadow-sm !rounded-full";
+  const cartItemCount = cart?.items?.length ?? 0;
 
   return (
     <header className="sticky top-0 z-50 w-full">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 md:px-8 py-4 mt-4">
-        {/* The Floating Container*/}
-        <div className="flex items-center justify-between gap-3 sm:gap-4 md:gap-6 rounded-full border border-border/40 bg-background/40 backdrop-blur-md p-3 sm:p-4 shadow-md hover:shadow-lg transition-shadow duration-300">
-          {/* LEFT: Pill Navigation Menu */}
-          <nav className="hidden lg:flex items-center shrink-0">
-            <div className="flex items-center gap-0 bg-muted/40 p-1.5 rounded-full border border-border/30">
-              <NavigationMenu>
-                <NavigationMenuList className="gap-0">
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link
-                        to={isAdmin ? "/admin" : "/"}
-                        className={cn(
-                          menuTriggerClass,
-                          (location.pathname === "/" ||
-                            location.pathname.startsWith("/admin")) &&
-                            activeClass,
-                        )}
-                      >
-                        {isAdmin ? "Dashboard" : "Home"}
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-
-                  {!isAdmin && (
+      <div className="mx-auto max-w-7xl px-4 py-4 mt-2">
+        {/* SỬA THÀNH GRID 3 CỘT: Đảm bảo phần giữa luôn ở tâm */}
+        <div className="grid grid-cols-3 items-center rounded-full border border-border/40 bg-background/40 backdrop-blur-md p-2 sm:p-3 shadow-md hover:shadow-lg transition-shadow duration-300">
+          {/* 1. LEFT: Navigation Menu */}
+          <div className="flex justify-start">
+            <nav className="hidden xl:flex items-center shrink-0">
+              <div className="flex items-center gap-0 bg-muted/40 p-1 rounded-full border border-border/30">
+                <NavigationMenu>
+                  <NavigationMenuList className="gap-0">
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
                         <Link
-                          to="/map"
+                          to={isAdmin ? "/admin" : "/"}
                           className={cn(
                             menuTriggerClass,
-                            location.pathname === "/map" && activeClass,
-                          )}
-                        >
-                          Map
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-                  )}
-
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link
-                        to="/products"
-                        className={cn(
-                          menuTriggerClass,
-                          location.pathname === "/products" && activeClass,
-                        )}
-                      >
-                        Products
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-
-                  {token && (
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/profile"
-                          className={cn(
-                            menuTriggerClass,
-                            location.pathname === "/profile" && activeClass,
-                          )}
-                        >
-                          Profile
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-                  )}
-                  {token && !isAdmin && (
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/identify"
-                          className={cn(
-                            menuTriggerClass,
-                            location.pathname.startsWith("/identify") &&
+                            (location.pathname === "/" ||
+                              location.pathname.startsWith("/admin")) &&
                               activeClass,
                           )}
                         >
-                          Identify
+                          {isAdmin ? "Dashboard" : "Home"}
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
-                  )}
-                </NavigationMenuList>
-              </NavigationMenu>
-            </div>
-          </nav>
 
-          {/* CENTER: Logo & Juratifact*/}
-          <Link
-            to="/"
-            className="flex items-center gap-1 sm:gap-1.5 shrink-0 group hover:opacity-80 transition-opacity duration-300"
-          >
-            <img
-              src="/juralogo.png"
-              alt="Logo"
-              className="size-24 sm:size-16 object-contain dark:invert"
-            />
-            <span className="text-lg sm:text-3xl font-bold tracking-tight text-foreground hidden md:block -ml-7">
-              Juratifact
-            </span>
-          </Link>
+                    {!isAdmin && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/map"
+                            className={cn(
+                              menuTriggerClass,
+                              location.pathname === "/map" && activeClass,
+                            )}
+                          >
+                            Map
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
 
-          {/* RIGHT: Search, Theme Toggle & Actions */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Search Bar*/}
-            <div className="relative hidden sm:flex items-center">
+                    <NavigationMenuItem>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to="/products"
+                          className={cn(
+                            menuTriggerClass,
+                            location.pathname === "/products" && activeClass,
+                          )}
+                        >
+                          Products
+                        </Link>
+                      </NavigationMenuLink>
+                    </NavigationMenuItem>
+
+                    {token && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/profile"
+                            className={cn(
+                              menuTriggerClass,
+                              location.pathname === "/profile" && activeClass,
+                            )}
+                          >
+                            Profile
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                    {token && !isAdmin && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/identify"
+                            className={cn(
+                              menuTriggerClass,
+                              location.pathname.startsWith("/identify") &&
+                                activeClass,
+                            )}
+                          >
+                            Identify
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
+                  </NavigationMenuList>
+                </NavigationMenu>
+              </div>
+            </nav>
+          </div>
+
+          {/* 2. CENTER: Logo (Căn giữa tuyệt đối trong cột 2) */}
+          <div className="flex justify-center">
+            <Link
+              to="/"
+              className="flex items-center gap-0 shrink-0 group hover:opacity-80 transition-opacity duration-300 -space-x-4"
+            >
+              <img
+                src="/juralogo.png"
+                alt="Logo"
+                className="size-10 sm:size-12 object-contain dark:invert "
+              />
+              <span className="text-base sm:text-2xl font-bold tracking-tight text-foreground hidden md:block ">
+                Juratifact
+              </span>
+            </Link>
+          </div>
+
+          {/* 3. RIGHT: Search, Theme & Actions */}
+          <div className="flex items-center justify-end gap-2 min-w-0">
+            {/* Search Bar (Thu nhỏ max-width để không lấn chiếm logo) */}
+            <div className="relative hidden lg:flex items-center max-w-40 w-full">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <Input
                 key={location.search}
@@ -180,56 +188,75 @@ const Header = () => {
                     applySearch();
                   }
                 }}
-                placeholder="Search products..."
-                className="h-8 sm:h-9 w-40 sm:w-48 rounded-full border border-border/40 bg-muted/30 pl-9 text-xs sm:text-sm placeholder:text-muted-foreground/60 focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:border-primary/30 transition-all duration-300"
+                placeholder="Search..."
+                className="h-8 w-full rounded-full border border-border/40 bg-muted/30 pl-9 text-xs placeholder:text-muted-foreground/60 focus-visible:ring-1 transition-all duration-300"
               />
             </div>
 
-            {/* Theme Toggle Button */}
-            <Button
-              onClick={toggleTheme}
-              variant="ghost"
-              size="sm"
-              className="rounded-full h-8 sm:h-9 w-8 sm:w-9 p-0 hover:bg-muted/50 transition-colors duration-300"
-              aria-label="Toggle theme"
-            >
-              <Sun className="size-4 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute size-4 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
-            </Button>
+            <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              <Button
+                onClick={toggleTheme}
+                variant="ghost"
+                size="sm"
+                className="rounded-full h-8 w-8 p-0 hover:bg-muted/50 transition-colors duration-300"
+              >
+                <Sun className="size-4 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute size-4 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
+              </Button>
 
-            {/* Separator Line */}
-            <div className="hidden sm:block w-px h-6 bg-border/40"></div>
+              <div className="hidden sm:block w-px h-6 bg-border/40"></div>
 
-            {/* Login/Logout Actions */}
-            <div className="flex items-center gap-1 sm:gap-2">
-              {!token ? (
-                <Button
-                  asChild
-                  className="rounded-full px-4 sm:px-6 h-8 sm:h-9 text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-300"
-                >
-                  <Link to="/login">Sign in</Link>
-                </Button>
-              ) : (
-                <div className="flex items-center gap-1 sm:gap-2">
-                  {token && !isAdmin && (
-                    <Button
-                      asChild
-                      size="sm"
-                      className="rounded-full h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm font-medium transition-all duration-300 hover:shadow-md"
-                    >
-                      <Link to="/products/create">Post</Link>
-                    </Button>
-                  )}
+              {token && !isAdmin && (
+                <>
                   <Button
+                    asChild
                     variant="ghost"
                     size="sm"
-                    className="rounded-full h-8 sm:h-9 px-2 sm:px-3 text-xs sm:text-sm text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-colors duration-300"
-                    onClick={() => logoutMutation.mutate()}
+                    className="relative rounded-full h-8 w-8 p-0 hover:bg-muted/50 transition-colors duration-300"
                   >
-                    Sign out
+                    <Link to="/cart" aria-label="Cart">
+                      <ShoppingBag className="size-4" />
+                      {cartItemCount > 0 && (
+                        <span className="absolute -right-1 -top-1 inline-flex min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold leading-4 text-destructive-foreground">
+                          {cartItemCount}
+                        </span>
+                      )}
+                    </Link>
                   </Button>
-                </div>
+                  <div className="hidden sm:block w-px h-6 bg-border/40"></div>
+                </>
               )}
+
+              <div className="flex items-center gap-1">
+                {!token ? (
+                  <Button
+                    asChild
+                    className="rounded-full px-4 h-8 text-xs font-semibold"
+                  >
+                    <Link to="/login">Sign in</Link>
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    {token && !isAdmin && (
+                      <Button
+                        asChild
+                        size="sm"
+                        className="rounded-full h-8 px-3 text-xs font-medium whitespace-nowrap"
+                      >
+                        <Link to="/products/create">Post</Link>
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-full h-8 px-2 sm:px-3 text-xs text-destructive/80 hover:bg-destructive/10 hover:text-destructive whitespace-nowrap"
+                      onClick={() => logoutMutation.mutate()}
+                    >
+                      Sign out
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

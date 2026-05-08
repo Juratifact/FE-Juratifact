@@ -192,6 +192,8 @@ export function ProductCard({
   const navigate = useNavigate();
   const location = useLocation();
   const accessToken = useAuthStore((state) => state.access_token);
+  const userId = useAuthStore((state) => state.userId);
+  const isOwner = product.sellerId === userId;
   const [commentText, setCommentText] = useState("");
   const [replyToComment, setReplyToComment] = useState<ProductComment | null>(
     null,
@@ -429,7 +431,7 @@ export function ProductCard({
               }).format(product.price)}
             </div>
 
-            {onAddToCart && (
+            {onAddToCart && !isOwner && (
               <Button
                 size="sm"
                 variant="secondary"
@@ -465,7 +467,7 @@ export function ProductCard({
           </div>
 
           <div className="flex items-center gap-2">
-            {onAddToCart && (
+            {onAddToCart && !isOwner && (
               <Button
                 size="sm"
                 variant="secondary"

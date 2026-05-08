@@ -13,6 +13,7 @@ import MapPage from "@/features/map/pages/MapPage";
 import ProductCatalog from "@/features/products/pages/ProductCatalog";
 import ManageProductCreate from "@/features/products/pages/ManageProductCreate";
 import ManageProductEdit from "@/features/products/pages/ManageProductEdit";
+import CartPage from "@/features/cart/pages/CartPage";
 import ManageReportList from "@/features/reports/pages/ManageReportList";
 import ManageUserList from "@/features/users/pages/ManageUserList";
 import ProfilePage from "@/features/users/pages/ProfilePage";
@@ -30,6 +31,14 @@ export const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "map", element: <MapPage /> },
       { path: "products", element: <ProductCatalog /> },
+      {
+        path: "cart",
+        element: (
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller", "Shipper"]}>
+            <CartPage />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: "products/create",
         element: (
