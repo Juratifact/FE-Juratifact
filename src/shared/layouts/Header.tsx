@@ -22,6 +22,7 @@ const Header = () => {
   const token = useAuthStore((state) => state.access_token);
   const role = useAuthStore((state) => state.role);
   const isAdmin = role === "Admin";
+  const canSeeOrders = token && !isAdmin;
   const { data: cart } = useMyCart();
   const isProductsPage = location.pathname === "/products";
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -70,9 +71,9 @@ const Header = () => {
           {/* 1. LEFT: Navigation Menu */}
           <div className="flex justify-start">
             <nav className="hidden xl:flex items-center shrink-0">
-              <div className="flex items-center gap-0 bg-muted/40 p-1 rounded-full border border-border/30">
+              <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/30">
                 <NavigationMenu>
-                  <NavigationMenuList className="gap-0">
+                  <NavigationMenuList className="gap-1">
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
                         <Link
@@ -118,6 +119,23 @@ const Header = () => {
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
+
+                    {canSeeOrders && (
+                      <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/orders"
+                            className={cn(
+                              menuTriggerClass,
+                              location.pathname.startsWith("/orders") &&
+                                activeClass,
+                            )}
+                          >
+                            Orders
+                          </Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuItem>
+                    )}
 
                     {token && (
                       <NavigationMenuItem>

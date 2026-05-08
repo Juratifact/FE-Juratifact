@@ -467,21 +467,6 @@ export function ProductCard({
           </div>
 
           <div className="flex items-center gap-2">
-            {onAddToCart && !isOwner && (
-              <Button
-                size="sm"
-                variant="secondary"
-                className="w-full md:w-auto"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onAddToCart(product);
-                }}
-              >
-                <ShoppingBag className="mr-1 h-4 w-4" />
-                Add to cart
-              </Button>
-            )}
-
             <Button
               type="button"
               size="sm"

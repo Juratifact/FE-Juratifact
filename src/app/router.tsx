@@ -14,8 +14,13 @@ import ProductCatalog from "@/features/products/pages/ProductCatalog";
 import ManageProductCreate from "@/features/products/pages/ManageProductCreate";
 import ManageProductEdit from "@/features/products/pages/ManageProductEdit";
 import CartPage from "@/features/cart/pages/CartPage";
+import CheckoutPage from "@/features/orders/pages/CheckoutPage";
+import MyOrdersPage from "@/features/orders/pages/MyOrdersPage";
+import OrderDetailPage from "@/features/orders/pages/OrderDetailPage";
+import PaymentConfirmationPage from "@/features/orders/pages/PaymentConfirmationPage";
 import ManageReportList from "@/features/reports/pages/ManageReportList";
 import ManageUserList from "@/features/users/pages/ManageUserList";
+import ManageOrderList from "@/features/orders/pages/ManageOrderList";
 import ProfilePage from "@/features/users/pages/ProfilePage";
 import UserSearchPage from "@/features/users/pages/UserSearchPage";
 import { GuestRoute } from "@/shared/components/common/GuestRoute";
@@ -100,6 +105,46 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "checkout",
+        element: (
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller"]}>
+            <CheckoutPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "orders",
+        element: (
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller"]}>
+            <MyOrdersPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "seller/orders",
+        element: (
+          <ProtectedRoute allowedRoles={["Seller"]}>
+            <MyOrdersPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "orders/:orderId",
+        element: (
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller"]}>
+            <OrderDetailPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "payment-confirmation",
+        element: (
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller"]}>
+            <PaymentConfirmationPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "login",
         element: (
           <GuestRoute>
@@ -149,6 +194,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["Admin"]}>
             <ManageReportList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "orders",
+        element: (
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <ManageOrderList />
           </ProtectedRoute>
         ),
       },

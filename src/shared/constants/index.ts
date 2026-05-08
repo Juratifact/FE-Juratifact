@@ -45,6 +45,17 @@ export const API_ENDPOINTS = {
     REMOVE_ITEM: "/api/Cart/api/carts/items",
     CLEAR: "/api/Cart/clear",
   },
+  ORDER: {
+    BASE: "/api/Order",
+    CHECKOUT: "/api/Order/checkout",
+    MY_ORDER: "/api/Order/my-order",
+    GET_STATUS: (orderId: string) => `/api/Order/${orderId}/status`,
+    CONFIRM_RECEIPT: (orderId: string) =>
+      `/api/Order/${orderId}/confirm-receipt`,
+    CANCEL: (orderId: string) => `/api/Order/${orderId}/cancel`,
+    GET_ALL: "/api/Order",
+    GET_BY_ID: (orderId: string) => `/api/Order/${orderId}`,
+  },
 };
 export const QUERY_KEYS = {
   PRODUCTS: ["products"] as const,
@@ -60,6 +71,10 @@ export const QUERY_KEYS = {
   RITUALS: ["rituals"] as const,
   RITUAL_DETAIL: (id: string) => ["rituals", id] as const,
   RITUAL_CATEGORIES: ["ritual-categories"] as const,
+  ORDERS: ["orders"] as const,
+  ORDER_DETAIL: (id: string) => ["orders", id] as const,
+  MY_ORDERS: ["orders", "my"] as const,
+  SELLER_ORDERS: ["orders", "seller"] as const,
   IDENTIFY_MY_DOCUMENT: ["identify", "my-document"] as const,
   IDENTIFY_DOCUMENTS: ["identify", "documents"] as const,
   CART: ["cart"] as const,
