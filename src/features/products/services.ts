@@ -12,6 +12,7 @@ import type {
 } from "./types";
 import { API_ENDPOINTS } from "@/shared/constants";
 import apiClient from "@/lib/axios";
+import { useAuthStore } from "@/features/auth/store";
 
 type ProductApiItem = Partial<Product> & {
   id?: string;
@@ -248,6 +249,8 @@ const extractCommentItems = (
 };
 
 const fetchSellerProfiles = async (sellerIds: string[]) => {
+  const access_token = useAuthStore.getState().access_token;
+  if (!access_token) return;
   const uniqueSellerIds = Array.from(
     new Set(sellerIds.filter((id) => id && !sellerProfileCache.has(id))),
   );

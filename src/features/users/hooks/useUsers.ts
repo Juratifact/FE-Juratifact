@@ -45,6 +45,7 @@ export function useSearchUserByName(userName: string) {
 
 export function useMyProfile(userId?: string) {
   const storedUserId = useAuthStore((state) => state.userId);
+  const access_token = useAuthStore((state) => state.access_token);
 
   const resolvedId = useMemo(() => {
     return userId ?? storedUserId;
@@ -53,7 +54,7 @@ export function useMyProfile(userId?: string) {
   return useQuery({
     queryKey: QUERY_KEYS.MY_PROFILE(resolvedId ?? ""),
     queryFn: () => userService.getMyProfile(resolvedId!),
-    enabled: !!resolvedId,
+    enabled: !!resolvedId && !!access_token,
   });
 }
 

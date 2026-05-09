@@ -1,14 +1,27 @@
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
+import { useState } from "react";
 import { getOrderStatusLabel, getPaymentStatusLabel } from "../types";
 import type { Order, GroupedOrder } from "../types";
 
 interface OrderCardProps {
   order: Order | GroupedOrder;
+  onConfirmReceipt?: (orderId: string) => void;
+  isConfirmingReceipt?: boolean;
+  onCancelOrder?: (orderId: string, reason: string) => void;
+  isCancellingOrder?: boolean;
 }
 
-export function OrderCard({ order }: OrderCardProps) {
+export function OrderCard({
+  order,
+  onConfirmReceipt,
+  isConfirmingReceipt,
+  onCancelOrder,
+  isCancellingOrder,
+}: OrderCardProps) {
+  const [cancelReason, setCancelReason] = useState("");
   const isGroupedOrder = (value: Order | GroupedOrder): value is GroupedOrder =>
     Object.prototype.hasOwnProperty.call(value, "paymentStatus");
 
@@ -96,6 +109,40 @@ export function OrderCard({ order }: OrderCardProps) {
               </span>
             </div>
           </div>
+          {order.status === 4 && onConfirmReceipt && (
+            <div className="flex justify-end pt-2">
+              <Button
+                size="sm"
+                onClick={() => onConfirmReceipt(order.id)}
+                disabled={isConfirmingReceipt}
+              >
+                Đã nhận được hàng
+              </Button>
+            </div>
+          )}
+          {order.status === 1 && paymentStatus === 1 && onCancelOrder && (
+            <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">Lý do huỷ đơn</p>
+                <textarea
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Nhập lý do huỷ đơn"
+                  className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onCancelOrder(order.id, cancelReason.trim())}
+                  disabled={!cancelReason.trim() || isCancellingOrder}
+                >
+                  Huỷ đơn hàng
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
