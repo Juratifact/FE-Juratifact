@@ -45,9 +45,12 @@ const normalizeCart = (response: unknown) => {
 
 // ─── Get My Cart ────────────────────────────────────────
 export function useMyCart() {
+  const { access_token, userId } = useAuthStore();
+
   return useQuery({
-    queryKey: CART_QUERY_KEY,
+    queryKey: [...CART_QUERY_KEY, userId ?? "guest"],
     queryFn: async () => normalizeCart(await getMyCart()),
+    enabled: !!access_token,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   });

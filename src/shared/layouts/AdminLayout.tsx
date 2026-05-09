@@ -1,9 +1,12 @@
 import { Outlet, useLocation } from "react-router-dom";
-import {CircleUserRound } from "lucide-react";
+import { CircleUserRound } from "lucide-react";
 import AdminHeader from "./AdminHeader";
+import { useAuthStore } from "@/features/auth/store";
 
 export default function AdminLayout() {
   const location = useLocation();
+  const role = useAuthStore((s) => s.role);
+  const isShipper = role === "Shipper";
 
   const titleMap: Record<string, { title: string; subtitle: string }> = {
     "/admin": {
@@ -26,6 +29,10 @@ export default function AdminLayout() {
       title: "Upgrade",
       subtitle: "Mở rộng gói quản trị và tính năng",
     },
+    "/admin/shipper/orders": {
+      title: "Đơn khả dụng",
+      subtitle: "Nhận đơn hàng đang chờ shipper",
+    },
   };
 
   const current = titleMap[location.pathname] ?? titleMap["/admin"];
@@ -38,7 +45,7 @@ export default function AdminLayout() {
           <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-orange-500">
-                Marketplace admin
+                {isShipper ? "Marketplace shipper" : "Marketplace admin"}
               </p>
               <h2 className="mt-1 text-2xl font-black italic uppercase tracking-tight">
                 {current.title}
@@ -52,7 +59,7 @@ export default function AdminLayout() {
                 </div>
                 <div className="leading-tight">
                   <p className="text-xs font-semibold uppercase tracking-wide">
-                    Administrator
+                    {isShipper ? "Shipper" : "Administrator"}
                   </p>
                 </div>
               </div>

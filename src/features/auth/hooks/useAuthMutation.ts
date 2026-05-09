@@ -103,8 +103,8 @@ export const useLoginMutation = () => {
         role,
       });
       toast.success("Đăng nhập thành công");
-      // Redirect dựa trên role, Admin thì vào trang admin, user thì vào trang profile
-      if (role === "Admin") {
+      // Redirect dựa trên role, Admin/Shipper vào trang admin area
+      if (role === "Admin" || role === "Shipper") {
         navigate("/admin", { replace: true });
       } else {
         navigate(from, { replace: true });

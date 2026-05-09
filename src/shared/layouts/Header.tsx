@@ -21,8 +21,8 @@ const Header = () => {
   const logoutMutation = useLogoutMutation();
   const token = useAuthStore((state) => state.access_token);
   const role = useAuthStore((state) => state.role);
-  const isAdmin = role === "Admin";
-  const canSeeOrders = token && !isAdmin;
+  const isBackoffice = role === "Admin" || role === "Shipper";
+  const canSeeOrders = token && !isBackoffice;
   const { data: cart } = useMyCart();
   const isProductsPage = location.pathname === "/products";
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -77,7 +77,7 @@ const Header = () => {
                     <NavigationMenuItem>
                       <NavigationMenuLink asChild>
                         <Link
-                          to={isAdmin ? "/admin" : "/"}
+                          to={isBackoffice ? "/admin" : "/"}
                           className={cn(
                             menuTriggerClass,
                             (location.pathname === "/" ||
@@ -85,12 +85,12 @@ const Header = () => {
                               activeClass,
                           )}
                         >
-                          {isAdmin ? "Dashboard" : "Home"}
+                          {isBackoffice ? "Dashboard" : "Home"}
                         </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
 
-                    {!isAdmin && (
+                    {!isBackoffice && (
                       <NavigationMenuItem>
                         <NavigationMenuLink asChild>
                           <Link
@@ -152,7 +152,7 @@ const Header = () => {
                         </NavigationMenuLink>
                       </NavigationMenuItem>
                     )}
-                    {token && !isAdmin && (
+                    {token && !isBackoffice && (
                       <NavigationMenuItem>
                         <NavigationMenuLink asChild>
                           <Link
@@ -224,7 +224,7 @@ const Header = () => {
 
               <div className="hidden sm:block w-px h-6 bg-border/40"></div>
 
-              {token && !isAdmin && (
+              {token && !isBackoffice && (
                 <>
                   <Button
                     asChild
@@ -255,7 +255,7 @@ const Header = () => {
                   </Button>
                 ) : (
                   <div className="flex items-center gap-1">
-                    {token && !isAdmin && (
+                    {token && !isBackoffice && (
                       <Button
                         asChild
                         size="sm"

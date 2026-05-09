@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useLogoutMutation } from "@/features/auth/hooks/useAuthMutation";
+import { useAuthStore } from "@/features/auth/store";
 import { Button } from "@/shared/components/ui/button";
 import {
   LayoutDashboard,
@@ -7,17 +8,30 @@ import {
   Users,
   ChevronRight,
   FileCheck,
+  Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-const navItems = [
+
+const adminNavItems = [
   { label: "Bảng điều khiển", to: "/admin", icon: LayoutDashboard },
   { label: "Báo cáo vi phạm", to: "/admin/reports", icon: FlagTriangleRight },
   { label: "Xác minh tài liệu", to: "/admin/identify", icon: FileCheck },
   { label: "Người dùng", to: "/admin/users", icon: Users },
 ];
 
+const shipperNavItems = [
+  { label: "Đơn hàng khả dụng", to: "/admin/shipper/orders", icon: Truck },
+  {
+    label: "Đơn hàng đã nhận",
+    to: "/admin/shipper/my-orders",
+    icon: FileCheck,
+  },
+];
+
 export default function AdminHeader() {
   const logoutMutation = useLogoutMutation();
+  const role = useAuthStore((s) => s.role);
+  const navItems = role === "Shipper" ? shipperNavItems : adminNavItems;
   return (
     <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:sticky lg:top-0 lg:h-screen bg-background border-r border-border/50">
       <div className="flex h-full flex-col px-6 py-8">
@@ -35,7 +49,7 @@ export default function AdminHeader() {
               Juratifact
             </h1>
             <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground mt-1">
-              Management Suite
+              {role === "Shipper" ? "Shipper Console" : "Management Suite"}
             </span>
           </div>
         </div>

@@ -7,7 +7,7 @@ import ManageIdentifyCreate from "@/features/identify/pages/ManageIdentifyCreate
 import ManageIdentifyEdit from "@/features/identify/pages/ManageIdentifyEdit";
 import IdentifyDetailPage from "@/features/identify/pages/IdentifyDetailPage";
 import IdentifyList from "@/features/identify/pages/IdentifyList";
-import AdminPage from "@/features/landing/pages/AdminPage";
+import AdminLandingRoute from "@/features/landing/pages/AdminLandingRoute";
 import HomePage from "@/features/landing/pages/HomePage";
 import MapPage from "@/features/map/pages/MapPage";
 import ProductCatalog from "@/features/products/pages/ProductCatalog";
@@ -23,6 +23,9 @@ import ManageUserList from "@/features/users/pages/ManageUserList";
 import ManageOrderList from "@/features/orders/pages/ManageOrderList";
 import ProfilePage from "@/features/users/pages/ProfilePage";
 import UserSearchPage from "@/features/users/pages/UserSearchPage";
+import AvailableOrdersPage from "@/features/shipper/pages/AvailableOrdersPage";
+import ShipperMyOrdersPage from "@/features/shipper/pages/MyOrdersPage";
+import ShipperOrderDetail from "@/features/shipper/pages/ShipperOrderDetail";
 import { GuestRoute } from "@/shared/components/common/GuestRoute";
 import { ProtectedRoute } from "@/shared/components/common/ProtectedRoute";
 import AdminLayout from "@/shared/layouts/AdminLayout";
@@ -39,7 +42,7 @@ export const router = createBrowserRouter([
       {
         path: "cart",
         element: (
-          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller", "Shipper"]}>
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller"]}>
             <CartPage />
           </ProtectedRoute>
         ),
@@ -63,9 +66,7 @@ export const router = createBrowserRouter([
       {
         path: "profile",
         element: (
-          <ProtectedRoute
-            allowedRoles={["User", "Buyer", "Seller", "Shipper", "Admin"]}
-          >
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller", "Admin"]}>
             <ProfilePage />
           </ProtectedRoute>
         ),
@@ -73,9 +74,7 @@ export const router = createBrowserRouter([
       {
         path: "users/search",
         element: (
-          <ProtectedRoute
-            allowedRoles={["User", "Buyer", "Seller", "Shipper", "Admin"]}
-          >
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller", "Admin"]}>
             <UserSearchPage />
           </ProtectedRoute>
         ),
@@ -168,7 +167,7 @@ export const router = createBrowserRouter([
   {
     path: "admin",
     element: (
-      <ProtectedRoute allowedRoles={["Admin"]}>
+      <ProtectedRoute allowedRoles={["Admin", "Shipper"]}>
         <AdminLayout />
       </ProtectedRoute>
     ),
@@ -176,8 +175,8 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <ProtectedRoute allowedRoles={["Admin"]}>
-            <AdminPage />
+          <ProtectedRoute allowedRoles={["Admin", "Shipper"]}>
+            <AdminLandingRoute />
           </ProtectedRoute>
         ),
       },
@@ -210,6 +209,30 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["Admin"]}>
             <IdentifyList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "shipper/orders",
+        element: (
+          <ProtectedRoute allowedRoles={["Shipper"]}>
+            <AvailableOrdersPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "shipper/my-orders",
+        element: (
+          <ProtectedRoute allowedRoles={["Shipper"]}>
+            <ShipperMyOrdersPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "shipper/my-orders/:orderId",
+        element: (
+          <ProtectedRoute allowedRoles={["Shipper"]}>
+            <ShipperOrderDetail />
           </ProtectedRoute>
         ),
       },

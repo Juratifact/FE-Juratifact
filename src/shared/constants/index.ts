@@ -45,6 +45,12 @@ export const API_ENDPOINTS = {
     REMOVE_ITEM: "/api/Cart/api/carts/items",
     CLEAR: "/api/Cart/clear",
   },
+  SHIPPER: {
+    BASE: "/api/Shipper",
+    AVAILABLE_ORDERS: "/api/Shipper/available-orders",
+    ACCEPT_ORDER: "/api/Shipper/accept-order",
+    MY_ORDERS_BY_ID: "/api/Shipper/my-ordersByOrderID",
+  },
   ORDER: {
     BASE: "/api/Order",
     CHECKOUT: "/api/Order/checkout",
@@ -75,6 +81,7 @@ export const QUERY_KEYS = {
   IDENTIFY_MY_DOCUMENT: ["identify", "my-document"] as const,
   IDENTIFY_DOCUMENTS: ["identify", "documents"] as const,
   CART: ["cart"] as const,
+  SHIPPER_AVAILABLE_ORDERS: ["shipper", "available-orders"] as const,
 };
 
 export const PRODUCT_CONDITIONS = [
