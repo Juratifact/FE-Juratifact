@@ -72,7 +72,7 @@ export default function ShipperOrderDetail() {
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <Button variant="ghost" size="sm" asChild className="mb-6">
-        <Link to="/shipper/my-orders">
+        <Link to="/admin/shipper/my-orders">
           <ArrowLeft className="mr-1 h-4 w-4" />
           Quay lại danh sách
         </Link>
@@ -262,72 +262,74 @@ export default function ShipperOrderDetail() {
           )}
 
           {/* Confirm actions: upload evidence + confirm pickup/delivery */}
-          <div className="space-y-3 border-t pt-4">
-            <p className="font-semibold">Xác nhận</p>
-            <div className="space-y-3">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">
-                  Tải lên hình ảnh chứng minh
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                  className="rounded-md border px-3 py-2"
-                  required
-                />
-                {!file && (
-                  <p className="text-xs text-red-600">
-                    Vui lòng chọn hình ảnh trước khi xác nhận
-                  </p>
-                )}
-              </div>
-              <div className="flex gap-2">
-                {/* Show pickup button only if status is pending (2) */}
-                {order.status === 2 && (
-                  <Button
-                    disabled={!file || confirmPickupMutation.isPending}
-                    onClick={() => {
-                      if (!file) {
-                        toast.error(
-                          "Vui lòng chọn hình ảnh trước khi xác nhận",
-                        );
-                        return;
-                      }
-                      confirmPickupMutation.mutate({
-                        orderId: order.orderId,
-                        file,
-                      });
-                    }}
-                    className="flex-1"
-                  >
-                    Xác nhận nhận hàng
-                  </Button>
-                )}
-                {/* Show delivery button only if already picked up (status !== 2) */}
-                {order.status !== 2 && (
-                  <Button
-                    disabled={!file || confirmDeliveryMutation.isPending}
-                    onClick={() => {
-                      if (!file) {
-                        toast.error(
-                          "Vui lòng chọn hình ảnh trước khi xác nhận",
-                        );
-                        return;
-                      }
-                      confirmDeliveryMutation.mutate({
-                        orderId: order.orderId,
-                        file,
-                      });
-                    }}
-                    className="flex-1"
-                  >
-                    Xác nhận giao hàng
-                  </Button>
-                )}
+          {!(order.shipperPod1Url && order.shipperPod2Url) && (
+            <div className="space-y-3 border-t pt-4">
+              <p className="font-semibold">Xác nhận</p>
+              <div className="space-y-3">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">
+                    Tải lên hình ảnh chứng minh
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                    className="rounded-md border px-3 py-2"
+                    required
+                  />
+                  {!file && (
+                    <p className="text-xs text-red-600">
+                      Vui lòng chọn hình ảnh trước khi xác nhận
+                    </p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {/* Show pickup button only if status is pending (2) */}
+                  {order.status === 2 && (
+                    <Button
+                      disabled={!file || confirmPickupMutation.isPending}
+                      onClick={() => {
+                        if (!file) {
+                          toast.error(
+                            "Vui lòng chọn hình ảnh trước khi xác nhận",
+                          );
+                          return;
+                        }
+                        confirmPickupMutation.mutate({
+                          orderId: order.orderId,
+                          file,
+                        });
+                      }}
+                      className="flex-1"
+                    >
+                      Xác nhận nhận hàng
+                    </Button>
+                  )}
+                  {/* Show delivery button only if already picked up (status !== 2) */}
+                  {order.status !== 2 && (
+                    <Button
+                      disabled={!file || confirmDeliveryMutation.isPending}
+                      onClick={() => {
+                        if (!file) {
+                          toast.error(
+                            "Vui lòng chọn hình ảnh trước khi xác nhận",
+                          );
+                          return;
+                        }
+                        confirmDeliveryMutation.mutate({
+                          orderId: order.orderId,
+                          file,
+                        });
+                      }}
+                      className="flex-1"
+                    >
+                      Xác nhận giao hàng
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>

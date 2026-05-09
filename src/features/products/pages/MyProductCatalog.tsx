@@ -1,14 +1,14 @@
-import { useMemo, useState } from "react";
-import { Search, X } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { X, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { EmptyState } from "@/shared/components/common/EmptyState";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 import { Pagination } from "@/shared/components/common/Pagination";
-import { useDebounce } from "@/shared/hooks/useDebounce";
 import { ProductForm } from "../components/ProductForm";
 import {
   useDeleteMyProduct,
@@ -16,6 +16,7 @@ import {
   useUpdateMyProduct,
 } from "../hooks/useProduct";
 import { ProductCard } from "../components/ProductCard";
+import { ConfirmationModal } from "@/shared/components/common/ConfirmationModal";
 import type { Product, UpdateMyProductDto } from "../types";
 import type { ProductFormData } from "../schema";
 
@@ -24,11 +25,10 @@ interface MyProductCatalogProps {
 }
 
 export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
-  const [searchInput, setSearchInput] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 6;
-  const debouncedSearch = useDebounce(searchInput, 500);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
   const updateMyProductMutation = useUpdateMyProduct();
   const deleteMyProductMutation = useDeleteMyProduct();
@@ -36,13 +36,7 @@ export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
   const { products, pagination, isLoading, error } = useMyProducts({
     page,
     limit: pageSize,
-    title: debouncedSearch.trim() || undefined,
   });
-
-  const hasActiveSearch = useMemo(
-    () => debouncedSearch.trim().length > 0,
-    [debouncedSearch],
-  );
 
   const buildUpdatePayload = (
     original: Product,
@@ -56,9 +50,12 @@ export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
       status: original.status,
     };
 
-    const nextImage = data.image?.[0] ?? null;
-    if (nextImage) {
-      payload.image = nextImage;
+    if (data.image && data.image.length > 0) {
+      payload.images = Array.from(data.image);
+    }
+
+    if (data.imageUrls) {
+      payload.imageUrls = data.imageUrls;
     }
 
     const nextVideo = data.video?.[0] ?? null;
@@ -87,13 +84,14 @@ export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
   };
 
   const handleDelete = (product: Product) => {
-    const confirmed = window.confirm(
-      `Xoá sản phẩm "${product.title}"? Hành động này không thể hoàn tác.`,
-    );
+    setDeletingProduct(product);
+  };
 
-    if (!confirmed) return;
-
-    deleteMyProductMutation.mutate(product.id);
+  const handleConfirmDelete = () => {
+    if (!deletingProduct) return;
+    deleteMyProductMutation.mutate(deletingProduct.id, {
+      onSuccess: () => setDeletingProduct(null),
+    });
   };
 
   const content = (
@@ -105,32 +103,18 @@ export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
             Theo dõi và quản lý các sản phẩm bạn đang đăng bán.
           </p>
         </div>
-
-        <div className="w-full md:max-w-sm">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={searchInput}
-              onChange={(e) => {
-                setSearchInput(e.target.value);
-                setPage(1);
-              }}
-              placeholder="Tìm theo tên sản phẩm..."
-              className="pl-9"
-            />
-          </div>
-        </div>
+        <Button asChild className="rounded-full shadow-md transition-all hover:shadow-lg active:scale-95">
+          <Link to="/products/create" className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            <span>Đăng sản phẩm mới</span>
+          </Link>
+        </Button>
       </div>
 
       <div className="flex items-center justify-between gap-3">
         <Badge variant="secondary">
           {pagination?.totalItems ?? products.length} sản phẩm
         </Badge>
-        {hasActiveSearch && (
-          <p className="text-xs text-muted-foreground">
-            Đang lọc theo từ khoá: {debouncedSearch.trim()}
-          </p>
-        )}
       </div>
 
       {error && (
@@ -172,53 +156,62 @@ export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
     </div>
   );
 
-  if (embedded) {
-    return (
-      <>
-        {content}
+  return (
+    <div className={cn(!embedded && "container mx-auto px-4 py-8")}>
+      {content}
 
-        {editingProduct && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-            <Card className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl border bg-background shadow-2xl">
-              <div className="flex items-center justify-between border-b px-5 py-4">
-                <div>
-                  <p className="text-sm font-semibold">Chỉnh sửa sản phẩm</p>
-                  <p className="text-xs text-muted-foreground">
-                    Chỉ các trường thay đổi mới được gửi lên API.
-                  </p>
-                </div>
-
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 rounded-full"
-                  onClick={() => setEditingProduct(null)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+      {editingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <Card className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl border bg-background shadow-2xl">
+            <div className="flex items-center justify-between border-b px-5 py-4">
+              <div>
+                <p className="text-sm font-semibold">Chỉnh sửa sản phẩm</p>
+                <p className="text-xs text-muted-foreground">
+                  Chỉ các trường thay đổi mới được gửi lên API.
+                </p>
               </div>
 
-              <CardContent className="max-h-[calc(90vh-73px)] overflow-auto p-5 md:p-6">
-                <ProductForm
-                  key={editingProduct.id}
-                  defaultValues={{
-                    title: editingProduct.title,
-                    description: editingProduct.description ?? "",
-                    condition: editingProduct.condition,
-                    price: editingProduct.price,
-                  }}
-                  onSubmit={handleEditSubmit}
-                  isPending={updateMyProductMutation.isPending}
-                  submitLabel="Lưu thay đổi"
-                />
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </>
-    );
-  }
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setEditingProduct(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
 
-  return <div className="container mx-auto px-4 py-8">{content}</div>;
+            <CardContent className="max-h-[calc(90vh-73px)] overflow-auto p-5 md:p-6">
+              <ProductForm
+                key={editingProduct.id}
+                defaultValues={{
+                  title: editingProduct.title,
+                  description: editingProduct.description ?? "",
+                  condition: editingProduct.condition,
+                  price: editingProduct.price,
+                }}
+                initialImageUrls={editingProduct.imageUrls}
+                onSubmit={handleEditSubmit}
+                isPending={updateMyProductMutation.isPending}
+                submitLabel="Lưu thay đổi"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <ConfirmationModal
+        isOpen={!!deletingProduct}
+        title="Xoá sản phẩm?"
+        description={`Bạn có chắc chắn muốn xoá "${deletingProduct?.title}"? Hành động này không thể hoàn tác.`}
+        confirmLabel="Xoá ngay"
+        cancelLabel="Huỷ"
+        variant="destructive"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeletingProduct(null)}
+        isPending={deleteMyProductMutation.isPending}
+      />
+    </div>
+  );
 }

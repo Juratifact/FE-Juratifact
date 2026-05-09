@@ -3,18 +3,17 @@ import type { CartFormData } from "./schema";
 
 // ─── Cart Entity ────────────────────────────────────────
 export interface CartItem {
-  id: string;
+  cartDetailId: string;
   productId: string;
-  title?: string;
-  price?: number;
+  productTitle: string;
+  productImageUrls: string[];
+  productVideoUrls?: string[];
+  price: number;
   quantity: number;
-  imageUrls?: string[];
-  product?: {
-    id: string;
-    title: string;
-    price: number;
-    imageUrls: string[];
-  };
+  condition: string;
+  sellerId: string;
+  sellerName: string;
+  addedAt: string;
 }
 
 export interface Cart {

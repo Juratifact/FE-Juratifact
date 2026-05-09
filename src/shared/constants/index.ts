@@ -61,6 +61,8 @@ export const API_ENDPOINTS = {
     CANCEL: (orderId: string) => `/api/Order/${orderId}/cancel`,
     GET_ALL: "/api/Order",
     GET_BY_ID: (orderId: string) => `/api/Order/${orderId}`,
+    GET_PRODUCTS_BY_ORDER: "/api/Order/get-products-by-orderId",
+    CANCEL_CHECKOUT: (orderId: string) => `/api/Order/${orderId}/cancel-checkout`,
   },
 };
 export const QUERY_KEYS = {

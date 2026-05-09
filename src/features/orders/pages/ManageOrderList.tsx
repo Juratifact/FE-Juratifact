@@ -87,9 +87,9 @@ export default function ManageOrderList() {
       ) : (
         <>
           <OrderTable
-            orders={orders}
-            onConfirm={(id) => confirmMutation.mutate(id)}
-            onCancel={(id) => cancelMutation.mutate({ id })}
+            orders={orders as any}
+            onConfirmReceipt={(id: string) => confirmMutation.mutate(id)}
+            onCancel={(id: string, reason: string) => cancelMutation.mutate({ id, data: { reason } })}
             isProcessing={confirmMutation.isPending || cancelMutation.isPending}
           />
 

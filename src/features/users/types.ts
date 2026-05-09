@@ -9,6 +9,7 @@ export interface UserProfile {
   phoneNumber?: string;
   address?: string;
   profilePicture?: string;
+  isVerify?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

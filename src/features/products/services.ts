@@ -26,6 +26,8 @@ type ProductApiItem = Partial<Product> & {
   status?: number;
   imageUrls?: string[];
   imageUrl?: string[];
+  images?: string[];
+  productImages?: string[];
   videoUrls?: string[];
   video?: Array<string | null>;
   createdAt?: string;
@@ -72,13 +74,39 @@ type ProductCommentListRawResponse =
 const sellerProfileCache = new Map<string, SellerApiItem>();
 
 const normalizeArray = (value: unknown): string[] => {
-  if (typeof value === "string" && value.length > 0) {
-    return [value];
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed || trimmed === "null" || trimmed === "undefined") return [];
+
+    // Handle JSON array strings
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return parsed
+            .map((x) => (x === null || x === undefined ? "" : String(x).trim()))
+            .filter((x) => x.length > 0 && x !== "null" && x !== "undefined");
+        }
+      } catch {
+        // Fallback to treat as single string if JSON parse fails
+      }
+    }
+    return [trimmed];
   }
-  if (!Array.isArray(value)) return [];
-  return value.filter(
-    (x): x is string => typeof x === "string" && x.length > 0,
-  );
+
+  if (Array.isArray(value)) {
+    return value
+      .map((x) => (x === null || x === undefined ? "" : String(x).trim()))
+      .filter((x) => x.length > 0 && x !== "null" && x !== "undefined");
+  }
+
+  if (value && typeof value === "object" && "length" in value) {
+    return Array.from(value as any)
+      .map((x) => (x === null || x === undefined ? "" : String(x).trim()))
+      .filter((x) => x.length > 0 && x !== "null" && x !== "undefined");
+  }
+
+  return [];
 };
 
 const normalizeCondition = (value: unknown): Product["condition"] => {
@@ -291,7 +319,9 @@ const normalizeProduct = (item: ProductApiItem): Product => {
     condition: normalizeCondition(item.condition),
     price: Number(item.price ?? 0),
     status: item.status === 1 ? 1 : 0,
-    imageUrls: normalizeArray(item.imageUrls ?? item.imageUrl),
+    imageUrls: normalizeArray(
+      item.imageUrls ?? item.imageUrl ?? item.images ?? item.productImages,
+    ),
     videoUrls: normalizeArray(item.videoUrls ?? item.video),
     comments,
     createdAt: item.createdAt ?? new Date().toISOString(),
@@ -410,8 +440,12 @@ const productBaseService = createBaseService<
       formData.append("Description", data.description.trim());
     }
 
-    if (data.image) {
-      formData.append("Image", data.image);
+    if (data.images && data.images.length > 0) {
+      data.images.forEach((file) => {
+        formData.append("Images", file);
+        // Fallback for older backend versions
+        formData.append("Image", file);
+      });
     }
 
     if (data.video) {
@@ -512,8 +546,11 @@ export const productService = Object.assign(productBaseService, {
       formData.append("Status", String(data.status));
     }
 
-    if (data.image instanceof File) {
-      formData.append("Image", data.image);
+    if (Array.isArray(data.images) && data.images.length > 0) {
+      data.images.forEach((file) => {
+        formData.append("Images", file);
+        formData.append("Image", file);
+      });
     }
 
     if (data.video instanceof File) {

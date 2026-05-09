@@ -17,7 +17,7 @@ export default function ManageProductCreate() {
       description: data.description,
       condition: data.condition,
       price: data.price,
-      image: data.image?.[0] ?? null,
+      images: data.image ? Array.from(data.image) : [],
       video: data.video?.[0] ?? null,
     };
 

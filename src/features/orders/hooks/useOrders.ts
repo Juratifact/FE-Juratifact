@@ -137,3 +137,25 @@ export function useMyOrders() {
     },
   });
 }
+export function useOrderProductDetail(orderId: string, productId: string) {
+  return useQuery({
+    queryKey: ["orders", orderId, "products", productId],
+    queryFn: async () => {
+      const response = await orderActions.getProductsByOrderId(
+        orderId,
+        productId,
+      );
+      return response;
+    },
+    enabled: !!orderId && !!productId,
+  });
+}
+export function useCancelCheckout() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (orderId: string) => orderActions.cancelCheckout(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_ORDERS });
+    },
+  });
+}

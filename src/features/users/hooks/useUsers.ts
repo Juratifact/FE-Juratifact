@@ -43,7 +43,7 @@ export function useSearchUserByName(userName: string) {
   });
 }
 
-export function useMyProfile(userId?: string) {
+export function useMyProfile(userId?: string, options?: { refetchInterval?: number }) {
   const storedUserId = useAuthStore((state) => state.userId);
   const access_token = useAuthStore((state) => state.access_token);
 
@@ -55,6 +55,7 @@ export function useMyProfile(userId?: string) {
     queryKey: QUERY_KEYS.MY_PROFILE(resolvedId ?? ""),
     queryFn: () => userService.getMyProfile(resolvedId!),
     enabled: !!resolvedId && !!access_token,
+    refetchInterval: options?.refetchInterval,
   });
 }
 

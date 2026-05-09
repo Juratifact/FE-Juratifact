@@ -123,6 +123,9 @@ export const reportService = createBaseService<
       },
     } satisfies ReportListResponse;
   },
+  getById: async (id) => {
+    return (await apiClient.get(`${API_ENDPOINTS.REPORT.GET_REPORT}/${id}`)) as Report;
+  },
 });
 
 // ─── Additional API calls for report actions ─────────────

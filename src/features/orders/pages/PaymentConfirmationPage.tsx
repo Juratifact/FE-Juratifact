@@ -12,13 +12,13 @@ import { CheckCircle, QrCode, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { QUERY_KEYS } from "@/shared/constants";
 import { orderActions } from "../services";
-import { useCancelOrder } from "../hooks/useOrders";
+import { useCancelCheckout } from "../hooks/useOrders";
 
 export default function PaymentConfirmationPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const paymentInfo = location.state?.paymentInfo;
-  const cancelOrderMutation = useCancelOrder();
+  const cancelCheckoutMutation = useCancelCheckout();
 
   const orderQuery = useQuery({
     queryKey: QUERY_KEYS.ORDER_DETAIL(paymentInfo?.orderId ?? ""),
@@ -35,22 +35,12 @@ export default function PaymentConfirmationPage() {
     }
   }, [navigate, orderQuery.data?.paymentStatus]);
 
-  const handleCheckTransfer = async () => {
-    const result = await orderQuery.refetch();
-    if (result.data?.paymentStatus === 1) {
-      toast.success("Thanh toán đã được xác nhận");
-      navigate("/orders", { replace: true });
-      return;
-    }
-
-    toast.info("Chưa xác nhận chuyển khoản, vui lòng thử lại sau.");
-  };
 
   const handleCancelPayment = () => {
     if (!paymentInfo?.orderId) return;
 
-    cancelOrderMutation.mutate(
-      { id: paymentInfo.orderId },
+    cancelCheckoutMutation.mutate(
+      paymentInfo.orderId,
       {
         onSuccess: () => {
           navigate("/cart", { replace: true });
@@ -91,12 +81,9 @@ export default function PaymentConfirmationPage() {
 
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Đơn hàng đã được tạo</h1>
+          <h1 className="text-2xl font-bold">Đơn hàng đã được tạo</h1>
           <p className="mt-2 text-muted-foreground">
-            Mã đơn hàng:{" "}
-            <span className="font-mono font-semibold">
-              {paymentInfo.orderId}
-            </span>
+            Vui lòng quét mã QR để thanh toán
           </p>
         </div>
 
@@ -138,22 +125,14 @@ export default function PaymentConfirmationPage() {
           </CardContent>
         </Card>
 
-        {/* Action Buttons */}
         <div className="flex gap-3">
           <Button
             variant="outline"
-            className="flex-1 rounded-full"
+            className="w-full rounded-full"
             onClick={handleCancelPayment}
-            disabled={cancelOrderMutation.isPending}
+            disabled={cancelCheckoutMutation.isPending}
           >
-            {cancelOrderMutation.isPending ? "Đang hủy..." : "Hủy thanh toán"}
-          </Button>
-          <Button
-            className="flex-1 rounded-full"
-            onClick={handleCheckTransfer}
-            disabled={orderQuery.isFetching}
-          >
-            {orderQuery.isFetching ? "Đang kiểm tra..." : "Tôi đã chuyển khoản"}
+            {cancelCheckoutMutation.isPending ? "Đang hủy..." : "Hủy thanh toán"}
           </Button>
         </div>
       </div>

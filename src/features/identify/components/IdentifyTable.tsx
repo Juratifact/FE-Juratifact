@@ -34,7 +34,6 @@ export function IdentifyTable({ documents }: IdentifyTableProps) {
             <TableHead>Người dùng</TableHead>
             <TableHead>Ngày gửi</TableHead>
             <TableHead>Trạng thái</TableHead>
-            <TableHead>Ghi chú</TableHead>
             <TableHead className="text-right">Thao tác</TableHead>
           </TableRow>
         </TableHeader>

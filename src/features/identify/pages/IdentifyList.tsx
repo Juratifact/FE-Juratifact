@@ -1,6 +1,5 @@
 import { useCallback } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { Button } from "@/shared/components/ui/button";
+import { useSearchParams } from "react-router-dom";
 import { Badge } from "@/shared/components/ui/badge";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 import { EmptyState } from "@/shared/components/common/EmptyState";
@@ -70,9 +69,6 @@ export default function IdentifyList() {
           title="Chưa có tài liệu"
           description="Chưa có ai gửi tài liệu xác minh."
         >
-          <Button asChild>
-            <Link to="/identify/create">Gửi xác minh</Link>
-          </Button>
         </EmptyState>
       ) : (
         <>

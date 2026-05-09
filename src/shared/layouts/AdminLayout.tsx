@@ -38,10 +38,10 @@ export default function AdminLayout() {
   const current = titleMap[location.pathname] ?? titleMap["/admin"];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 lg:flex">
+    <div className="min-h-screen bg-background text-foreground lg:flex">
       <AdminHeader />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-slate-50/90 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-border/50 bg-background/80 backdrop-blur">
           <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-orange-500">
@@ -50,11 +50,11 @@ export default function AdminLayout() {
               <h2 className="mt-1 text-2xl font-black italic uppercase tracking-tight">
                 {current.title}
               </h2>
-              <p className="text-sm text-slate-500">{current.subtitle}</p>
+              <p className="text-sm text-muted-foreground">{current.subtitle}</p>
             </div>
             <div className="flex items-center gap-2">
-              <div className="hidden sm:flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-                <div className="grid size-9 place-items-center rounded-xl bg-slate-950 text-white">
+              <div className="hidden sm:flex items-center gap-3 rounded-2xl border border-border bg-card px-3 py-2 shadow-sm">
+                <div className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground">
                   <CircleUserRound className="size-4" />
                 </div>
                 <div className="leading-tight">

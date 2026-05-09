@@ -17,6 +17,7 @@ export interface IdentifyDocument {
   note?: string | null;
   message?: string;
   verifiedAt?: string | null;
+  isVerify?: boolean;
   createdAt: string;
   updatedAt: string;
 }

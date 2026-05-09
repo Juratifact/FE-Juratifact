@@ -37,6 +37,7 @@ export interface AuthResponse {
     hasActiveSubscription: boolean;
     subscriptionType?: string;
   };
+  isVerify?: boolean;
 }
 
 export interface RegisterResponse {
@@ -47,13 +48,16 @@ export interface AuthState {
   access_token: string | null;
   userId: string | null;
   role: UserRole | null;
+  isVerify: boolean;
 }
 export interface AuthActions {
   setAuth: (payload: {
     access_token: string;
     userId?: string;
     role: UserRole | null;
+    isVerify?: boolean;
   }) => void;
+  setIsVerify: (isVerify: boolean) => void;
   clearAuth: () => void;
 }
 export interface JwtPayload {

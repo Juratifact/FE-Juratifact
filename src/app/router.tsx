@@ -23,6 +23,7 @@ import ManageUserList from "@/features/users/pages/ManageUserList";
 import ManageOrderList from "@/features/orders/pages/ManageOrderList";
 import ProfilePage from "@/features/users/pages/ProfilePage";
 import UserSearchPage from "@/features/users/pages/UserSearchPage";
+import MyProductCatalog from "@/features/products/pages/MyProductCatalog";
 import AvailableOrdersPage from "@/features/shipper/pages/AvailableOrdersPage";
 import ShipperMyOrdersPage from "@/features/shipper/pages/MyOrdersPage";
 import ShipperOrderDetail from "@/features/shipper/pages/ShipperOrderDetail";
@@ -68,6 +69,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["User", "Buyer", "Seller", "Admin"]}>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "my-products",
+        element: (
+          <ProtectedRoute allowedRoles={["Buyer", "Seller"]}>
+            <MyProductCatalog />
           </ProtectedRoute>
         ),
       },

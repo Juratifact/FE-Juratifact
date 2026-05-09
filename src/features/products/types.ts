@@ -54,7 +54,7 @@ export interface CreateProductDto {
   description?: string;
   condition: Product["condition"];
   price: number;
-  image?: File | null;
+  images?: File[] | null;
   video?: File | null;
   imageUrls?: string[];
   videoUrls?: string[];
@@ -73,9 +73,11 @@ export interface UpdateMyProductDto {
   description?: string;
   condition?: Product["condition"];
   price?: number;
-  image?: File | null;
+  images?: File[] | null;
   video?: File | null;
   status?: Product["status"];
+  imageUrls?: string[];
+  videoUrls?: string[];
 }
 
 // ─── Form Props ──────────────────────────────────────────

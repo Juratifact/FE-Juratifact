@@ -1,14 +1,16 @@
 import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormData } from "../schema";
 import { Label } from "@/shared/components/ui/label";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, X, ImagePlus } from "lucide-react";
 import { PRODUCT_CONDITIONS } from "@/shared/constants";
 
 interface ProductFormProps {
   defaultValues?: Partial<ProductFormData>;
+  initialImageUrls?: string[];
   onSubmit: (data: ProductFormData) => void;
   isPending?: boolean;
   submitLabel?: string;
@@ -16,6 +18,7 @@ interface ProductFormProps {
 
 export function ProductForm({
   defaultValues,
+  initialImageUrls,
   onSubmit,
   isPending,
   submitLabel = "Save product",
@@ -23,6 +26,7 @@ export function ProductForm({
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
     mode: "onTouched",
@@ -36,8 +40,55 @@ export function ProductForm({
     },
   });
 
+  const [currentInitialUrls, setCurrentInitialUrls] = useState<string[]>(
+    initialImageUrls ?? [],
+  );
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [newPreviews, setNewPreviews] = useState<string[]>([]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const addedFiles = Array.from(files);
+      const addedPreviews = addedFiles.map((file) => URL.createObjectURL(file));
+
+      setNewFiles((prev) => [...prev, ...addedFiles]);
+      setNewPreviews((prev) => [...prev, ...addedPreviews]);
+
+    }
+    e.target.value = "";
+  };
+
+  useEffect(() => {
+    setValue("image", newFiles as unknown as FileList);
+  }, [newFiles, setValue]);
+
+  useEffect(() => {
+    setValue("imageUrls", currentInitialUrls);
+  }, [currentInitialUrls, setValue]);
+
+  const removeInitialImage = (url: string) => {
+    setCurrentInitialUrls((prev) => prev.filter((u) => u !== url));
+  };
+
+  const removeNewImage = (index: number) => {
+    setNewFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewPreviews((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      newPreviews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [newPreviews]);
+
   const handleFormSubmit = (data: ProductFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+    });
   };
 
   return (
@@ -115,11 +166,23 @@ export function ProductForm({
         <Label htmlFor="price">Price (VND) *</Label>
         <Input
           id="price"
-          type="number"
-          placeholder="1000000"
-          {...register("price", { valueAsNumber: true })}
+          type="text"
+          placeholder="1.000.000"
           className={errors.price ? "border-destructive" : ""}
           required
+          onChange={(e) => {
+            const rawValue = e.target.value.replace(/\D/g, "");
+            const numericValue = parseInt(rawValue, 10) || 0;
+            
+            // Update form state with raw number
+            setValue("price", numericValue, { shouldValidate: true });
+            
+            // Update display with dots
+            e.target.value = numericValue > 0 
+              ? numericValue.toLocaleString("vi-VN").replace(/,/g, ".") 
+              : "";
+          }}
+          defaultValue={defaultValues?.price ? defaultValues.price.toLocaleString("vi-VN").replace(/,/g, ".") : ""}
         />
         {errors.price && (
           <p className="text-destructive text-xs">{errors.price.message}</p>
@@ -129,15 +192,64 @@ export function ProductForm({
       {/* Media */}
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="image">Image (optional)</Label>
+          <Label htmlFor="image" className="flex items-center gap-2">
+            <ImagePlus className="h-4 w-4" />
+            Images
+          </Label>
           <Input
             id="image"
             type="file"
             accept="image/*"
-            {...register("image")}
+            multiple
+            onChange={handleImageChange}
+            className="cursor-pointer"
           />
+          {(currentInitialUrls.length > 0 || newFiles.length > 0) && (
+            <div className="grid grid-cols-3 gap-2 pt-2">
+              {/* Initial Images */}
+              {currentInitialUrls.map((url, idx) => (
+                <div
+                  key={`initial-${idx}`}
+                  className="group relative aspect-square overflow-hidden rounded-md border bg-muted"
+                >
+                  <img
+                    src={url}
+                    alt={`Existing ${idx + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeInitialImage(url)}
+                    className="absolute right-1 top-1 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/70"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+              {/* New Images */}
+              {newPreviews.map((url, idx) => (
+                <div
+                  key={`new-${idx}`}
+                  className="group relative aspect-square overflow-hidden rounded-md border bg-muted"
+                >
+                  <img
+                    src={url}
+                    alt={`New ${idx + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeNewImage(idx)}
+                    className="absolute right-1 top-1 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/70"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">
-            You can submit without image.
+            You can select multiple images.
           </p>
           {errors.image && (
             <p className="text-destructive text-xs">{errors.image.message}</p>

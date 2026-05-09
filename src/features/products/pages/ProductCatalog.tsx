@@ -1,18 +1,26 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Filter, X, Loader2 } from "lucide-react";
+import { Filter, X, Loader2} from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { useInfinityScroll } from "@/shared/hooks/useInfinityScroll";
 import { EmptyState } from "@/shared/components/common/EmptyState";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 import { PRODUCT_CONDITIONS } from "@/shared/constants";
-import { useInfiniteProducts } from "../hooks/useProduct";
+import {
+  useInfiniteProducts,
+  useDeleteMyProduct,
+  useUpdateMyProduct,
+} from "../hooks/useProduct";
 import { ProductCard } from "../components/ProductCard";
+import { ProductForm } from "../components/ProductForm";
+import { ConfirmationModal } from "@/shared/components/common/ConfirmationModal";
 import { useAddProductToCart } from "@/features/cart/hooks/useCart";
 import { useAuthStore } from "@/features/auth/store";
-import type { Product } from "../types";
+import type { Product, UpdateMyProductDto } from "../types";
+import type { ProductFormData } from "../schema";
 
 export default function ProductCatalog() {
   const navigate = useNavigate();
@@ -20,13 +28,11 @@ export default function ProductCatalog() {
   const accessToken = useAuthStore((state) => state.access_token);
   const addToCartMutation = useAddProductToCart();
   const [searchParams, setSearchParams] = useSearchParams();
-  const ITEM_HEIGHT = 560;
-  const OVERSCAN = 4;
-  const listRef = useRef<HTMLDivElement>(null);
-  const [{ startIndex, endIndex }, setRange] = useState({
-    startIndex: 0,
-    endIndex: 10,
-  });
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+
+  const updateMyProductMutation = useUpdateMyProduct();
+  const deleteMyProductMutation = useDeleteMyProduct();
 
   const {
     products,
@@ -37,72 +43,66 @@ export default function ProductCatalog() {
     fetchNextPage,
   } = useInfiniteProducts();
 
+  const buildUpdatePayload = (
+    original: Product,
+    data: ProductFormData,
+  ): UpdateMyProductDto => {
+    const payload: UpdateMyProductDto = {
+      title: data.title.trim() || original.title,
+      description: data.description ?? original.description ?? "",
+      condition: data.condition,
+      price: data.price,
+      status: original.status,
+    };
+
+    if (data.image && data.image.length > 0) {
+      payload.images = Array.from(data.image);
+    }
+
+    if (data.imageUrls) {
+      payload.imageUrls = data.imageUrls;
+    }
+
+    const nextVideo = data.video?.[0] ?? null;
+    if (nextVideo) {
+      payload.video = nextVideo;
+    }
+
+    return payload;
+  };
+
+  const handleEditSubmit = (data: ProductFormData) => {
+    if (!editingProduct) return;
+
+    const payload = buildUpdatePayload(editingProduct, data);
+    updateMyProductMutation.mutate(
+      { id: editingProduct.id, data: payload },
+      {
+        onSuccess: () => setEditingProduct(null),
+      },
+    );
+  };
+
+  const handleDelete = (product: Product) => {
+    setDeletingProduct(product);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deletingProduct) return;
+    deleteMyProductMutation.mutate(deletingProduct.id, {
+      onSuccess: () => setDeletingProduct(null),
+    });
+  };
+
   const { observerRef } = useInfinityScroll({
     hasMore,
     isLoading: isFetchingNextPage,
     onLoadMore: () => {
       void fetchNextPage();
     },
-    threshold: 0,
+    threshold: 0.1,
   });
 
-  useEffect(() => {
-    const updateVirtualRange = () => {
-      const listTop =
-        (listRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY;
-      const scrollWithinList = Math.max(0, window.scrollY - listTop);
-      const viewportHeight = window.innerHeight;
-      const visibleCount =
-        Math.ceil(viewportHeight / ITEM_HEIGHT) + OVERSCAN * 2;
-      const nextStart = Math.max(
-        0,
-        Math.floor(scrollWithinList / ITEM_HEIGHT) - OVERSCAN,
-      );
-      const nextEnd = Math.min(products.length, nextStart + visibleCount);
-
-      setRange((prev) => {
-        if (prev.startIndex === nextStart && prev.endIndex === nextEnd) {
-          return prev;
-        }
-        return { startIndex: nextStart, endIndex: nextEnd };
-      });
-    };
-
-    updateVirtualRange();
-
-    let ticking = false;
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        window.requestAnimationFrame(() => {
-          updateVirtualRange();
-          ticking = false;
-        });
-      }
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-    };
-  }, [products.length]);
-
-  const virtualItems = useMemo(
-    () => products.slice(startIndex, endIndex),
-    [products, startIndex, endIndex],
-  );
-
-  const paddingTop = startIndex * ITEM_HEIGHT;
-  const paddingBottom = Math.max(0, (products.length - endIndex) * ITEM_HEIGHT);
-
-  useEffect(() => {
-    const nearEnd = endIndex >= products.length - 2;
-    if (hasMore && nearEnd && !isFetchingNextPage) {
-      void fetchNextPage();
-    }
-  }, [endIndex, fetchNextPage, hasMore, isFetchingNextPage, products.length]);
 
   const handleFilterChange = (key: string, value: string | undefined) => {
     const params = new URLSearchParams(searchParams);
@@ -181,32 +181,6 @@ export default function ProductCatalog() {
             ))}
           </select>
 
-          <select
-            value={`${searchParams.get("sortBy") || ""}:${searchParams.get("sortOrder") || ""}`}
-            onChange={(e) =>
-              (() => {
-                const [sortBy, sortOrder] = e.target.value.split(":");
-                const params = new URLSearchParams(searchParams);
-
-                if (sortBy) {
-                  params.set("sortBy", sortBy);
-                  params.set("sortOrder", sortOrder || "DESC");
-                } else {
-                  params.delete("sortBy");
-                  params.delete("sortOrder");
-                }
-
-                params.delete("page");
-                setSearchParams(params);
-              })()
-            }
-            className="h-9 rounded-full border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="">Sort by</option>
-            <option value="date:DESC">Newest</option>
-            <option value="price:ASC">Price: low to high</option>
-            <option value="price:DESC">Price: high to low</option>
-          </select>
 
           {hasActiveFilters && (
             <Button
@@ -243,17 +217,17 @@ export default function ProductCatalog() {
         />
       ) : (
         <>
-          <div ref={listRef} className="mx-auto w-full max-w-4xl space-y-5">
-            <div style={{ paddingTop, paddingBottom }} className="space-y-5">
-              {virtualItems.map((product, index) => (
-                <div key={product.id ?? `${startIndex}-${index}`}>
-                  <ProductCard
-                    product={product}
-                    onAddToCart={handleAddToCart}
-                  />
-                </div>
-              ))}
-            </div>
+          <div className="mx-auto w-full max-w-4xl space-y-5">
+            {products.map((product) => (
+              <div key={product.id}>
+                <ProductCard
+                  product={product}
+                  onAddToCart={handleAddToCart}
+                  onEdit={(item) => setEditingProduct(item)}
+                  onDelete={handleDelete}
+                />
+              </div>
+            ))}
           </div>
 
           {isFetchingNextPage && (
@@ -281,6 +255,59 @@ export default function ProductCatalog() {
           )}
         </>
       )}
+
+      {editingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <Card className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl border bg-background shadow-2xl">
+            <div className="flex items-center justify-between border-b px-5 py-4">
+              <div>
+                <p className="text-sm font-semibold">Chỉnh sửa sản phẩm</p>
+                <p className="text-xs text-muted-foreground">
+                  Chỉ các trường thay đổi mới được gửi lên API.
+                </p>
+              </div>
+
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setEditingProduct(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <CardContent className="max-h-[calc(90vh-73px)] overflow-auto p-5 md:p-6">
+              <ProductForm
+                key={editingProduct.id}
+                defaultValues={{
+                  title: editingProduct.title,
+                  description: editingProduct.description ?? "",
+                  condition: editingProduct.condition,
+                  price: editingProduct.price,
+                }}
+                initialImageUrls={editingProduct.imageUrls}
+                onSubmit={handleEditSubmit}
+                isPending={updateMyProductMutation.isPending}
+                submitLabel="Lưu thay đổi"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <ConfirmationModal
+        isOpen={!!deletingProduct}
+        title="Xoá sản phẩm?"
+        description={`Bạn có chắc chắn muốn xoá "${deletingProduct?.title}"? Hành động này không thể hoàn tác.`}
+        confirmLabel="Xoá ngay"
+        cancelLabel="Huỷ"
+        variant="destructive"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeletingProduct(null)}
+        isPending={deleteMyProductMutation.isPending}
+      />
     </div>
   );
 }
