@@ -10,13 +10,17 @@ export function UserLayout() {
   const isLoggedIn = !!access_token && !!role;
   const location = useLocation();
 
-  if (access_token) {
+  if (access_token && role) {
     if (role === "Shipper") {
       return <Navigate to="/admin/shipper/orders" replace />;
     }
 
+    if (role === "Admin") {
+      return <Navigate to="/admin" replace />;
+    }
+
     const isIdentifyRoute = location.pathname.startsWith("/identify");
-    if (!isVerify && role !== "Admin" && !isIdentifyRoute) {
+    if (!isVerify && !isIdentifyRoute) {
       return <Navigate to="/identify/create" replace />;
     }
   }

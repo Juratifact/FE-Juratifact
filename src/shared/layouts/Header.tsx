@@ -44,7 +44,7 @@ const Header = () => {
   const isBackoffice = isLoggedIn && (role === "Admin" || role === "Shipper");
   const canSeeOrders = isBackoffice ? false : (isLoggedIn && isVerify);
   const isUnverified = isLoggedIn && !isVerify && role !== "Admin";
-  const { data: cart } = useMyCart(isLoggedIn);
+  const { data: cart } = useMyCart(isLoggedIn && !isBackoffice);
   const isProductsPage = location.pathname === "/products";
   const searchInputRef = useRef<HTMLInputElement>(null);
   const currentTitleSearch =
