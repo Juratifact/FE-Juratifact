@@ -6,11 +6,13 @@ import {
   LayoutDashboard,
   FlagTriangleRight,
   Users,
-  ChevronRight,
   FileCheck,
   Truck,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useThemeStore } from "@/app/store";
 
 const adminNavItems = [
   { label: "Bảng điều khiển", to: "/admin", icon: LayoutDashboard },
@@ -31,9 +33,10 @@ const shipperNavItems = [
 export default function AdminHeader() {
   const logoutMutation = useLogoutMutation();
   const role = useAuthStore((s) => s.role);
+  const { theme, toggleTheme } = useThemeStore();
   const navItems = role === "Shipper" ? shipperNavItems : adminNavItems;
   return (
-    <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:sticky lg:top-0 lg:h-screen bg-background border-r border-border/50">
+    <aside className="hidden lg:flex lg:w-72 lg:flex-col lg:sticky lg:top-0 lg:h-screen bg-card border-r border-border/50">
       <div className="flex h-full flex-col px-6 py-8">
         {/* Logo Section*/}
         <div className="flex items-center gap-3 px-2 mb-10">
@@ -87,12 +90,6 @@ export default function AdminHeader() {
                       {item.label}
                     </span>
                   </div>
-                  <ChevronRight
-                    className={cn(
-                      "size-3.5 transition-all duration-300 opacity-0 -translate-x-2",
-                      "group-hover:opacity-100 group-hover:translate-x-0",
-                    )}
-                  />
                 </NavLink>
               );
             })}
@@ -100,12 +97,24 @@ export default function AdminHeader() {
         </div>
 
         {/* Footer info */}
-        <div className="mt-auto">
-          <div className="mb-3 flex justify-center">
+        <div className="mt-auto space-y-4">
+          <div className="flex items-center justify-between gap-2 px-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full size-9 text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-300"
+              onClick={toggleTheme}
+            >
+              {theme === "dark" ? (
+                <Sun className="size-4.5" />
+              ) : (
+                <Moon className="size-4.5" />
+              )}
+            </Button>
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full h-8 sm:h-9 px-3 sm:px-4 text-xs sm:text-sm text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-colors duration-300"
+              className="rounded-full h-9 px-4 text-xs font-medium text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-colors duration-300"
               onClick={() => logoutMutation.mutate()}
             >
               Đăng xuất

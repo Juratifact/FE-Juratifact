@@ -11,10 +11,16 @@ export function ProtectedRoute({
   allowedRoles,
 }: ProtectedRouteProps) {
   const location = useLocation();
-  const { access_token, role } = useAuthStore();
+  const { access_token, role, isVerify } = useAuthStore();
   if (!access_token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
+
+  const isIdentifyRoute = location.pathname.startsWith("/identify");
+  if (!isVerify && role !== "Admin" && !isIdentifyRoute) {
+    return <Navigate to="/identify/create" replace />;
+  }
+
   if (allowedRoles && !allowedRoles.includes(role!)) {
     return <Navigate to="/unauthorized" replace />;
   }

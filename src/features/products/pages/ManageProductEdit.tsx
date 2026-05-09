@@ -20,6 +20,8 @@ export default function ManageProductEdit() {
       description: data.description,
       condition: data.condition,
       price: data.price,
+      images: data.image ? Array.from(data.image) : [],
+      imageUrls: data.imageUrls,
     };
 
     updateProduct({
@@ -61,6 +63,7 @@ export default function ManageProductEdit() {
           condition: product.condition,
           price: product.price,
         }}
+        initialImageUrls={product.imageUrls}
         onSubmit={handleSubmit}
         isPending={isPending}
         submitLabel="Update"

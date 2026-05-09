@@ -38,7 +38,7 @@ export function ReportCard({
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-medium">
-            {report.reportedProduct?.title || "Sản phẩm chưa xác định"}
+            {report.product?.title || "Sản phẩm chưa xác định"}
           </h3>
           <p className="text-sm text-muted-foreground">{report.reason}</p>
         </div>

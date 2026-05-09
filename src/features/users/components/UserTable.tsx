@@ -1,7 +1,4 @@
-import { Link } from "react-router-dom";
-import { Eye } from "lucide-react";
 
-import { Button } from "@/shared/components/ui/button";
 import {
   Table,
   TableBody,
@@ -54,16 +51,6 @@ export function UserTable({ users }: UserTableProps) {
                 {user.email ?? "—"}
               </TableCell>
               <TableCell>{user.phoneNumber ?? "—"}</TableCell>
-              <TableCell>
-                <div className="flex justify-end">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to={`/profile?userId=${user.id}`}>
-                      <Eye className="mr-1 h-3 w-3" />
-                      Xem hồ sơ
-                    </Link>
-                  </Button>
-                </div>
-              </TableCell>
             </TableRow>
           ))}
         </TableBody>

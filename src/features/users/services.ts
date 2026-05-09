@@ -46,6 +46,7 @@ const normalizeUser = (
     "ProfilePicture",
     "profilePictureUrl",
   ),
+  isVerify: item.isVerify === true || item.IsVerify === true,
   createdAt: pickString(item, "createdAt", "CreatedAt"),
   updatedAt: pickString(item, "updatedAt", "UpdatedAt"),
 });

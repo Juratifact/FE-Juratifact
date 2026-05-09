@@ -8,12 +8,30 @@ import {
 } from "@/shared/components/ui/navigation-menu";
 import { navigationMenuTriggerStyle } from "@/shared/components/ui/navigation-menu-trigger-style";
 import { Input } from "@/shared/components/ui/input";
-import { Search, Moon, Sun, ShoppingBag } from "lucide-react";
+import {
+  Search,
+  Moon,
+  Sun,
+  ShoppingBag,
+  User,
+  LogOut,
+  Package,
+  Fingerprint,
+  LayoutGrid,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/features/auth/store";
 import { useLogoutMutation } from "@/features/auth/hooks/useAuthMutation";
 import { Button } from "@/shared/components/ui/button";
 import { useMyCart } from "@/features/cart/hooks/useCart";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
 
 const Header = () => {
   const location = useLocation();
@@ -21,9 +39,12 @@ const Header = () => {
   const logoutMutation = useLogoutMutation();
   const token = useAuthStore((state) => state.access_token);
   const role = useAuthStore((state) => state.role);
-  const isBackoffice = role === "Admin" || role === "Shipper";
-  const canSeeOrders = token && !isBackoffice;
-  const { data: cart } = useMyCart();
+  const isVerify = useAuthStore((state) => state.isVerify);
+  const isLoggedIn = !!token && !!role;
+  const isBackoffice = isLoggedIn && (role === "Admin" || role === "Shipper");
+  const canSeeOrders = isBackoffice ? false : (isLoggedIn && isVerify);
+  const isUnverified = isLoggedIn && !isVerify && role !== "Admin";
+  const { data: cart } = useMyCart(isLoggedIn);
   const isProductsPage = location.pathname === "/products";
   const searchInputRef = useRef<HTMLInputElement>(null);
   const currentTitleSearch =
@@ -66,115 +87,65 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className="mx-auto max-w-7xl px-4 py-4 mt-2">
-        {/* SỬA THÀNH GRID 3 CỘT: Đảm bảo phần giữa luôn ở tâm */}
         <div className="grid grid-cols-3 items-center rounded-full border border-border/40 bg-background/40 backdrop-blur-md p-2 sm:p-3 shadow-md hover:shadow-lg transition-shadow duration-300">
           {/* 1. LEFT: Navigation Menu */}
           <div className="flex justify-start">
             <nav className="hidden xl:flex items-center shrink-0">
-              <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/30">
-                <NavigationMenu>
-                  <NavigationMenuList className="gap-1">
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to={isBackoffice ? "/admin" : "/"}
-                          className={cn(
-                            menuTriggerClass,
-                            (location.pathname === "/" ||
-                              location.pathname.startsWith("/admin")) &&
-                              activeClass,
-                          )}
-                        >
-                          {isBackoffice ? "Dashboard" : "Home"}
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-
-                    {!isBackoffice && (
+              {!isUnverified && (
+                <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/30">
+                  <NavigationMenu>
+                    <NavigationMenuList className="gap-1">
                       <NavigationMenuItem>
                         <NavigationMenuLink asChild>
                           <Link
-                            to="/map"
+                            to={isBackoffice ? "/admin" : "/"}
                             className={cn(
                               menuTriggerClass,
-                              location.pathname === "/map" && activeClass,
-                            )}
-                          >
-                            Map
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-
-                    <NavigationMenuItem>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/products"
-                          className={cn(
-                            menuTriggerClass,
-                            location.pathname === "/products" && activeClass,
-                          )}
-                        >
-                          Products
-                        </Link>
-                      </NavigationMenuLink>
-                    </NavigationMenuItem>
-
-                    {canSeeOrders && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/orders"
-                            className={cn(
-                              menuTriggerClass,
-                              location.pathname.startsWith("/orders") &&
+                              (location.pathname === "/" ||
+                                location.pathname.startsWith("/admin")) &&
                                 activeClass,
                             )}
                           >
-                            Orders
+                            {isBackoffice ? "Dashboard" : "Home"}
                           </Link>
                         </NavigationMenuLink>
                       </NavigationMenuItem>
-                    )}
 
-                    {token && (
+                      {!isBackoffice && (
+                        <NavigationMenuItem>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              to="/map"
+                              className={cn(
+                                menuTriggerClass,
+                                location.pathname === "/map" && activeClass,
+                              )}
+                            >
+                              Map
+                            </Link>
+                          </NavigationMenuLink>
+                        </NavigationMenuItem>
+                      )}
+
                       <NavigationMenuItem>
                         <NavigationMenuLink asChild>
                           <Link
-                            to="/profile"
+                            to="/products"
                             className={cn(
                               menuTriggerClass,
-                              location.pathname === "/profile" && activeClass,
+                              location.pathname === "/products" && activeClass,
                             )}
                           >
-                            Profile
+                            Products
                           </Link>
                         </NavigationMenuLink>
                       </NavigationMenuItem>
-                    )}
-                    {token && !isBackoffice && (
-                      <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/identify"
-                            className={cn(
-                              menuTriggerClass,
-                              location.pathname.startsWith("/identify") &&
-                                activeClass,
-                            )}
-                          >
-                            Identify
-                          </Link>
-                        </NavigationMenuLink>
-                      </NavigationMenuItem>
-                    )}
-                  </NavigationMenuList>
-                </NavigationMenu>
-              </div>
+                    </NavigationMenuList>
+                  </NavigationMenu>
+                </div>
+              )}
             </nav>
           </div>
-
-          {/* 2. CENTER: Logo (Căn giữa tuyệt đối trong cột 2) */}
           <div className="flex justify-center">
             <Link
               to="/"
@@ -193,22 +164,25 @@ const Header = () => {
 
           {/* 3. RIGHT: Search, Theme & Actions */}
           <div className="flex items-center justify-end gap-2 min-w-0">
-            {/* Search Bar (Thu nhỏ max-width để không lấn chiếm logo) */}
             <div className="relative hidden lg:flex items-center max-w-40 w-full">
-              <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-              <Input
-                key={location.search}
-                ref={searchInputRef}
-                defaultValue={currentTitleSearch}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    applySearch();
-                  }
-                }}
-                placeholder="Search..."
-                className="h-8 w-full rounded-full border border-border/40 bg-muted/30 pl-9 text-xs placeholder:text-muted-foreground/60 focus-visible:ring-1 transition-all duration-300"
-              />
+              {!isUnverified && (
+                <>
+                  <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Input
+                    key={location.search}
+                    ref={searchInputRef}
+                    defaultValue={currentTitleSearch}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        applySearch();
+                      }
+                    }}
+                    placeholder="Search..."
+                    className="h-8 w-full rounded-full border border-border/40 bg-muted/30 pl-9 text-xs placeholder:text-muted-foreground/60 focus-visible:ring-1 transition-all duration-300"
+                  />
+                </>
+              )}
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2 shrink-0">
@@ -224,7 +198,7 @@ const Header = () => {
 
               <div className="hidden sm:block w-px h-6 bg-border/40"></div>
 
-              {token && !isBackoffice && (
+              {isLoggedIn && !isBackoffice && (
                 <>
                   <Button
                     asChild
@@ -255,23 +229,61 @@ const Header = () => {
                   </Button>
                 ) : (
                   <div className="flex items-center gap-1">
-                    {token && !isBackoffice && (
-                      <Button
-                        asChild
-                        size="sm"
-                        className="rounded-full h-8 px-3 text-xs font-medium whitespace-nowrap"
-                      >
-                        <Link to="/products/create">Post</Link>
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="rounded-full h-8 px-2 sm:px-3 text-xs text-destructive/80 hover:bg-destructive/10 hover:text-destructive whitespace-nowrap"
-                      onClick={() => logoutMutation.mutate()}
-                    >
-                      Sign out
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="relative h-8 w-8 rounded-full p-0"
+                        >
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src="" alt="User" />
+                            <AvatarFallback>
+                              <User className="h-4 w-4" />
+                            </AvatarFallback>
+                          </Avatar>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-56" align="end">
+                        <DropdownMenuItem asChild>
+                          <Link to="/profile" className="flex items-center">
+                            <User className="mr-2 h-4 w-4" />
+                            <span>Profile</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        {!isBackoffice && (
+                          <DropdownMenuItem asChild>
+                            <Link to="/my-products" className="flex items-center">
+                              <LayoutGrid className="mr-2 h-4 w-4" />
+                              <span>My products</span>
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
+                        {canSeeOrders && (
+                          <DropdownMenuItem asChild>
+                            <Link to="/orders" className="flex items-center">
+                              <Package className="mr-2 h-4 w-4" />
+                              <span>Orders</span>
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
+                        {!isBackoffice && (
+                          <DropdownMenuItem asChild>
+                            <Link to="/identify" className="flex items-center">
+                              <Fingerprint className="mr-2 h-4 w-4" />
+                              <span>Identify</span>
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                          onClick={() => logoutMutation.mutate()}
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          <span>Sign out</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 )}
               </div>

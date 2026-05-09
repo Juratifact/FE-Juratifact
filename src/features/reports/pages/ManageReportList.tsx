@@ -1,9 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { Badge } from "@/shared/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
@@ -16,8 +15,6 @@ import {
   useRejectReport,
 } from "../hooks/useReports";
 import { ReportTable } from "../components/ReportTable";
-import { REPORT_STATUS_MAP } from "../types";
-import { Separator } from "@/shared/components/ui/separator";
 
 export default function ManageReportList() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -52,8 +49,6 @@ export default function ManageReportList() {
     }
   }, [debouncedSearch, searchParams, updateSearchParam]);
 
-  // status filter removed because API doesn't support filtering by status
-
   const handlePageChange = (page: number) => {
     setSearchParams((prev) => {
       const params = new URLSearchParams(prev);
@@ -69,105 +64,60 @@ export default function ManageReportList() {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl space-y-8 p-6">
-      {/* Header Section - Modern & Clean */}
-      <header className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground"
-            >
-              Compliance
-            </Badge>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight">Quản lý báo cáo</h1>
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Quản lý báo cáo</h2>
           <p className="text-sm text-muted-foreground">
             Xử lý các khiếu nại và vi phạm nội dung trên toàn hệ thống.
           </p>
         </div>
-
-        <div className="flex items-center gap-3">
-          {/* Quick Stats in Header */}
-          <div className="flex gap-4 border-l pl-6 dark:border-border">
-            <div className="text-center">
-              <p className="text-[10px] font-medium uppercase text-muted-foreground">
-                Tổng số
-              </p>
-              <p className="text-xl font-bold">{pagination?.totalItems ?? 0}</p>
-            </div>
-            <Separator orientation="vertical" className="h-10" />
-            <div className="text-center">
-              <p className="text-[10px] font-medium uppercase text-amber-600">
-                Cần xử lý
-              </p>
-              <p className="text-xl font-bold text-amber-600">
-                {
-                  reports.filter(
-                    (r) => r.status === REPORT_STATUS_MAP.PROCESSING,
-                  ).length
-                }
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      </div>
 
       {/* Filter Toolbar */}
-      <Card className="border-none shadow-sm ring-1 ring-border">
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Filter className="size-4" />
-            Bộ lọc dữ liệu
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4 md:flex-row md:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/70" />
-              <Input
-                placeholder="Tìm lí do báo cáo"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="h-10 pl-10 focus-visible:ring-1 focus-visible:ring-primary"
-              />
-            </div>
-
-            {/* status dropdown removed - keep search only */}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Main Content Area */}
-      <div className="space-y-4">
-        {isLoading ? (
-          <div className="flex h-64 items-center justify-center">
-            <LoadingSpinner />
-          </div>
-        ) : reports.length === 0 ? (
-          <EmptyState
-            title="Hàng chờ trống"
-            description="Tuyệt vời! Không có báo cáo nào cần xử lý tại thời điểm này."
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative max-w-sm flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Tìm lí do báo cáo..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="pl-10"
           />
-        ) : (
-          <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-            <ReportTable
-              reports={reports}
-              onApprove={(id) => approveMutation.mutate(id)}
-              onReject={(id) => rejectMutation.mutate(id)}
-              onDelete={handleDelete}
-              isDeleting={deleteMutation.isPending}
-              isLoading={approveMutation.isPending || rejectMutation.isPending}
-            />
+        </div>
 
-            {pagination && (
-              <div className="border-t border-border bg-muted/20 p-4">
-                <Pagination meta={pagination} onPageChange={handlePageChange} />
-              </div>
-            )}
-          </div>
+        {pagination && (
+          <Badge variant="secondary" className="ml-auto">
+            Tổng: {pagination.totalItems}
+          </Badge>
         )}
       </div>
+
+      {/* Main Content Area */}
+      {isLoading ? (
+        <LoadingSpinner className="py-16" size="lg" />
+      ) : reports.length === 0 ? (
+        <EmptyState
+          title="Hàng chờ trống"
+          description="Tuyệt vời! Không có báo cáo nào cần xử lý tại thời điểm này."
+        />
+      ) : (
+        <>
+          <ReportTable
+            reports={reports}
+            onApprove={(id) => approveMutation.mutate(id)}
+            onReject={(id) => rejectMutation.mutate(id)}
+            onDelete={handleDelete}
+            isDeleting={deleteMutation.isPending}
+            isLoading={approveMutation.isPending || rejectMutation.isPending}
+          />
+
+          {pagination && (
+            <Pagination meta={pagination} onPageChange={handlePageChange} />
+          )}
+        </>
+      )}
     </div>
   );
 }

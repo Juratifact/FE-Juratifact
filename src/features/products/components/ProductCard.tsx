@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Eye,
   ChevronDown,
@@ -9,6 +9,9 @@ import {
   ShoppingBag,
   Send,
   X,
+  Play,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import {
@@ -220,12 +223,20 @@ export function ProductCard({
     [commentTree],
   );
 
-  const mainImage = useMemo(() => {
-    if (Array.isArray(product.imageUrls) && product.imageUrls.length > 0) {
-      return product.imageUrls[0];
-    }
-    return undefined;
-  }, [product.imageUrls]);
+  const mediaList = useMemo(() => {
+    const images = (product.imageUrls ?? []).map((url) => ({
+      type: "image" as const,
+      url,
+    }));
+    const videos = (product.videoUrls ?? []).map((url) => ({
+      type: "video" as const,
+      url,
+    }));
+    return [...images, ...videos];
+  }, [product.imageUrls, product.videoUrls]);
+
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const currentMedia = mediaList[currentMediaIndex];
 
   const goToLogin = () => {
     window.scrollTo(0, 0);
@@ -263,6 +274,10 @@ export function ProductCard({
 
   const handleOpenComments = () => {
     if (!requireAuth()) return;
+    setIsCommentsOpen(true);
+  };
+
+  const handleOpenPreview = () => {
     setIsCommentsOpen(true);
   };
 
@@ -346,7 +361,7 @@ export function ProductCard({
 
               {isActionOpen && (
                 <div className="absolute right-0 top-10 z-20 min-w-32 rounded-xl border bg-background p-1.5 shadow-lg">
-                  {mode === "owner" ? (
+                  {mode === "owner" || isOwner ? (
                     <>
                       <Button
                         type="button"
@@ -397,14 +412,77 @@ export function ProductCard({
           </div>
         </CardHeader>
 
-        <Link to={`/products/${product.id}`} className="group block">
+        <div
+          role="button"
+          tabIndex={0}
+          className="group block cursor-pointer"
+          onClick={handleOpenPreview}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleOpenPreview();
+            }
+          }}
+        >
           <div className="relative aspect-4/3 overflow-hidden bg-muted">
-            {mainImage ? (
-              <img
-                src={mainImage}
-                alt={product.title}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-              />
+            {currentMedia ? (
+              <>
+                {currentMedia.type === "image" ? (
+                  <img
+                    src={currentMedia.url}
+                    alt={product.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
+                ) : (
+                  <div className="relative h-full w-full">
+                    <video
+                      src={currentMedia.url}
+                      className="h-full w-full object-cover"
+                      muted
+                      playsInline
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                      <div className="rounded-full bg-white/20 p-3 backdrop-blur-sm">
+                        <Play className="h-8 w-8 text-white fill-white" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {mediaList.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-black/20 text-white hover:bg-black/40 hover:text-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentMediaIndex((prev) =>
+                          prev === 0 ? mediaList.length - 1 : prev - 1,
+                        );
+                      }}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-black/20 text-white hover:bg-black/40 hover:text-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentMediaIndex((prev) =>
+                          prev === mediaList.length - 1 ? 0 : prev + 1,
+                        );
+                      }}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    <div className="absolute right-2 top-2 rounded-full bg-black/40 px-2 py-1 text-[10px] font-medium text-white backdrop-blur-sm">
+                      {currentMediaIndex + 1} / {mediaList.length}
+                    </div>
+                  </>
+                )}
+              </>
             ) : (
               <div className="flex h-full items-center justify-center bg-muted">
                 <ShoppingBag className="h-12 w-12 text-muted-foreground" />
@@ -437,7 +515,7 @@ export function ProductCard({
                 variant="secondary"
                 className="w-full"
                 onClick={(e) => {
-                  e.preventDefault();
+                  e.stopPropagation();
                   onAddToCart(product);
                 }}
               >
@@ -446,7 +524,7 @@ export function ProductCard({
               </Button>
             )}
           </CardContent>
-        </Link>
+        </div>
 
         <Separator />
 
@@ -532,42 +610,116 @@ export function ProductCard({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="hidden min-h-0 flex-1 flex-col border-r bg-muted/20 md:flex">
-              <div className="flex items-center justify-between border-b px-5 py-4">
-                <div>
-                  <p className="text-sm font-semibold">Product preview</p>
-                  <p className="text-xs text-muted-foreground">
-                    {product.title}
-                  </p>
+                <div className="flex items-center justify-between border-b px-5 py-4">
+                  <div>
+                    <p className="text-sm font-semibold">Product preview</p>
+                    <p className="text-xs text-muted-foreground">
+                      {product.title}
+                    </p>
+                  </div>
                 </div>
 
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 rounded-full"
-                  onClick={() => {
-                    setIsCommentsOpen(false);
-                    setReplyToComment(null);
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
               <div className="min-h-0 flex-1 overflow-auto">
-                <div className="aspect-square w-full bg-muted">
-                  {mainImage ? (
-                    <img
-                      src={mainImage}
-                      alt={product.title}
-                      className="h-full w-full object-cover"
-                    />
+                <div className="relative aspect-square w-full bg-muted">
+                  {currentMedia ? (
+                    <>
+                      {currentMedia.type === "image" ? (
+                        <img
+                          src={currentMedia.url}
+                          alt={product.title}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <video
+                          src={currentMedia.url}
+                          className="h-full w-full bg-black"
+                          controls
+                          autoPlay
+                          playsInline
+                        />
+                      )}
+
+                      {mediaList.length > 1 && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute left-4 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-black/20 text-white hover:bg-black/40 hover:text-white"
+                            onClick={() =>
+                              setCurrentMediaIndex((prev) =>
+                                prev === 0 ? mediaList.length - 1 : prev - 1,
+                              )
+                            }
+                          >
+                            <ChevronLeft className="h-6 w-6" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-4 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-black/20 text-white hover:bg-black/40 hover:text-white"
+                            onClick={() =>
+                              setCurrentMediaIndex((prev) =>
+                                prev === mediaList.length - 1 ? 0 : prev + 1,
+                              )
+                            }
+                          >
+                            <ChevronRight className="h-6 w-6" />
+                          </Button>
+                          <div className="absolute right-4 top-4 rounded-full bg-black/40 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md">
+                            {currentMediaIndex + 1} / {mediaList.length}
+                          </div>
+                          <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
+                            {mediaList.map((_, idx) => (
+                              <button
+                                key={idx}
+                                className={cn(
+                                  "h-2 w-2 rounded-full transition-all",
+                                  idx === currentMediaIndex
+                                    ? "w-4 bg-white"
+                                    : "bg-white/50",
+                                )}
+                                onClick={() => setCurrentMediaIndex(idx)}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </>
                   ) : (
                     <div className="flex h-full items-center justify-center">
                       <ShoppingBag className="h-16 w-16 text-muted-foreground" />
                     </div>
                   )}
                 </div>
+
+                {mediaList.length > 1 && (
+                  <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-5">
+                    {mediaList.map((item, idx) => (
+                      <button
+                        key={idx}
+                        className={cn(
+                          "relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all",
+                          idx === currentMediaIndex
+                            ? "border-primary ring-2 ring-primary/20"
+                            : "border-transparent opacity-60 hover:opacity-100",
+                        )}
+                        onClick={() => setCurrentMediaIndex(idx)}
+                      >
+                        {item.type === "image" ? (
+                          <img
+                            src={item.url}
+                            alt={`Media ${idx + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="relative h-full w-full bg-black flex items-center justify-center">
+                            <Play className="h-6 w-6 text-white" />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 <div className="space-y-4 p-5">
                   <div className="flex items-center gap-3">
@@ -622,6 +774,21 @@ export function ProductCard({
                       </p>
                     )}
                   </div>
+                  {onAddToCart && !isOwner && (
+                    <div className="mt-6">
+                      <Button
+                        size="lg"
+                        className="w-full shadow-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddToCart(product);
+                        }}
+                      >
+                        <ShoppingBag className="mr-2 h-5 w-5" />
+                        Thêm vào giỏ hàng
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

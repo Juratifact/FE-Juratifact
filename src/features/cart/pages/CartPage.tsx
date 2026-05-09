@@ -14,6 +14,7 @@ import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 import { useMyCart, useRemoveCartItem } from "../hooks/useCart";
 import { useCreateOrder } from "@/features/orders/hooks/useOrders";
 import { CheckoutDialog } from "@/features/orders/components/CheckoutDialog";
+import type { CartItem } from "../types";
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function CartPage() {
   const total = cart?.total ?? 0;
 
   const handleCheckoutSubmit = (address: string, note?: string) => {
-    const orderItems = items.map((item) => ({
+    const orderItems = items.map((item: CartItem) => ({
       productId: item.productId,
       quantity: item.quantity,
     }));
@@ -90,29 +91,40 @@ export default function CartPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-4">
-            {items.map((item) => (
+            {items.map((item: CartItem) => (
               <Card
                 key={item.productId}
                 className="overflow-hidden rounded-2xl"
               >
                 <CardContent className="flex gap-4 p-4">
-                  <Link to={`/products/${item.productId}`} className="shrink-0">
+                  <div className="shrink-0">
                     <img
-                      src={item.imageUrls?.[0] || "/placeholder-image.png"}
-                      alt={item.title || "Product"}
+                      src={item.productImageUrls?.[0] || "/placeholder-image.png"}
+                      alt={item.productTitle || "Product"}
                       className="h-24 w-24 rounded-xl object-cover"
                     />
-                  </Link>
+                  </div>
 
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <Link
-                          to={`/products/${item.productId}`}
-                          className="line-clamp-1 font-semibold hover:text-primary"
-                        >
-                          {item.title}
-                        </Link>
+                        <div className="line-clamp-1 font-semibold">
+                          {item.productTitle}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <span className="font-medium text-foreground">Seller:</span>
+                            {item.sellerName}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <span className="font-medium text-foreground">Cond:</span>
+                            {item.condition}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <span className="font-medium text-foreground">Qty:</span>
+                            {item.quantity}
+                          </div>
+                        </div>
                       </div>
                       <p className="font-bold text-primary">
                         {(item.price ?? 0).toLocaleString("vi-VN")} đ

@@ -9,19 +9,24 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         access_token: null,
         userId: null,
         role: null,
+        isVerify: false,
 
-        setAuth: ({ access_token, userId, role }) =>
+        setAuth: ({ access_token, userId, role, isVerify }) =>
           set({
             access_token,
             userId,
             role,
+            isVerify: isVerify ?? false,
           }),
+
+        setIsVerify: (isVerify) => set({ isVerify }),
 
         clearAuth: () =>
           set({
             access_token: null,
             userId: null,
             role: null,
+            isVerify: false,
           }),
       }),
       {

@@ -39,8 +39,16 @@ export const orderActions = {
     (await apiClient.get(
       API_ENDPOINTS.ORDER.GET_BY_ID(orderId),
     )) as unknown as Order,
-  getStatus: async (orderId: string): Promise<Order> =>
+  getStatus: async (orderId: string) =>
     (await apiClient.get(
       API_ENDPOINTS.ORDER.GET_STATUS(orderId),
     )) as unknown as Order,
+  getProductsByOrderId: async (orderId: string, productId: string) =>
+    (await apiClient.get(API_ENDPOINTS.ORDER.GET_PRODUCTS_BY_ORDER, {
+      params: { orderId, productId },
+    })) as unknown as any,
+  cancelCheckout: async (orderId: string) =>
+    (await apiClient.put(
+      API_ENDPOINTS.ORDER.CANCEL_CHECKOUT(orderId),
+    )) as unknown as any,
 };

@@ -101,9 +101,16 @@ export const useLoginMutation = () => {
         access_token: response.access_token,
         userId: response.userId,
         role,
+        isVerify: response.isVerify,
       });
       toast.success("Đăng nhập thành công");
-      // Redirect dựa trên role, Admin/Shipper vào trang admin area
+
+      // Redirect dựa trên verification status và role
+      if (!response.isVerify && role !== "Admin") {
+        navigate("/identify/create", { replace: true });
+        return;
+      }
+
       if (role === "Admin" || role === "Shipper") {
         navigate("/admin", { replace: true });
       } else {

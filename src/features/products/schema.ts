@@ -31,12 +31,13 @@ export const productSchema = z.object({
 
   price: z
     .number()
-    .min(0, "Price cannot be negative")
+    .min(1000, "Price must be at least 1000 VND")
     .max(999999999, "Price is too high"),
 
   image: optionalFileListSchema,
 
   video: optionalFileListSchema,
+  imageUrls: z.array(z.string()).optional(),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;

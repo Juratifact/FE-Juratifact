@@ -7,50 +7,45 @@ import {
   removeCartItem,
   clearCart,
 } from "../services";
-import type { AddToCartDto, UpdateCartItemDto } from "../types";
+import type { AddToCartDto, Cart, UpdateCartItemDto } from "../types";
 import { QUERY_KEYS } from "@/shared/constants";
 import { useAuthStore } from "@/features/auth/store";
 import type { CartItem } from "../types";
 
 const CART_QUERY_KEY = QUERY_KEYS.CART || ["cart"];
+const DUPLICATE_PRODUCT_ERROR = "DUPLICATE_PRODUCT_IN_CART";
 
-const normalizeCart = (response: unknown) => {
-  if (Array.isArray(response)) {
-    const items = response as CartItem[];
-    return {
-      items,
-      total: items.reduce(
-        (sum, item) => sum + (item.price ?? 0) * (item.quantity ?? 1),
-        0,
-      ),
-      itemCount: items.length,
-    };
+const normalizeCart = (response: any): Cart => {
+  if (!response || typeof response !== "object") {
+    return { items: [], total: 0, itemCount: 0 };
   }
 
-  if (response && typeof response === "object") {
-    const cart = response as Record<string, unknown>;
-    const items = Array.isArray(cart.items) ? (cart.items as CartItem[]) : [];
+  // Handle both flat response or data wrapper
+  const data = response.data ?? response;
+  const items = Array.isArray(data.items) ? (data.items as CartItem[]) : [];
+  
+  const total = items.reduce(
+    (sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1),
+    0
+  );
 
-    return {
-      ...cart,
-      items,
-      total: typeof cart.total === "number" ? cart.total : 0,
-      itemCount:
-        typeof cart.itemCount === "number" ? cart.itemCount : items.length,
-    };
-  }
-
-  return { items: [], total: 0, itemCount: 0 };
+  return {
+    ...data,
+    items,
+    total,
+    itemCount: typeof data.totalItems === "number" ? data.totalItems : items.length,
+  };
 };
 
 // ─── Get My Cart ────────────────────────────────────────
-export function useMyCart() {
-  const { access_token, userId } = useAuthStore();
+export function useMyCart(enabled = true) {
+  const access_token = useAuthStore((s) => s.access_token);
+  const userId = useAuthStore((s) => s.userId);
 
   return useQuery({
     queryKey: [...CART_QUERY_KEY, userId ?? "guest"],
     queryFn: async () => normalizeCart(await getMyCart()),
-    enabled: !!access_token,
+    enabled: enabled && !!access_token,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   });
@@ -60,16 +55,34 @@ export function useMyCart() {
 export function useAddProductToCart() {
   const queryClient = useQueryClient();
   const { userId } = useAuthStore();
+  const cartQueryKey = [...CART_QUERY_KEY, userId ?? "guest"];
 
   return useMutation({
-    mutationFn: (data: AddToCartDto) =>
-      addProductToCart(userId ?? undefined, data),
+    mutationFn: async (data: AddToCartDto) => {
+      const cached = queryClient.getQueryData(cartQueryKey) as
+        | { items?: CartItem[] }
+        | undefined;
+      const existed = (cached?.items ?? []).some(
+        (item) =>
+          item.productId === data.productId,
+      );
+
+      if (existed) {
+        throw new Error(DUPLICATE_PRODUCT_ERROR);
+      }
+
+      return addProductToCart(userId ?? undefined, data);
+    },
     onSuccess: (response) => {
       toast.success("Thêm vào giỏ hàng thành công");
-      queryClient.setQueryData(CART_QUERY_KEY, normalizeCart(response));
-      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
+      queryClient.setQueryData(cartQueryKey, normalizeCart(response));
+      queryClient.invalidateQueries({ queryKey: cartQueryKey });
     },
-    onError: () => {
+    onError: (error) => {
+      if (error instanceof Error && error.message === DUPLICATE_PRODUCT_ERROR) {
+        toast.info("Sản phẩm đã có trong giỏ hàng");
+        return;
+      }
       toast.error("Không thể thêm vào giỏ hàng");
     },
   });

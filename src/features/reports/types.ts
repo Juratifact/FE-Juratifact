@@ -33,14 +33,29 @@ export const REPORT_STATUS_DISPLAY: Record<
 // ─── Report Entity ───────────────────────────────────────
 export interface Report {
   id: string;
-  reportId?: string;
-  reason?: string;
-  description?: string;
-  status: number; // 0=Processing, 1=Approved, 2=Rejected, 3=Dismissed
-  productId?: string;
-  userId?: string;
-  reportedProductId?: string;
-  reportedProduct?: ReportedProduct;
+  reason: string;
+  description: string;
+  status: number; // 0=Processing, 1=Approved, 2=Rejected
+  product?: {
+    id: string;
+    title: string;
+    description?: string;
+    price: number;
+    imageUrl: string[];
+    video?: (string | null)[];
+    seller?: {
+      id: string;
+      fullName: string;
+      email: string;
+      phoneNumber?: string;
+    };
+  };
+  reporter?: {
+    id: string;
+    fullName: string;
+    email: string;
+    phoneNumber?: string;
+  };
   createdAt?: string;
   updatedAt?: string;
 }

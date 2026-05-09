@@ -8,6 +8,7 @@ import {
 import { toast } from "sonner";
 import { QUERY_KEYS } from "@/shared/constants";
 import type { AxiosProgressEvent } from "axios";
+import { useAuthStore } from "@/features/auth/store";
 
 export function useSubmitIdentifyDocument() {
   const queryClient = useQueryClient();
@@ -28,11 +29,17 @@ export function useSubmitIdentifyDocument() {
   });
 }
 
-export function useGetMyIdentifyDocument() {
+export function useGetMyIdentifyDocument(options?: {
+  refetchInterval?: number | false;
+  enabled?: boolean;
+}) {
+  const access_token = useAuthStore((s) => s.access_token);
   return useQuery({
     queryKey: QUERY_KEYS.IDENTIFY_MY_DOCUMENT,
     queryFn: () => getMyIdentifyDocument(),
     staleTime: 5 * 60 * 1000,
+    refetchInterval: options?.refetchInterval,
+    enabled: (options?.enabled ?? true) && !!access_token,
   });
 }
 
