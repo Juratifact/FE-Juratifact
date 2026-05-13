@@ -58,9 +58,8 @@ export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
       payload.imageUrls = data.imageUrls;
     }
 
-    const nextVideo = data.video?.[0] ?? null;
-    if (nextVideo) {
-      payload.video = nextVideo;
+    if (data.video && data.video.length > 0) {
+      payload.video = Array.from(data.video);
     }
 
     return payload;

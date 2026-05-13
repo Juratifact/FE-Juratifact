@@ -65,7 +65,7 @@ export function useShipperOrders() {
   }, [searchParams]);
 
   const query = useQuery({
-    queryKey: [QUERY_KEYS.SHIPPER_AVAILABLE_ORDERS, filter, shipperId],
+    queryKey: [QUERY_KEYS.SHIPPER_ORDERS, filter, shipperId],
     queryFn: () => shipperOrderActions.getMyOrders(shipperId, filter),
     enabled: !!shipperId,
     placeholderData: (prev) => prev,
@@ -111,7 +111,7 @@ export function useUpdateShipperOrder() {
     onSuccess: (_, variables) => {
       toast.success("Cập nhật đơn hàng thành công!");
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.SHIPPER_AVAILABLE_ORDERS],
+        queryKey: [QUERY_KEYS.SHIPPER_ORDERS],
       });
       queryClient.invalidateQueries({
         queryKey: ["shipper-order", shipperId, variables.orderId],
@@ -137,7 +137,7 @@ export function useConfirmPickup() {
     onSuccess: (_, variables) => {
       toast.success("Xác nhận lấy hàng thành công!");
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.SHIPPER_AVAILABLE_ORDERS],
+        queryKey: [QUERY_KEYS.SHIPPER_ORDERS],
       });
       queryClient.invalidateQueries({
         queryKey: ["shipper-order", userId, variables.orderId],
@@ -163,7 +163,7 @@ export function useConfirmDelivery() {
     onSuccess: (_, variables) => {
       toast.success("Xác nhận giao hàng thành công!");
       queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.SHIPPER_AVAILABLE_ORDERS],
+        queryKey: [QUERY_KEYS.SHIPPER_ORDERS],
       });
       queryClient.invalidateQueries({
         queryKey: ["shipper-order", userId, variables.orderId],

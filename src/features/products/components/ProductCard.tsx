@@ -12,6 +12,8 @@ import {
   Play,
   ChevronLeft,
   ChevronRight,
+  Trash2,
+  Edit2,
 } from "lucide-react";
 
 import {
@@ -24,6 +26,7 @@ import {
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
+
 import {
   Avatar,
   AvatarFallback,
@@ -34,6 +37,8 @@ import { cn } from "@/lib/utils";
 import {
   useCreateProductComment,
   useProductComments,
+  useUpdateProductComment,
+  useDeleteProductComment,
 } from "../hooks/useProduct";
 import { useCreateProductReport } from "@/features/reports/hooks/useReports";
 import { useAuthStore } from "@/features/auth/store";
@@ -64,6 +69,14 @@ interface CommentThreadNodeProps {
   node: CommentNode;
   depth?: number;
   onReply: (comment: ProductComment) => void;
+  currentUserId?: string;
+  onEditStart?: (comment: ProductComment) => void;
+  onDeleteStart?: (commentId: string) => void;
+  isEditingId?: string;
+  editContent?: string;
+  onEditContentChange?: (content: string) => void;
+  onEditSubmit?: () => void;
+  isEditingLoading?: boolean;
 }
 
 const buildCommentTree = (comments: ProductComment[]) => {
@@ -96,11 +109,22 @@ function CommentThreadNode({
   node,
   depth = 0,
   onReply,
+  currentUserId,
+  onEditStart,
+  onDeleteStart,
+  isEditingId,
+  editContent,
+  onEditContentChange,
+  onEditSubmit,
+  isEditingLoading,
 }: CommentThreadNodeProps) {
   const [isRepliesOpen, setIsRepliesOpen] = useState(depth > 0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const displayName = node.displayName ?? node.userName ?? "User";
   const hasReplies = node.children.length > 0;
   const repliesLabel = Math.max(node.replyCount ?? 0, node.children.length);
+  const isCommentOwner = currentUserId && node.userId === currentUserId;
+  const isEditing = isEditingId === node.id;
 
   return (
     <div className={cn("space-y-2", depth > 0 && "pl-4")}>
@@ -125,25 +149,102 @@ function CommentThreadNode({
                   {new Date(node.createdAt).toLocaleString("vi-VN")}
                 </p>
               </div>
+              {isCommentOwner && (
+                <div className="relative">
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 rounded-full"
+                    onClick={() => setIsMenuOpen((prev) => !prev)}
+                  >
+                    <MoreHorizontal className="h-3.5 w-3.5" />
+                  </Button>
+                  {isMenuOpen && (
+                    <div className="absolute right-0 top-7 z-20 min-w-28 rounded-lg border bg-background p-1 shadow-lg">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-full justify-start gap-2 rounded-md text-xs hover:bg-muted"
+                        onClick={() => {
+                          onEditStart?.(node);
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                        Edit
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-full justify-start gap-2 rounded-md text-xs text-destructive hover:bg-destructive/10"
+                        onClick={() => {
+                          onDeleteStart?.(node.id);
+                          setIsMenuOpen(false);
+                        }}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            <p className="mt-1 whitespace-pre-wrap wrap-break-word text-sm text-muted-foreground">
-              {node.content}
-            </p>
+            {isEditing ? (
+              <div className="mt-2 space-y-2">
+                <textarea
+                  value={editContent ?? ""}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    onEditContentChange?.(e.target.value)
+                  }
+                  className="min-h-20 w-full rounded border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Edit your comment..."
+                />
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="default"
+                    onClick={onEditSubmit}
+                    disabled={isEditingLoading}
+                  >
+                    {isEditingLoading ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onEditStart?.(node)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-1 whitespace-pre-wrap wrap-break-word text-sm text-muted-foreground">
+                {node.content}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className={cn("mt-2", depth > 0 && "pl-11")}>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-7 rounded-full px-2 text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => onReply(node)}
-          >
-            Reply
-          </Button>
-        </div>
+        {!isEditing && (
+          <div className={cn("mt-2", depth > 0 && "pl-11")}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 rounded-full px-2 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => onReply(node)}
+            >
+              Reply
+            </Button>
+          </div>
+        )}
 
         {hasReplies && (
           <button
@@ -177,6 +278,14 @@ function CommentThreadNode({
               node={child}
               depth={depth + 1}
               onReply={onReply}
+              currentUserId={currentUserId}
+              onEditStart={onEditStart}
+              onDeleteStart={onDeleteStart}
+              isEditingId={isEditingId}
+              editContent={editContent}
+              onEditContentChange={onEditContentChange}
+              onEditSubmit={onEditSubmit}
+              isEditingLoading={isEditingLoading}
             />
           ))}
         </div>
@@ -206,8 +315,14 @@ export function ProductCard({
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportDescription, setReportDescription] = useState("");
+  const [isEditingCommentId, setIsEditingCommentId] = useState<string | null>(
+    null,
+  );
+  const [editingCommentContent, setEditingCommentContent] = useState("");
   const { data: serverComments } = useProductComments(product.id);
   const createCommentMutation = useCreateProductComment();
+  const updateCommentMutation = useUpdateProductComment(product.id);
+  const deleteCommentMutation = useDeleteProductComment(product.id);
   const createReportMutation = useCreateProductReport();
 
   const displayedComments = useMemo(
@@ -308,6 +423,37 @@ export function ProductCard({
         },
       },
     );
+  };
+
+  const handleEditCommentStart = (comment: ProductComment) => {
+    if (isEditingCommentId === comment.id) {
+      setIsEditingCommentId(null);
+      setEditingCommentContent("");
+    } else {
+      setIsEditingCommentId(comment.id);
+      setEditingCommentContent(comment.content);
+    }
+  };
+
+  const handleEditCommentSubmit = () => {
+    if (!isEditingCommentId || !editingCommentContent.trim()) return;
+
+    updateCommentMutation.mutate(
+      {
+        commentId: isEditingCommentId,
+        data: { content: editingCommentContent.trim() },
+      },
+      {
+        onSuccess: () => {
+          setIsEditingCommentId(null);
+          setEditingCommentContent("");
+        },
+      },
+    );
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    deleteCommentMutation.mutate(commentId);
   };
 
   return (
@@ -610,14 +756,14 @@ export function ProductCard({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="hidden min-h-0 flex-1 flex-col border-r bg-muted/20 md:flex">
-                <div className="flex items-center justify-between border-b px-5 py-4">
-                  <div>
-                    <p className="text-sm font-semibold">Product preview</p>
-                    <p className="text-xs text-muted-foreground">
-                      {product.title}
-                    </p>
-                  </div>
+              <div className="flex items-center justify-between border-b px-5 py-4">
+                <div>
+                  <p className="text-sm font-semibold">Product preview</p>
+                  <p className="text-xs text-muted-foreground">
+                    {product.title}
+                  </p>
                 </div>
+              </div>
 
               <div className="min-h-0 flex-1 overflow-auto">
                 <div className="relative aspect-square w-full bg-muted">
@@ -698,7 +844,7 @@ export function ProductCard({
                       <button
                         key={idx}
                         className={cn(
-                          "relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all",
+                          "relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition-all",
                           idx === currentMediaIndex
                             ? "border-primary ring-2 ring-primary/20"
                             : "border-transparent opacity-60 hover:opacity-100",
@@ -831,6 +977,16 @@ export function ProductCard({
                           setReplyToComment(comment);
                           setIsCommentsOpen(true);
                         }}
+                        currentUserId={userId ?? undefined}
+                        onEditStart={handleEditCommentStart}
+                        onDeleteStart={(commentId) => {
+                          handleDeleteComment(commentId);
+                        }}
+                        isEditingId={isEditingCommentId ?? undefined}
+                        editContent={editingCommentContent}
+                        onEditContentChange={setEditingCommentContent}
+                        onEditSubmit={handleEditCommentSubmit}
+                        isEditingLoading={updateCommentMutation.isPending}
                       />
                     ))}
                   </div>

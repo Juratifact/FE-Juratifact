@@ -171,9 +171,9 @@ export const userService = {
   },
 
   async getUserByName(userName: string): Promise<UserProfile[]> {
-    const raw = (await apiClient.get(API_ENDPOINTS.USER.GET_BY_NAME, {
-      params: { userName },
-    })) as UserApiItem | UserApiItem[] | { data?: UserApiItem[] } | null;
+    const raw = (await apiClient.get(
+      API_ENDPOINTS.USER.GET_BY_USERNAME(userName),
+    )) as UserApiItem | UserApiItem[] | { data?: UserApiItem[] } | null;
 
     if (!raw) return [];
 
@@ -195,7 +195,7 @@ export const userService = {
 
   async getMyProfile(userId: string): Promise<UserProfile> {
     const raw = (await apiClient.get(
-      `${API_ENDPOINTS.USER.MY_PROFILE}/${userId}`,
+      API_ENDPOINTS.USER.GET_BY_ID(userId),
     )) as UserApiItem;
 
     return normalizeUser(raw, userId);
@@ -208,7 +208,7 @@ export const userService = {
     const formData = buildProfileFormData(data);
 
     const updated = (await apiClient.put(
-      `${API_ENDPOINTS.USER.PROFILE}/${id}`,
+      API_ENDPOINTS.USER.UPDATE(id),
       formData,
     )) as UserApiItem | string | null;
 

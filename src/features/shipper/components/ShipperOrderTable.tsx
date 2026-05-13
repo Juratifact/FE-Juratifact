@@ -42,9 +42,9 @@ const statusLabel: Record<number, string> = {
 };
 
 const paymentStatusLabel: Record<number, string> = {
-  1: "Chờ thanh toán",
-  2: "Đã thanh toán",
-  0: "Khác",
+  1: "Đã thanh toán",
+  2: "Đã quyết toán",
+  0: "Chưa thanh toán",
 };
 
 /**

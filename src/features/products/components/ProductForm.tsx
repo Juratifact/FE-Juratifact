@@ -7,6 +7,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Loader2, X, ImagePlus } from "lucide-react";
 import { PRODUCT_CONDITIONS } from "@/shared/constants";
+import { toast } from "sonner";
 
 interface ProductFormProps {
   defaultValues?: Partial<ProductFormData>;
@@ -45,6 +46,8 @@ export function ProductForm({
   );
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [newVideoFiles, setNewVideoFiles] = useState<File[]>([]);
+  const [newVideoPreviews, setNewVideoPreviews] = useState<string[]>([]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -54,7 +57,28 @@ export function ProductForm({
 
       setNewFiles((prev) => [...prev, ...addedFiles]);
       setNewPreviews((prev) => [...prev, ...addedPreviews]);
+    }
+    e.target.value = "";
+  };
 
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
+      const addedFiles = Array.from(files);
+      
+      const validFiles = addedFiles.filter(file => file.size <= MAX_VIDEO_SIZE);
+      const invalidFilesCount = addedFiles.length - validFiles.length;
+
+      if (invalidFilesCount > 0) {
+        toast.error(`${invalidFilesCount} video(s) exceed the 100MB size limit and were skipped.`);
+      }
+
+      if (validFiles.length > 0) {
+        const addedPreviews = validFiles.map((file) => URL.createObjectURL(file));
+        setNewVideoFiles((prev) => [...prev, ...validFiles]);
+        setNewVideoPreviews((prev) => [...prev, ...addedPreviews]);
+      }
     }
     e.target.value = "";
   };
@@ -62,6 +86,10 @@ export function ProductForm({
   useEffect(() => {
     setValue("image", newFiles as unknown as FileList);
   }, [newFiles, setValue]);
+
+  useEffect(() => {
+    setValue("video", newVideoFiles as unknown as FileList);
+  }, [newVideoFiles, setValue]);
 
   useEffect(() => {
     setValue("imageUrls", currentInitialUrls);
@@ -79,11 +107,20 @@ export function ProductForm({
     });
   };
 
+  const removeNewVideo = (index: number) => {
+    setNewVideoFiles((prev) => prev.filter((_, i) => i !== index));
+    setNewVideoPreviews((prev) => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
   useEffect(() => {
     return () => {
       newPreviews.forEach((url) => URL.revokeObjectURL(url));
+      newVideoPreviews.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [newPreviews]);
+  }, [newPreviews, newVideoPreviews]);
 
   const handleFormSubmit = (data: ProductFormData) => {
     onSubmit({
@@ -257,15 +294,40 @@ export function ProductForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="video">Video (optional)</Label>
+          <Label htmlFor="video">Videos (optional)</Label>
           <Input
             id="video"
             type="file"
             accept="video/*"
-            {...register("video")}
+            multiple
+            onChange={handleVideoChange}
+            className="cursor-pointer"
           />
+          {newVideoFiles.length > 0 && (
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              {newVideoPreviews.map((url, idx) => (
+                <div
+                  key={`video-${idx}`}
+                  className="group relative aspect-video overflow-hidden rounded-md border bg-muted"
+                >
+                  <video
+                    src={url}
+                    className="h-full w-full object-cover"
+                    muted
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeNewVideo(idx)}
+                    className="absolute right-1 top-1 rounded-full bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/70"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
           <p className="text-xs text-muted-foreground">
-            You can submit without video.
+            You can select multiple videos.
           </p>
           {errors.video && (
             <p className="text-destructive text-xs">{errors.video.message}</p>

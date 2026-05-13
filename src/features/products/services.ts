@@ -7,6 +7,7 @@ import type {
   ProductFilterParams,
   ProductComment,
   ProductCommentResponse,
+  UpdateProductCommentDto,
   UpdateMyProductDto,
   UpdateProductDto,
 } from "./types";
@@ -55,9 +56,14 @@ type ProductCommentApiItem = Partial<ProductCommentResponse> & {
   replyCount?: number;
   replies?: ProductCommentApiItem[];
   userName?: string;
+  userId?: string;
   createdByName?: string;
   CreatedByName?: string;
-  user?: unknown;
+  user?: {
+    userId?: string;
+    name?: string;
+    userName?: string;
+  };
   author?: unknown;
   createdBy?: unknown;
   profile?: unknown;
@@ -101,7 +107,7 @@ const normalizeArray = (value: unknown): string[] => {
   }
 
   if (value && typeof value === "object" && "length" in value) {
-    return Array.from(value as any)
+    return Array.from(value as ArrayLike<unknown>)
       .map((x) => (x === null || x === undefined ? "" : String(x).trim()))
       .filter((x) => x.length > 0 && x !== "null" && x !== "undefined");
   }
@@ -211,6 +217,15 @@ const normalizeComment = (
     "UserName",
   ]);
 
+  // Extract userId from nested user object or direct property
+  let userId: string | undefined;
+  if (typeof item.userId === "string") {
+    userId = item.userId;
+  } else if (item.user && typeof item.user === "object") {
+    const userObj = item.user as Record<string, unknown>;
+    userId = typeof userObj.userId === "string" ? userObj.userId : undefined;
+  }
+
   return {
     id: commentId,
     commentId,
@@ -220,6 +235,7 @@ const normalizeComment = (
     replyCount: item.replyCount,
     displayName,
     userName: pickNestedString(item, ["userName", "UserName"]),
+    userId,
   };
 };
 
@@ -289,7 +305,7 @@ const fetchSellerProfiles = async (sellerIds: string[]) => {
     uniqueSellerIds.map(async (sellerId) => {
       try {
         const profile = (await apiClient.get(
-          `${API_ENDPOINTS.USER.MY_PROFILE}/${sellerId}`,
+          API_ENDPOINTS.USER.GET_BY_ID(sellerId),
         )) as SellerApiItem;
         sellerProfileCache.set(sellerId, profile ?? {});
       } catch {
@@ -448,12 +464,16 @@ const productBaseService = createBaseService<
       });
     }
 
-    if (data.video) {
-      formData.append("Video", data.video);
+    if (data.video && data.video.length > 0) {
+      data.video.forEach((file) => {
+        formData.append("Videos", file);
+        // Fallback for older backend versions
+        formData.append("Video", file);
+      });
     }
 
     const created = (await apiClient.post(
-      API_ENDPOINTS.PRODUCT.POST,
+      API_ENDPOINTS.PRODUCT.CREATE,
       formData,
       {
         headers: {
@@ -474,9 +494,9 @@ const productBaseService = createBaseService<
     const shouldSearchByCondition = !title && !!condition;
 
     const endpoint = shouldSearchByTitle
-      ? API_ENDPOINTS.PRODUCT.TITLE
+      ? API_ENDPOINTS.PRODUCT.BY_TITLE
       : shouldSearchByCondition
-        ? API_ENDPOINTS.PRODUCT.CONDITION
+        ? API_ENDPOINTS.PRODUCT.BY_CONDITION
         : API_ENDPOINTS.PRODUCT.BASE;
 
     const requestParams = shouldSearchByTitle
@@ -512,7 +532,7 @@ export const productService = Object.assign(productBaseService, {
     const limit = params?.limit ?? 6;
     const title = toTrimmed(params?.title);
 
-    const raw = (await apiClient.get(API_ENDPOINTS.PRODUCT.MY_PRODUCTS, {
+    const raw = (await apiClient.get(API_ENDPOINTS.PRODUCT.GET_MY_PRODUCTS, {
       params: {
         pageIndex: page,
         pageSize: limit,
@@ -553,12 +573,15 @@ export const productService = Object.assign(productBaseService, {
       });
     }
 
-    if (data.video instanceof File) {
-      formData.append("Video", data.video);
+    if (Array.isArray(data.video) && data.video.length > 0) {
+      data.video.forEach((file) => {
+        formData.append("Videos", file);
+        formData.append("Video", file);
+      });
     }
 
     const updated = (await apiClient.put(
-      `${API_ENDPOINTS.PRODUCT.POST}/${id}`,
+      API_ENDPOINTS.PRODUCT.UPDATE(id),
       formData,
       {
         headers: {
@@ -571,7 +594,7 @@ export const productService = Object.assign(productBaseService, {
   },
 
   async deleteMyProduct(id: string) {
-    await apiClient.delete(`${API_ENDPOINTS.PRODUCT.POST}/${id}`);
+    await apiClient.delete(API_ENDPOINTS.PRODUCT.DELETE(id));
   },
 });
 
@@ -586,9 +609,28 @@ export const productCommentService = {
   },
 
   async create(data: CreateProductCommentDto): Promise<ProductComment> {
-    const res = await apiClient.post(API_ENDPOINTS.PRODUCT.COMMENT, data);
+    const res = await apiClient.post(
+      API_ENDPOINTS.PRODUCT.COMMENTS(data.productId),
+      data,
+    );
     const created = res;
     const result = normalizeComment(created as ProductCommentApiItem);
     return result;
+  },
+
+  async update(
+    commentId: string,
+    data: UpdateProductCommentDto,
+  ): Promise<ProductComment> {
+    const updated = (await apiClient.put(
+      API_ENDPOINTS.PRODUCT.COMMENT_BY_ID(commentId),
+      data,
+    )) as ProductCommentApiItem;
+
+    return normalizeComment(updated);
+  },
+
+  async remove(commentId: string): Promise<void> {
+    await apiClient.delete(API_ENDPOINTS.PRODUCT.COMMENT_BY_ID(commentId));
   },
 };

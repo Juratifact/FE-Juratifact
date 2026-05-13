@@ -9,6 +9,8 @@ import type {
   CreateProductCommentDto,
   CreateProductDto,
   ProductFilterParams,
+  ProductComment,
+  UpdateProductCommentDto,
   UpdateMyProductDto,
   UpdateProductDto,
 } from "../types";
@@ -153,7 +155,6 @@ export function useInfiniteProducts() {
     fetchNextPage: query.fetchNextPage,
   };
 }
-
 
 export function useCreateProduct() {
   const navigate = useNavigate();
@@ -345,6 +346,85 @@ export function useCreateProductComment() {
       });
       queryClient.invalidateQueries({
         queryKey: QUERY_KEYS.PRODUCT_DETAIL(variables.productId),
+      });
+    },
+  });
+}
+
+export function useUpdateProductComment(productId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      commentId,
+      data,
+    }: {
+      commentId: string;
+      data: UpdateProductCommentDto;
+    }) => productCommentService.update(commentId, data),
+    onSuccess: (updatedComment) => {
+      toast.success("Đã cập nhật bình luận");
+
+      queryClient.setQueryData(
+        QUERY_KEYS.PRODUCT_COMMENTS(productId),
+        (current: unknown) => {
+          if (!Array.isArray(current)) return current;
+
+          return current.map((item) => {
+            const comment = item as ProductComment;
+            const currentId = comment.commentId ?? comment.id;
+            const updatedId = updatedComment.commentId ?? updatedComment.id;
+
+            if (currentId !== updatedId) {
+              return comment;
+            }
+
+            return {
+              ...comment,
+              ...updatedComment,
+              id: updatedComment.id ?? comment.id,
+              commentId: updatedComment.commentId ?? comment.commentId,
+            };
+          });
+        },
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.PRODUCT_COMMENTS(productId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.PRODUCT_DETAIL(productId),
+      });
+    },
+  });
+}
+
+export function useDeleteProductComment(productId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (commentId: string) => productCommentService.remove(commentId),
+    onSuccess: (_data, commentId) => {
+      toast.success("Đã xoá bình luận");
+
+      queryClient.setQueryData(
+        QUERY_KEYS.PRODUCT_COMMENTS(productId),
+        (current: unknown) => {
+          if (!Array.isArray(current)) return current;
+
+          return current.filter((item) => {
+            const comment = item as ProductComment;
+            const currentId = comment.commentId ?? comment.id;
+            return currentId !== commentId;
+          });
+        },
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.PRODUCT_COMMENTS(productId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.PRODUCT_DETAIL(productId),
       });
     },
   });

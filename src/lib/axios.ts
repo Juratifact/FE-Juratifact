@@ -7,7 +7,7 @@ import { toast } from "sonner";
 //Create axios instance
 const apiClient = axios.create({
   baseURL: env.API_URL,
-  timeout: 15_000, //15s timeout
+  timeout: 15_00000, //15s timeout
   withCredentials: true, // cho phép gửi cookie (refresh token) trong các request
 });
 

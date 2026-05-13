@@ -6,9 +6,10 @@ import { API_ENDPOINTS } from "@/shared/constants";
 export const authService = {
   //Login
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    return apiClient.get<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, {
-      params: credentials,
-    }) as unknown as Promise<AuthResponse>;
+    return apiClient.post<AuthResponse>(
+      API_ENDPOINTS.AUTH.LOGIN,
+      credentials,
+    ) as unknown as Promise<AuthResponse>;
   },
   async register(data: RegisterDto): Promise<AuthResponse> {
     const formData = new FormData();

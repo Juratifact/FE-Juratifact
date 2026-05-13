@@ -2,6 +2,8 @@ import { z } from "zod";
 
 export const CONDITIONS = ["New", "Like new", "Good"] as const;
 
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+
 const optionalFileListSchema = z
   .custom<FileList | undefined>(
     (value) =>
@@ -10,6 +12,21 @@ const optionalFileListSchema = z
       (typeof value === "object" && value !== null && "length" in value),
     {
       message: "Invalid file input",
+    },
+  )
+  .optional();
+
+const videoFileListSchema = z
+  .custom<FileList | undefined>(
+    (value) => {
+      if (value === undefined || value === null) return true;
+      if (!(typeof value === "object" && "length" in value)) return false;
+      
+      const files = Array.from(value as unknown as FileList);
+      return files.every((file) => file.size <= MAX_VIDEO_SIZE);
+    },
+    {
+      message: "Video size must be 100MB or less",
     },
   )
   .optional();
@@ -36,7 +53,7 @@ export const productSchema = z.object({
 
   image: optionalFileListSchema,
 
-  video: optionalFileListSchema,
+  video: videoFileListSchema,
   imageUrls: z.array(z.string()).optional(),
 });
 

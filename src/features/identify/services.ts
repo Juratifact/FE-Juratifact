@@ -30,9 +30,9 @@ export const identifyService = createBaseService<
 >({
   endpoint: API_ENDPOINTS.IDENTIFY_DOCUMENT.BASE,
   getById: async (documentId) => {
-    return (await apiClient.get(API_ENDPOINTS.IDENTIFY_DOCUMENT.GET_BY_ID, {
-      params: { documentId },
-    })) as IdentifyDocument;
+    return (await apiClient.get(
+      API_ENDPOINTS.IDENTIFY_DOCUMENT.GET_BY_ID(String(documentId)),
+    )) as IdentifyDocument;
   },
   getAll: async (params) => {
     const response = await apiClient.get<IdentifyListApiWrapper>(
@@ -118,13 +118,7 @@ export const reSubmitIdentifyDocument = async (
 export const approveIdentifyDocument = async (
   documentId: string,
 ): Promise<void> => {
-  await apiClient.put(
-    API_ENDPOINTS.IDENTIFY_DOCUMENT.APPROVE,
-    {},
-    {
-      params: { documentId },
-    },
-  );
+  await apiClient.put(API_ENDPOINTS.IDENTIFY_DOCUMENT.APPROVE(documentId), {});
 };
 
 export const rejectIdentifyDocument = async (
@@ -132,10 +126,10 @@ export const rejectIdentifyDocument = async (
   reason: string,
 ): Promise<void> => {
   await apiClient.put(
-    API_ENDPOINTS.IDENTIFY_DOCUMENT.REJECT,
+    API_ENDPOINTS.IDENTIFY_DOCUMENT.REJECT(documentId),
     {},
     {
-      params: { documentId, reason },
+      params: { reason },
     },
   );
 };

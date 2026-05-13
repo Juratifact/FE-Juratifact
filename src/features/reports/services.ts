@@ -124,27 +124,17 @@ export const reportService = createBaseService<
     } satisfies ReportListResponse;
   },
   getById: async (id) => {
-    return (await apiClient.get(`${API_ENDPOINTS.REPORT.GET_REPORT}/${id}`)) as Report;
+    return (await apiClient.get(
+      API_ENDPOINTS.REPORT.GET_BY_ID(String(id)),
+    )) as Report;
   },
 });
 
 // ─── Additional API calls for report actions ─────────────
 export const approveReport = async (reportId: string): Promise<void> => {
-  await apiClient.put(
-    `${API_ENDPOINTS.REPORT.APPROVE}`,
-    {},
-    {
-      params: { reportId },
-    },
-  );
+  await apiClient.put(API_ENDPOINTS.REPORT.APPROVE(reportId), {});
 };
 
 export const rejectReport = async (reportId: string): Promise<void> => {
-  await apiClient.put(
-    `${API_ENDPOINTS.REPORT.REJECT}`,
-    {},
-    {
-      params: { reportId },
-    },
-  );
+  await apiClient.put(API_ENDPOINTS.REPORT.REJECT(reportId), {});
 };

@@ -1,6 +1,5 @@
 import apiClient from "@/lib/axios";
 import { API_ENDPOINTS } from "@/shared/constants";
-import { createBaseService } from "@/shared/services/BaseService";
 import type {
   AcceptOrderDto,
   AcceptOrderResponse,
@@ -11,16 +10,6 @@ import type {
   ConfirmActionParams,
   ConfirmActionResponse,
 } from "./types";
-
-// Base service for shipper orders (my orders)
-export const shipperOrderService = createBaseService<
-  ShipperOrder,
-  unknown,
-  UpdateShipperOrderDto,
-  ShipperOrderFilterParams
->({
-  endpoint: `${API_ENDPOINTS.SHIPPER.BASE}/${"{shipperId}"}/my-orders`,
-});
 
 // Available orders service
 export const shipperAvailableOrdersService = {
@@ -40,11 +29,8 @@ export const shipperAvailableOrdersService = {
 
   acceptOrder: async (data: AcceptOrderDto): Promise<AcceptOrderResponse> => {
     const response = await apiClient.post(
-      API_ENDPOINTS.SHIPPER.ACCEPT_ORDER,
+      API_ENDPOINTS.SHIPPER.ACCEPT_ORDER(data.shipperId, data.orderId),
       {},
-      {
-        params: { orderId: data.orderId, shipperId: data.shipperId },
-      },
     );
     return response as unknown as AcceptOrderResponse;
   },
@@ -56,10 +42,12 @@ export const shipperAvailableOrdersService = {
       fd.append("pod1Image", params.file);
     }
     const response = await apiClient.post(
-      `${API_ENDPOINTS.SHIPPER.BASE}/confirm-pickup`,
+      API_ENDPOINTS.SHIPPER.PICKUP(params.shipperId, params.orderId),
       fd,
       {
-        params: { orderId: params.orderId, shipperId: params.shipperId },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
     );
     return response as unknown as ConfirmActionResponse;
@@ -72,10 +60,12 @@ export const shipperAvailableOrdersService = {
       fd.append("pod2Image", params.file);
     }
     const response = await apiClient.post(
-      `${API_ENDPOINTS.SHIPPER.BASE}/confirm-delivery`,
+      API_ENDPOINTS.SHIPPER.DELIVERY(params.shipperId, params.orderId),
       fd,
       {
-        params: { orderId: params.orderId, shipperId: params.shipperId },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
     );
     return response as unknown as ConfirmActionResponse;
@@ -94,25 +84,57 @@ export const shipperOrderActions = {
     shipperId: string,
     filters?: ShipperOrderFilterParams,
   ) => {
-    const endpoint = `${API_ENDPOINTS.SHIPPER.BASE}/${shipperId}/my-orders`;
-    const response = await apiClient.get(endpoint, { params: filters });
+    const endpoint = API_ENDPOINTS.SHIPPER.GET_MY_ORDERS(shipperId);
+    const response = await apiClient.get(endpoint, {
+      params: {
+        pageIndex: filters?.page ?? 1,
+        pageSize: filters?.limit ?? 10,
+        searchTerm: filters?.search,
+        status: filters?.status,
+        paymentStatus: filters?.paymentStatus,
+      },
+    });
+
+    // Extract items from response (could be array or wrapped in object)
     const items: ShipperOrder[] = Array.isArray(response)
       ? response
-      : response && typeof response === "object" && "data" in response
-        ? ((response as { data?: ShipperOrder[] }).data ?? [])
-        : [];
-    const total = items.length;
-    const page = filters?.page ?? 1;
-    const limit = filters?.limit ?? (items.length || 10);
+      : response && typeof response === "object" && "items" in response
+        ? ((response as { items?: ShipperOrder[] }).items ?? [])
+        : response && typeof response === "object" && "data" in response
+          ? ((response as { data?: ShipperOrder[] }).data ?? [])
+          : [];
+
+    // Extract pagination info from response metadata
+    const responseRecord =
+      response && typeof response === "object"
+        ? (response as unknown as Record<string, unknown>)
+        : {};
+    const metaRecord =
+      responseRecord.meta && typeof responseRecord.meta === "object"
+        ? (responseRecord.meta as Record<string, unknown>)
+        : responseRecord;
+    const total =
+      (metaRecord.totalItems as number | undefined) ??
+      (metaRecord.totalCount as number | undefined) ??
+      (metaRecord.total as number | undefined) ??
+      items.length;
+    const page =
+      (metaRecord.currentPage as number | undefined) ??
+      (metaRecord.pageIndex as number | undefined) ??
+      filters?.page ??
+      1;
+    const limit =
+      (metaRecord.pageSize as number | undefined) ??
+      (metaRecord.itemsPerPage as number | undefined) ??
+      filters?.limit ??
+      10;
+
     return { data: items, meta: { total, page, limit } };
   },
 
   getOrderDetail: async (shipperId: string, orderId: string) => {
     const response = await apiClient.get(
-      API_ENDPOINTS.SHIPPER.MY_ORDERS_BY_ID,
-      {
-        params: { shipperId, orderId },
-      },
+      API_ENDPOINTS.SHIPPER.GET_ORDER_DETAIL(shipperId, orderId),
     );
     return response as unknown as ShipperOrder;
   },
@@ -122,7 +144,7 @@ export const shipperOrderActions = {
     orderId: string,
     data: UpdateShipperOrderDto,
   ) => {
-    const endpoint = `${API_ENDPOINTS.SHIPPER.BASE}/${shipperId}/my-orders/${orderId}`;
+    const endpoint = API_ENDPOINTS.SHIPPER.GET_ORDER_DETAIL(shipperId, orderId);
     const response = await apiClient.patch(endpoint, data);
     return response as unknown as ShipperOrder;
   },
