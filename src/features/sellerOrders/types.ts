@@ -7,6 +7,7 @@ export interface SellerOrderItem {
   unitPrice: number;
   quantity: number;
   totalPrice: number;
+  imageUrl?: string[];
 }
 
 export interface SellerOrder {

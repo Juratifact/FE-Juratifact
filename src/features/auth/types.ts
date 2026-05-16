@@ -16,6 +16,7 @@ export interface User {
   birthday?: string;
   profilePicture?: string;
   role: UserRole;
+  roles?: UserRole[];
   createdAt: string;
   updatedAt: string;
   // ... other fields
@@ -33,6 +34,7 @@ export interface AuthResponse {
   refresh_token?: string;
   userId?: string;
   role?: UserRole;
+  roles?: UserRole[];
   subcription?: {
     hasActiveSubscription: boolean;
     subscriptionType?: string;
@@ -48,6 +50,7 @@ export interface AuthState {
   access_token: string | null;
   userId: string | null;
   role: UserRole | null;
+  roles: UserRole[];
   isVerify: boolean;
 }
 export interface AuthActions {
@@ -55,6 +58,7 @@ export interface AuthActions {
     access_token: string;
     userId?: string;
     role: UserRole | null;
+    roles?: UserRole[];
     isVerify?: boolean;
   }) => void;
   setIsVerify: (isVerify: boolean) => void;
@@ -64,4 +68,5 @@ export interface JwtPayload {
   sub: string;
   email: string;
   role: UserRole;
+  roles?: UserRole[];
 }

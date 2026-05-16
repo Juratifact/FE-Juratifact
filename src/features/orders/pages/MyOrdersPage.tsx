@@ -12,13 +12,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui
 import { useSellerOrders } from "@/features/sellerOrders/hooks/useSellerOrders";
 import { SellerOrderTable } from "@/features/sellerOrders/components/SellerOrderTable";
 import { ShoppingBag, Store } from "lucide-react";
+import { useAuthStore } from "@/features/auth/store";
 
 export default function MyOrdersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") === "selling" ? "selling" : "buying";
   
+  const roles = useAuthStore((s) => s.roles);
+  const isSeller = roles.includes("Seller");
+
   const { data: buyOrders = [], isLoading: isBuyLoading } = useMyOrders();
-  const { orders: sellOrders = [], isLoading: isSellLoading } = useSellerOrders();
+  const { orders: sellOrders = [], isLoading: isSellLoading } = useSellerOrders({
+    enabled: isSeller,
+  });
   const confirmReceipt = useConfirmReceipt();
   const cancelOrder = useCancelOrder();
 
@@ -41,10 +47,12 @@ export default function MyOrdersPage() {
             <ShoppingBag className="w-4 h-4" />
             Đơn mua
           </TabsTrigger>
-          <TabsTrigger value="selling" className="gap-2">
-            <Store className="w-4 h-4" />
-            Đơn bán
-          </TabsTrigger>
+          {isSeller && (
+            <TabsTrigger value="selling" className="gap-2">
+              <Store className="w-4 h-4" />
+              Đơn bán
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="buying">

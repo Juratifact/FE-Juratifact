@@ -48,10 +48,19 @@ export const identifyService = createBaseService<
 
     const data = response as unknown as IdentifyListApiWrapper;
     const items = data.items ?? [];
-    const totalItems = data.totalItems ?? items.length;
     const itemsPerPage = data.pageSize ?? params?.pageSize ?? 10;
     const currentPage = data.pageIndex ?? params?.pageIndex ?? 1;
-    const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+    const totalItems = data.totalItems ?? items.length;
+    
+    let totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+
+    // Smart fallback: if the page is full, assume there might be more
+    if (items.length >= itemsPerPage && totalPages <= currentPage) {
+      totalPages = currentPage + 1;
+    }
+
+    // Ensure we can always see the pagination to go back if we are not on page 1
+    totalPages = Math.max(totalPages, currentPage);
 
     return {
       data: items,

@@ -1,4 +1,3 @@
-import { useMyProducts } from "@/features/products/hooks/useProduct";
 import { useAppliedProducts, useTogglePromotion } from "../hooks/usePromotions";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
@@ -13,22 +12,13 @@ interface AppliedProductsModalProps {
 }
 
 export function AppliedProductsModal({ subscription, onClose }: AppliedProductsModalProps) {
-  const { data: appliedItems, isLoading: isAppliedLoading } = useAppliedProducts({ 
-    enabled: !!subscription 
-  });
-
-  const { products: myProducts, isLoading: isProductsLoading } = useMyProducts({ 
-    limit: 100,
+  const { data: currentApplied = [], isLoading } = useAppliedProducts(subscription?.promotionPackageId, { 
     enabled: !!subscription 
   });
   
   const toggleMutation = useTogglePromotion();
 
   if (!subscription) return null;
-
-  const currentApplied = appliedItems || [];
-
-  const isLoading = isAppliedLoading || isProductsLoading;
 
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
@@ -74,62 +64,58 @@ export function AppliedProductsModal({ subscription, onClose }: AppliedProductsM
                 <p className="text-muted-foreground font-medium">Chưa có sản phẩm nào được áp dụng gói này.</p>
               </div>
             ) : (
-              currentApplied.map((item) => {
-                const product = myProducts.find(p => p.id === item.productId);
-                
-                return (
-                  <div 
-                    key={item.productPromotionId}
-                    className="group relative flex items-center gap-6 p-4 rounded-[2rem] bg-muted/30 border border-border/50 hover:bg-muted/50 transition-all duration-300"
-                  >
-                    <div className="relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden shadow-lg bg-background">
-                      <img 
-                        src={product?.imageUrls[0] || "/placeholder-product.png"} 
-                        alt={product?.title || "Product"}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <h4 className="font-bold text-lg truncate">{product?.title || "Sản phẩm không xác định"}</h4>
-                      <div className="flex items-center gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                         <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-emerald-500" />
-                            Hết hạn: {new Date(item.expiresAt).toLocaleDateString("vi-VN")}
-                         </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="flex flex-col items-center gap-1.5 px-3 border-l border-border/50">
-                        <span className={cn(
-                          "text-[9px] font-black uppercase tracking-tighter transition-colors",
-                          item.isActive ? "text-emerald-500" : "text-muted-foreground/40"
-                        )}>
-                          {item.isActive ? "Đang bật" : "Đang tắt"}
-                        </span>
-                        <Switch 
-                          checked={item.isActive} 
-                          onCheckedChange={() => toggleMutation.mutate(item.productPromotionId)}
-                          disabled={toggleMutation.isPending}
-                          className="data-[state=checked]:bg-emerald-500 scale-90"
-                        />
-                      </div>
-
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
-                        asChild
-                      >
-                        <a href={`/products/${item.productId}`} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="w-5 h-5" />
-                        </a>
-                      </Button>
+              currentApplied.map((item) => (
+                <div 
+                  key={item.productPromotionId}
+                  className="group relative flex items-center gap-6 p-4 rounded-[2rem] bg-muted/30 border border-border/50 hover:bg-muted/50 transition-all duration-300"
+                >
+                  <div className="relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden shadow-lg bg-background">
+                    <img 
+                      src={item.imageUrl?.[0] || "/placeholder-product.png"} 
+                      alt={item.productTitle || "Product"}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <h4 className="font-bold text-lg truncate group-hover:text-primary transition-colors">{item.productTitle || "Sản phẩm không xác định"}</h4>
+                    <div className="flex items-center gap-4 text-xs font-bold text-muted-foreground uppercase tracking-widest">
+                       <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-emerald-500" />
+                          Hết hạn: {new Date(item.expiresAt).toLocaleDateString("vi-VN")}
+                       </div>
                     </div>
                   </div>
-                );
-              })
+
+                  <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-center gap-1.5 px-3 border-l border-border/50">
+                      <span className={cn(
+                        "text-[9px] font-black uppercase tracking-tighter transition-colors",
+                        item.isActive ? "text-emerald-500" : "text-muted-foreground/40"
+                      )}>
+                        {item.isActive ? "Đang bật" : "Đang tắt"}
+                      </span>
+                      <Switch 
+                        checked={item.isActive} 
+                        onCheckedChange={() => toggleMutation.mutate(item.productPromotionId)}
+                        disabled={toggleMutation.isPending}
+                        className="data-[state=checked]:bg-emerald-500 scale-90"
+                      />
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
+                      asChild
+                    >
+                      <a href={`/products/${item.productId}`} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-5 h-5" />
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              ))
             )}
           </div>
 

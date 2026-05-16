@@ -150,19 +150,25 @@ export const userService = {
       raw.totalItems ??
       raw.totalCount;
 
-    const totalPages =
+    let totalPages =
       raw.meta?.totalPages ??
       raw.totalPages ??
       (typeof totalItems === "number" && itemsPerPage > 0
         ? Math.max(1, Math.ceil(totalItems / itemsPerPage))
-        : currentPage + (users.length >= itemsPerPage ? 1 : 0));
+        : currentPage);
+
+    // Smart fallback: if the page is full, assume there might be more
+    if (users.length >= itemsPerPage && totalPages <= currentPage) {
+      totalPages = currentPage + 1;
+    }
+    
+    // Ensure we can always see the pagination to go back if we are not on page 1
+    totalPages = Math.max(totalPages, currentPage);
 
     const hasNextPage =
       raw.meta?.hasNextPage ??
       raw.hasNextPage ??
-      (typeof totalItems === "number"
-        ? currentPage < totalPages
-        : users.length >= itemsPerPage);
+      currentPage < totalPages;
 
     const hasPreviousPage =
       raw.meta?.hasPreviousPage ?? raw.hasPreviousPage ?? currentPage > 1;

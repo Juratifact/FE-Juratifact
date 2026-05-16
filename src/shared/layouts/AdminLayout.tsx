@@ -2,11 +2,21 @@ import { Outlet, useLocation } from "react-router-dom";
 import { CircleUserRound } from "lucide-react";
 import AdminHeader from "./AdminHeader";
 import { useAuthStore } from "@/features/auth/store";
+import { useEffect } from "react";
 
 export default function AdminLayout() {
   const location = useLocation();
   const role = useAuthStore((s) => s.role);
   const isShipper = role === "Shipper";
+
+  // Scroll to top on every route change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [location.pathname]);
 
   const titleMap: Record<string, { title: string; subtitle: string }> = {
     "/admin": {

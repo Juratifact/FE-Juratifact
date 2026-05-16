@@ -16,6 +16,7 @@ interface MyOrderRow {
   title: string;
   condition?: string;
   price?: number;
+  sellerOrderId?: string;
   sellerId?: string;
   userName?: string | null;
   sellerName?: string;
@@ -108,34 +109,24 @@ export function useMyOrders() {
       // Extract items from paginated response { items: [], totalItems: ... }
       const rows = (response?.items || response?.data || []) as MyOrderRow[];
       
-      // API returns flat rows (one per product) with an orderId — group into orders
-      const map = new Map<string, GroupedOrder>();
-      rows.forEach((r: MyOrderRow) => {
-        const id = r.orderId;
-        const existing: GroupedOrder = map.get(id) || {
-          id,
-          code: r.orderCode ?? undefined,
-          recipientName: r.name ?? undefined,
-          totalAmount: 0,
-          status: r.status,
-          paymentStatus: r.paymentStatus as PaymentStatus | undefined,
-          items: [],
-          sellerName: r.sellerName,
-        };
-
-        existing.items.push({
+      // Return each row as its own "order" for the UI, as requested by the user
+      return rows.map((r: MyOrderRow) => ({
+        id: r.orderId,
+        sellerOrderId: r.sellerOrderId, // Keep track of the specific seller order if needed
+        code: r.name || r.orderCode,
+        recipientName: r.name,
+        totalAmount: r.price || 0,
+        status: r.status,
+        paymentStatus: r.paymentStatus as PaymentStatus | undefined,
+        sellerName: r.sellerName,
+        items: [{
           productId: r.productId,
           productName: r.title,
           quantity: r.quantity ?? 1,
           unitPrice: r.price,
           condition: r.condition,
-        });
-
-        existing.totalAmount = (existing.totalAmount || 0) + (r.price || 0);
-        map.set(id, existing);
-      });
-
-      return Array.from(map.values());
+        }],
+      } as GroupedOrder));
     },
   });
 }

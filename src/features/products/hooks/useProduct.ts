@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { QUERY_KEYS } from "@/shared/constants";
 import { useMemo } from "react";
 import type { ProductListResponse, Product } from "../types";
+import { useRefreshMutation } from "@/features/auth/hooks/useAuthMutation";
 
 type ProductCache = ProductListResponse | undefined;
 
@@ -161,11 +162,16 @@ export function useInfiniteProducts() {
 export function useCreateProduct() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { mutate: refreshAuth } = useRefreshMutation();
 
   return useMutation({
     mutationFn: (data: CreateProductDto) => productService.create(data),
     onSuccess: () => {
-      toast.success("Product created successfully");
+      toast.success("Sản phẩm đã được đăng thành công!");
+      
+      // Refresh auth to update roles (e.g. from Buyer to Seller)
+      refreshAuth();
+
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
       navigate("/products");

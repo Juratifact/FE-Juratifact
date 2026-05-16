@@ -3,11 +3,25 @@ import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/shared/components/ui/button";
 import { IdentifyForm } from "../components/IdentifyForm";
-import { useSubmitIdentifyDocument } from "../hooks/useIdentify";
-
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useGetMyIdentifyDocument, useSubmitIdentifyDocument } from "../hooks/useIdentify";
+import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 
 export default function ManageIdentifyCreate() {
+  const navigate = useNavigate();
+  const { data: document, isLoading: isChecking } = useGetMyIdentifyDocument();
   const { mutate: submitIdentify, isPending } = useSubmitIdentifyDocument();
+
+  useEffect(() => {
+    if (!isChecking && document) {
+      navigate("/identify", { replace: true });
+    }
+  }, [document, isChecking, navigate]);
+
+  if (isChecking) {
+    return <LoadingSpinner className="py-20" size="lg" />;
+  }
 
   const handleSubmit = (data: {
     idCardFrontUrl: File;

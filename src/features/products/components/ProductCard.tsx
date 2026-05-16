@@ -581,7 +581,7 @@ export function ProductCard({
                         }}
                     >
                         <ShoppingBag className="h-4 w-4" />
-                        Mua ngay
+                        Thêm vào giỏ
                     </Button>
                 )}
             </div>
