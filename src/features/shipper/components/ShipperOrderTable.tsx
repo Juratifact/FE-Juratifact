@@ -42,9 +42,9 @@ const statusLabel: Record<number, string> = {
 };
 
 const paymentStatusLabel: Record<number, string> = {
-  1: "Chờ thanh toán",
-  2: "Đã thanh toán",
-  0: "Khác",
+  1: "Đã thanh toán",
+  2: "Đã quyết toán",
+  0: "Chưa thanh toán",
 };
 
 /**
@@ -63,6 +63,7 @@ export function ShipperOrderTable({
           <TableRow>
             <TableHead>Mã đơn</TableHead>
             <TableHead>Khách hàng</TableHead>
+            <TableHead>Địa chỉ lấy</TableHead>
             <TableHead>Địa chỉ giao</TableHead>
             <TableHead>Tổng tiền</TableHead>
             <TableHead>Trạng thái</TableHead>
@@ -81,6 +82,14 @@ export function ShipperOrderTable({
                   <p className="font-medium">{order.customerName}</p>
                   <p className="text-sm text-muted-foreground">
                     {order.customerPhone}
+                  </p>
+                </div>
+              </TableCell>
+              <TableCell className="max-w-xs">
+                <div className="flex items-start gap-2">
+                  <MapPin className="mt-1 h-3 w-3 shrink-0 text-blue-500" />
+                  <p className="truncate text-sm text-muted-foreground">
+                    {order.sellerAddress || "Chưa cập nhật"}
                   </p>
                 </div>
               </TableCell>

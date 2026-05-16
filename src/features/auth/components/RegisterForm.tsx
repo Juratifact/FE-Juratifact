@@ -47,7 +47,7 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="fullName">Full name</Label>
+        <Label htmlFor="fullName">Họ và tên</Label>
         <Input
           id="fullName"
           type="text"
@@ -62,7 +62,7 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="userName">Username</Label>
+        <Label htmlFor="userName">Tên đăng nhập</Label>
         <Input
           id="userName"
           type="text"
@@ -92,7 +92,7 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">Mật khẩu</Label>
         <Input
           id="password"
           type="password"
@@ -106,7 +106,7 @@ export function RegisterForm() {
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
         <Input
           id="confirmPassword"
           type="password"
@@ -122,7 +122,7 @@ export function RegisterForm() {
       </div>
       {/* PHONE */}
       <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number</Label>
+        <Label htmlFor="phone">Số điện thoại</Label>
         <Input
           id="phone"
           type="text"
@@ -147,7 +147,7 @@ export function RegisterForm() {
             Đang đăng ký...
           </>
         ) : (
-          "Register"
+          "Đăng ký"
         )}
       </Button>
 

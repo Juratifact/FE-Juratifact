@@ -28,6 +28,8 @@ export default function ProfilePage() {
           userName: data.userName || undefined,
           phoneNumber: data.phoneNumber || undefined,
           address: data.address || undefined,
+          vietMapRefId: data.vietMapRefId || undefined,
+          vietMapDisplay: data.vietMapDisplay || undefined,
           password: data.password || undefined,
           profilePicture: data.profilePicture?.[0] ?? null,
         },
@@ -64,7 +66,7 @@ export default function ProfilePage() {
                 className="h-11 w-full text-base"
                 onClick={() => setIsEditing(true)}
               >
-                Update Profile
+                Cập nhật hồ sơ
               </Button>
             ) : (
               <Button

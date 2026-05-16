@@ -9,17 +9,14 @@ export default function CheckoutPage() {
   const create = useCreateOrder();
   const { data: cart } = useMyCart();
   const [shippingAddress, setShippingAddress] = useState("");
-  const [itemsJson, setItemsJson] = useState('[{"productId":"","quantity":1}]');
+  const [itemsJson, setItemsJson] = useState('[]');
   const initializedRef = useRef(false);
 
   // Auto-populate from cart if available (only once)
   useEffect(() => {
     if (!initializedRef.current && cart?.items && cart.items.length > 0) {
-      const cartItems = cart.items.map((item) => ({
-        productId: item.productId,
-        quantity: item.quantity,
-      }));
-      setItemsJson(JSON.stringify(cartItems, null, 2));
+      const cartDetailIds = cart.items.map((item) => item.cartDetailId);
+      setItemsJson(JSON.stringify(cartDetailIds, null, 2));
       initializedRef.current = true;
     }
   }, [cart?.items]);
@@ -27,14 +24,14 @@ export default function CheckoutPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const items = JSON.parse(itemsJson) as {
-        productId: string;
-        quantity: number;
-      }[];
-      create.mutate({ shippingAddress, items });
+      const cartDetailIds = JSON.parse(itemsJson) as string[];
+      create.mutate({ 
+        shippingAddress, 
+        cartDetailIds,
+        vietMapRefId: "default-ref-id" // Placeholder for debug page
+      });
     } catch {
-      // naive validation
-      alert("Items JSON invalid");
+      alert("Items JSON invalid (should be an array of string IDs)");
     }
   };
 

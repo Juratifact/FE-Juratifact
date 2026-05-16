@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { Search } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { Search, UserPlus } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 import { Badge } from "@/shared/components/ui/badge";
 import { Input } from "@/shared/components/ui/input";
+import { Button } from "@/shared/components/ui/button";
 import { useDebounce } from "@/shared/hooks/useDebounce";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 import { EmptyState } from "@/shared/components/common/EmptyState";
@@ -13,6 +14,7 @@ import { UserTable } from "../components/UserTable";
 
 export default function ManageUserList() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { users, pagination, isLoading } = useUsers();
 
   const [searchInput, setSearchInput] = useState(
@@ -53,6 +55,14 @@ export default function ManageUserList() {
             Quản lý tài khoản, phân quyền và giám sát hoạt động cộng đồng.
           </p>
         </div>
+
+        <Button
+          onClick={() => navigate("create")}
+          className="rounded-full shadow-lg shadow-primary/20"
+        >
+          <UserPlus className="mr-2 h-4 w-4" />
+          Tạo tài khoản
+        </Button>
       </div>
 
       {/* Filter Toolbar */}
@@ -63,7 +73,7 @@ export default function ManageUserList() {
             placeholder="Tìm email hoặc username..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="pl-10"
+            className="pl-10 rounded-xl"
           />
         </div>
 

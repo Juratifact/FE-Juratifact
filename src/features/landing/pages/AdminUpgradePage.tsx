@@ -10,18 +10,18 @@ import { CheckCircle2, Crown, ShieldCheck, Sparkles } from "lucide-react";
 
 const plans = [
   {
-    name: "Starter",
+    name: "Cơ bản",
     price: "Miễn phí",
     features: ["Dashboard cơ bản", "Quản lý users", "Quản lý reports"],
   },
   {
     name: "Pro",
     price: "299k/tháng",
-    features: ["Advanced analytics", "Bộ lọc nâng cao", "Hỗ trợ ưu tiên"],
+    features: ["Phân tích nâng cao", "Bộ lọc nâng cao", "Hỗ trợ ưu tiên"],
     featured: true,
   },
   {
-    name: "Enterprise",
+    name: "Doanh nghiệp",
     price: "Liên hệ",
     features: ["SSO / phân quyền", "Báo cáo nâng cao", "Tùy biến riêng"],
   },
@@ -34,7 +34,7 @@ export default function AdminUpgradePage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <Badge className="rounded-full bg-orange-500/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-orange-300 hover:bg-orange-500/20">
-              Upgrade center
+              Trung tâm nâng cấp
             </Badge>
             <h1 className="mt-4 text-3xl font-black italic uppercase tracking-tight sm:text-5xl">
               Nâng cấp
@@ -53,13 +53,13 @@ export default function AdminUpgradePage() {
             </div>
             <div className="rounded-2xl bg-white/5 px-4 py-3">
               <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
-                Tasks
+                Công việc
               </p>
               <p className="mt-1 text-2xl font-black">24</p>
             </div>
             <div className="rounded-2xl bg-white/5 px-4 py-3">
               <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
-                Alerts
+                Cảnh báo
               </p>
               <p className="mt-1 text-2xl font-black">3</p>
             </div>

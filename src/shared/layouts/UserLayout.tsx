@@ -9,18 +9,24 @@ export function UserLayout() {
   const isVerify = useAuthStore((s) => s.isVerify);
   const isLoggedIn = !!access_token && !!role;
   const location = useLocation();
+  const isIdentifyRoute = location.pathname.startsWith("/identify");
 
   if (access_token && role) {
     if (role === "Shipper") {
-      return <Navigate to="/admin/shipper/orders" replace />;
+      if (!isVerify) {
+        if (!isIdentifyRoute) {
+          return <Navigate to="/identify/create" replace />;
+        }
+      } else if (!location.pathname.startsWith("/admin/shipper")) {
+        return <Navigate to="/admin/shipper/orders" replace />;
+      }
     }
 
-    if (role === "Admin") {
+    if (role === "Admin" && !location.pathname.startsWith("/admin")) {
       return <Navigate to="/admin" replace />;
     }
 
-    const isIdentifyRoute = location.pathname.startsWith("/identify");
-    if (!isVerify && !isIdentifyRoute) {
+    if (!isVerify && !isIdentifyRoute && role !== "Admin") {
       return <Navigate to="/identify/create" replace />;
     }
   }

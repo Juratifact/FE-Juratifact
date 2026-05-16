@@ -9,7 +9,7 @@ export function VerificationPoller() {
   const role = useAuthStore((s) => s.role);
   const setIsVerify = useAuthStore((s) => s.setIsVerify);
 
-  const shouldPoll = !!access_token && !!role && !isVerify && role !== "Admin" && role !== "Shipper";
+  const shouldPoll = !!access_token && !!role && !isVerify && role !== "Admin";
 
   const { data: document } = useGetMyIdentifyDocument({
     refetchInterval: shouldPoll ? 5000 : false,

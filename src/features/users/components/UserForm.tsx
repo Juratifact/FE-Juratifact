@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 
@@ -14,6 +14,7 @@ import {
 } from "@/shared/components/ui/card";
 import { userProfileSchema, type UserProfileFormData } from "../schema";
 import type { UserFormProps } from "../types";
+import { LocationAutocomplete } from "@/features/map/components/LocationAutocomplete";
 
 export function UserForm({
   defaultValues,
@@ -25,6 +26,8 @@ export function UserForm({
   const {
     register,
     handleSubmit,
+    control,
+    setValue,
     formState: { errors },
   } = useForm<UserProfileFormData>({
     resolver: zodResolver(userProfileSchema),
@@ -33,6 +36,8 @@ export function UserForm({
       userName: "",
       phoneNumber: "",
       address: "",
+      vietMapRefId: "",
+      vietMapDisplay: "",
       password: "",
       ...defaultValues,
     },
@@ -103,12 +108,23 @@ export function UserForm({
 
           <div className="space-y-2">
             <Label htmlFor="address">Địa chỉ</Label>
-            <textarea
-              id="address"
-              rows={3}
-              placeholder="Nhập địa chỉ"
-              className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              {...register("address")}
+            <Controller
+              name="address"
+              control={control}
+              render={({ field }) => (
+                <LocationAutocomplete
+                  value={field.value || ""}
+                  onChange={(address, refId) => {
+                    field.onChange(address);
+                    if (refId) {
+                      setValue("vietMapRefId", refId);
+                      setValue("vietMapDisplay", address);
+                    }
+                  }}
+                  placeholder="Nhập địa chỉ"
+                  disabled={isPending}
+                />
+              )}
             />
             {errors.address && (
               <p className="text-sm text-destructive">

@@ -8,6 +8,11 @@ export interface UserProfile {
   userName?: string;
   phoneNumber?: string;
   address?: string;
+  vietMapRefId?: string;
+  vietMapDisplay?: string;
+  latitude?: number;
+  longitude?: number;
+  trustScore?: number;
   profilePicture?: string;
   isVerify?: boolean;
   createdAt?: string;
@@ -25,8 +30,17 @@ export interface UpdateUserProfileDto {
   password?: string;
   phoneNumber?: string;
   address?: string;
+  vietMapRefId?: string;
+  vietMapDisplay?: string;
   userName?: string;
   profilePicture?: File | null;
+}
+
+export interface CreateShipperDto {
+  email: string;
+  fullName: string;
+  password: string;
+  phoneNumber: string;
 }
 
 export interface UserFormProps {

@@ -26,7 +26,7 @@ interface MyProductCatalogProps {
 
 export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
   const [page, setPage] = useState(1);
-  const pageSize = 6;
+  const pageSize = 10;
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
@@ -58,9 +58,8 @@ export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
       payload.imageUrls = data.imageUrls;
     }
 
-    const nextVideo = data.video?.[0] ?? null;
-    if (nextVideo) {
-      payload.video = nextVideo;
+    if (data.video && data.video.length > 0) {
+      payload.video = Array.from(data.video);
     }
 
     return payload;

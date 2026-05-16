@@ -15,6 +15,8 @@ export interface Product {
   status: 0 | 1; // 0: Sold/Unavailable, 1: Available
   imageUrls: string[];
   videoUrls?: string[];
+  isPromoted?: boolean;
+  promotionExpiresAt?: string;
   comments?: ProductComment[];
   createdAt: string;
   updatedAt: string;
@@ -29,6 +31,7 @@ export interface ProductComment {
   replyCount?: number;
   displayName?: string;
   userName?: string;
+  userId?: string;
 }
 
 export type ProductCommentResponse = ProductComment & {
@@ -55,7 +58,7 @@ export interface CreateProductDto {
   condition: Product["condition"];
   price: number;
   images?: File[] | null;
-  video?: File | null;
+  video?: File[] | null;
   imageUrls?: string[];
   videoUrls?: string[];
 }
@@ -66,6 +69,10 @@ export interface CreateProductCommentDto {
   parentCommentId?: string;
 }
 
+export interface UpdateProductCommentDto {
+  content: string;
+}
+
 export type UpdateProductDto = Partial<CreateProductDto>;
 
 export interface UpdateMyProductDto {
@@ -74,7 +81,7 @@ export interface UpdateMyProductDto {
   condition?: Product["condition"];
   price?: number;
   images?: File[] | null;
-  video?: File | null;
+  video?: File[] | null;
   status?: Product["status"];
   imageUrls?: string[];
   videoUrls?: string[];

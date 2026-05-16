@@ -104,8 +104,10 @@ export function useMyOrders() {
   return useQuery({
     queryKey: QUERY_KEYS.MY_ORDERS,
     queryFn: async () => {
-      const rows =
-        (await orderActions.getMyOrders()) as unknown as MyOrderRow[];
+      const response = (await orderActions.getMyOrders()) as any;
+      // Extract items from paginated response { items: [], totalItems: ... }
+      const rows = (response?.items || response?.data || []) as MyOrderRow[];
+      
       // API returns flat rows (one per product) with an orderId — group into orders
       const map = new Map<string, GroupedOrder>();
       rows.forEach((r: MyOrderRow) => {

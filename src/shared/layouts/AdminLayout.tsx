@@ -10,28 +10,36 @@ export default function AdminLayout() {
 
   const titleMap: Record<string, { title: string; subtitle: string }> = {
     "/admin": {
-      title: "Dashboard",
+      title: "Bảng điều khiển",
       subtitle: "Theo dõi tình hình vận hành của sàn",
     },
     "/admin/users": {
-      title: "Users",
+      title: "Người dùng",
       subtitle: "Quản lý tài khoản người dùng",
     },
     "/admin/reports": {
-      title: "Reports",
+      title: "Báo cáo vi phạm",
       subtitle: "Duyệt và xử lý báo cáo",
     },
     "/admin/categories": {
-      title: "Categories",
+      title: "Danh mục",
       subtitle: "Danh mục nội dung và hiển thị",
     },
     "/admin/upgrade": {
-      title: "Upgrade",
+      title: "Nâng cấp",
       subtitle: "Mở rộng gói quản trị và tính năng",
     },
     "/admin/shipper/orders": {
       title: "Đơn khả dụng",
       subtitle: "Nhận đơn hàng đang chờ shipper",
+    },
+    "/admin/promotions": {
+      title: "Gói ưu đãi",
+      subtitle: "Quản lý và cập nhật các gói ưu đãi hiện có",
+    },
+    "/admin/transactions": {
+      title: "Lịch sử giao dịch",
+      subtitle: "Theo dõi và quản lý dòng tiền toàn hệ thống",
     },
   };
 
@@ -45,7 +53,7 @@ export default function AdminLayout() {
           <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-orange-500">
-                {isShipper ? "Marketplace shipper" : "Marketplace admin"}
+                {isShipper ? "Giao hàng sàn" : "Quản trị viên sàn"}
               </p>
               <h2 className="mt-1 text-2xl font-black italic uppercase tracking-tight">
                 {current.title}
@@ -59,7 +67,7 @@ export default function AdminLayout() {
                 </div>
                 <div className="leading-tight">
                   <p className="text-xs font-semibold uppercase tracking-wide">
-                    {isShipper ? "Shipper" : "Administrator"}
+                    {isShipper ? "Shipper" : "Quản trị viên"}
                   </p>
                 </div>
               </div>

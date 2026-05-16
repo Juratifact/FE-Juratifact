@@ -91,7 +91,7 @@ export function ReportDetailModal({
                     {getStatusLabel(report.status)}
                   </Badge>
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-                    Report ID: {report.id.split("-")[0]}
+                    Mã báo cáo: {report.id.split("-")[0]}
                   </span>
                 </div>
                 <h3 className="text-xl font-bold tracking-tight">Chi tiết báo cáo vi phạm</h3>

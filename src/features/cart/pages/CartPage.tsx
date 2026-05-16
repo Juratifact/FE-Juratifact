@@ -26,17 +26,14 @@ export default function CartPage() {
   const items = cart?.items ?? [];
   const total = cart?.total ?? 0;
 
-  const handleCheckoutSubmit = (address: string, note?: string) => {
-    const orderItems = items.map((item: CartItem) => ({
-      productId: item.productId,
-      quantity: item.quantity,
-    }));
+  const handleCheckoutSubmit = (address: string, refId: string) => {
+    const cartDetailIds = items.map((item: CartItem) => item.cartDetailId);
 
     createOrderMutation.mutate(
       {
         shippingAddress: address,
-        items: orderItems,
-        note,
+        vietMapRefId: refId,
+        cartDetailIds,
       },
       {
         onSuccess: (paymentInfo) => {
@@ -100,7 +97,7 @@ export default function CartPage() {
                   <div className="shrink-0">
                     <img
                       src={item.productImageUrls?.[0] || "/placeholder-image.png"}
-                      alt={item.productTitle || "Product"}
+                      alt={item.productTitle || "Sản phẩm"}
                       className="h-24 w-24 rounded-xl object-cover"
                     />
                   </div>
@@ -113,15 +110,15 @@ export default function CartPage() {
                         </div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <span className="font-medium text-foreground">Seller:</span>
+                            <span className="font-medium text-foreground">Người bán:</span>
                             {item.sellerName}
                           </div>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <span className="font-medium text-foreground">Cond:</span>
+                            <span className="font-medium text-foreground">Tình trạng:</span>
                             {item.condition}
                           </div>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <span className="font-medium text-foreground">Qty:</span>
+                            <span className="font-medium text-foreground">Số lượng:</span>
                             {item.quantity}
                           </div>
                         </div>

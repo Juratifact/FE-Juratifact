@@ -1,4 +1,20 @@
-import type { UserLocation, LocationTrackingOptions } from "./types";
+import type {
+  UserLocation,
+  LocationTrackingOptions,
+  AutocompleteResponse,
+} from "./types";
+import apiClient from "@/lib/axios";
+import { API_ENDPOINTS } from "@/shared/constants";
+
+export async function getAutocompleteSuggestions(
+  text: string,
+): Promise<AutocompleteResponse> {
+  if (!text.trim()) return [];
+
+  return apiClient.get(API_ENDPOINTS.VIETMAP.AUTOCOMPLETE, {
+    params: { text },
+  });
+}
 
 export function getUserLocation(): Promise<UserLocation> {
   return new Promise((resolve, reject) => {

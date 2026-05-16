@@ -33,7 +33,7 @@ export function AddToCartButton({
       className={className}
     >
       <ShoppingCart className="mr-2 h-4 w-4" />
-      {isLoading ? "Adding..." : "Add to cart"}
+      {isLoading ? "Đang thêm..." : "Thêm vào giỏ"}
     </Button>
   );
 }

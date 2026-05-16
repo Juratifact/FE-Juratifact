@@ -5,6 +5,7 @@ import type {
   UserListResponse,
   UserProfile,
   UpdateUserProfileDto,
+  CreateShipperDto,
 } from "./types";
 
 type UserApiItem = Partial<UserProfile> & {
@@ -13,13 +14,19 @@ type UserApiItem = Partial<UserProfile> & {
   [key: string]: unknown;
 };
 
+const EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+
 const pickString = (
   item: UserApiItem,
   ...keys: string[]
 ): string | undefined => {
   for (const key of keys) {
     const value = item[key];
-    if (typeof value === "string" && value.length > 0) {
+    if (
+      typeof value === "string" &&
+      value.length > 0 &&
+      value !== EMPTY_GUID
+    ) {
       return value;
     }
   }
@@ -32,14 +39,19 @@ const normalizeUser = (
   fallbackId?: string,
 ): UserProfile => ({
   id:
-    pickString(item, "id", "userId", "UserId", "userID") ??
+    pickString(item, "userId", "UserId", "userID", "id") ??
     fallbackId ??
     crypto.randomUUID(),
   email: pickString(item, "email", "Email"),
   fullName: pickString(item, "fullName", "FullName"),
   userName: pickString(item, "userName", "UserName"),
   phoneNumber: pickString(item, "phoneNumber", "PhoneNumber"),
-  address: pickString(item, "address", "Address"),
+  address: pickString(item, "address", "Address", "vietMapDisplay"),
+  vietMapRefId: pickString(item, "vietMapRefId", "VietMapRefId"),
+  vietMapDisplay: pickString(item, "vietMapDisplay"),
+  latitude: Number(item.latitude ?? 0),
+  longitude: Number(item.longitude ?? 0),
+  trustScore: Number(item.trustScore ?? 0),
   profilePicture: pickString(
     item,
     "profilePicture",
@@ -69,6 +81,7 @@ const buildProfileFormData = (data: UpdateUserProfileDto) => {
   if (password) formData.append("Password", password);
   if (phoneNumber) formData.append("PhoneNumber", phoneNumber);
   if (address) formData.append("Address", address);
+  if (data.vietMapRefId) formData.append("VietMapRefId", data.vietMapRefId);
   if (userName) formData.append("UserName", userName);
   if (data.profilePicture) {
     formData.append("ProfilePicture", data.profilePicture);
@@ -171,9 +184,9 @@ export const userService = {
   },
 
   async getUserByName(userName: string): Promise<UserProfile[]> {
-    const raw = (await apiClient.get(API_ENDPOINTS.USER.GET_BY_NAME, {
-      params: { userName },
-    })) as UserApiItem | UserApiItem[] | { data?: UserApiItem[] } | null;
+    const raw = (await apiClient.get(
+      API_ENDPOINTS.USER.GET_BY_USERNAME(userName),
+    )) as UserApiItem | UserApiItem[] | { data?: UserApiItem[] } | null;
 
     if (!raw) return [];
 
@@ -194,10 +207,11 @@ export const userService = {
   },
 
   async getMyProfile(userId: string): Promise<UserProfile> {
-    const raw = (await apiClient.get(
-      `${API_ENDPOINTS.USER.MY_PROFILE}/${userId}`,
-    )) as UserApiItem;
+    const response = (await apiClient.get(
+      API_ENDPOINTS.USER.GET_BY_ID(userId),
+    )) as any;
 
+    const raw = response?.data ?? response;
     return normalizeUser(raw, userId);
   },
 
@@ -208,7 +222,7 @@ export const userService = {
     const formData = buildProfileFormData(data);
 
     const updated = (await apiClient.put(
-      `${API_ENDPOINTS.USER.PROFILE}/${id}`,
+      API_ENDPOINTS.USER.UPDATE(id),
       formData,
     )) as UserApiItem | string | null;
 
@@ -217,5 +231,23 @@ export const userService = {
     }
 
     return normalizeUser({ userId: id }, id);
+  },
+
+  async createShipper(data: CreateShipperDto): Promise<UserProfile> {
+    const formData = new FormData();
+    formData.append("Email", data.email);
+    formData.append("FullName", data.fullName);
+    formData.append("Password", data.password);
+    formData.append("PhoneNumber", data.phoneNumber);
+
+    const raw = (await apiClient.post(
+      API_ENDPOINTS.USER.SHIPPERS,
+      formData,
+    )) as UserApiItem;
+    return normalizeUser(raw);
+  },
+
+  async deleteUser(id: string): Promise<void> {
+    await apiClient.delete(API_ENDPOINTS.USER.DELETE(id));
   },
 };

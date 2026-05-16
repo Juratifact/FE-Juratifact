@@ -19,8 +19,8 @@ export function ConfirmationModal({
   isOpen,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel = "Xác nhận",
+  cancelLabel = "Hủy",
   variant = "default",
   onConfirm,
   onCancel,
@@ -75,7 +75,7 @@ export function ConfirmationModal({
               onClick={onConfirm}
               disabled={isPending}
             >
-              {isPending ? "Processing..." : confirmLabel}
+              {isPending ? "Đang xử lý..." : confirmLabel}
             </Button>
           </div>
         </CardContent>
