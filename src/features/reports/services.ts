@@ -100,13 +100,11 @@ export const reportService = createBaseService<
             inferredHasNextPage ? currentPage + 1 : currentPage,
           )
         : currentPage + (inferredHasNextPage ? 1 : 0));
-    const hasNextPage =
-      inferredHasNextPage ??
-      (typeof totalItems === "number"
-        ? currentPage < totalPages
-        : items.length >= itemsPerPage);
     const hasPreviousPage =
       data.meta?.hasPreviousPage ?? data.hasPreviousPage ?? currentPage > 1;
+
+    // Ensure we can always see the pagination to go back if we are not on page 1
+    const finalTotalPages = Math.max(totalPages, currentPage);
 
     return {
       data: items,
@@ -115,11 +113,11 @@ export const reportService = createBaseService<
           typeof totalItems === "number"
             ? Math.max(totalItems, fallbackTotalItems)
             : fallbackTotalItems,
-        totalPages,
+        totalPages: finalTotalPages,
         itemsPerPage,
         currentPage,
         hasPreviousPage,
-        hasNextPage,
+        hasNextPage: currentPage < finalTotalPages,
       },
     } satisfies ReportListResponse;
   },

@@ -93,6 +93,8 @@ export const API_ENDPOINTS = {
     MY_SUBSCRIPTION: "/api/promotions/subscriptions/me",
     APPLY: "/api/promotions/products/applications",
     GET_APPLIED_PRODUCTS: "/api/promotions/products",
+    GET_PRODUCTS_WITHOUT_PROMOTION: "/api/promotions/products/without-promotion",
+    GET_PRODUCTS_BY_PACKAGE: (id: string) => `/api/promotions/products/${id}`,
   },
   VIETMAP: {
     AUTOCOMPLETE: "/api/vietmap/autocomplete",
@@ -128,6 +130,7 @@ export const QUERY_KEYS = {
   MAP_AUTOCOMPLETE: (text: string) => ["map", "autocomplete", text] as const,
   WALLET: ["wallet"] as const,
   TRANSACTIONS: ["transactions"] as const,
+  PRODUCTS_WITHOUT_PROMOTION: ["promotions", "products-without"] as const,
 };
 
 export const PRODUCT_CONDITIONS = [

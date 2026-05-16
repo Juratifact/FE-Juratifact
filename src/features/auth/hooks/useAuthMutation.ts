@@ -34,6 +34,7 @@ const getPreferredRole = (claims: JwtClaims): UserRole | null => {
 
   if (!roles.length) return null;
   if (roles.includes("Admin")) return "Admin";
+  if (roles.includes("Seller")) return "Seller";
   return roles[0];
 };
 
@@ -97,10 +98,17 @@ export const useLoginMutation = () => {
     onSuccess: (response) => {
       const decoded = jwtDecode<JwtClaims>(response.access_token);
       const role = getPreferredRole(decoded);
+      const roles = [
+        ...normalizeClaimRoles(decoded.role),
+        ...normalizeClaimRoles(decoded.Role),
+        ...normalizeClaimRoles(decoded[ROLE_CLAIM_KEY]),
+      ];
+
       setAuth({
         access_token: response.access_token,
         userId: response.userId,
         role,
+        roles: response.roles || (roles.length > 0 ? roles : undefined),
         isVerify: response.isVerify,
       });
       toast.success("Đăng nhập thành công");
@@ -119,6 +127,36 @@ export const useLoginMutation = () => {
     },
   });
 };
+
+export const useRefreshMutation = () => {
+  const { setAuth } = useAuthStore();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => authService.refresh(),
+    onSuccess: (response) => {
+      const decoded = jwtDecode<JwtClaims>(response.access_token);
+      const role = getPreferredRole(decoded);
+      const roles = [
+        ...normalizeClaimRoles(decoded.role),
+        ...normalizeClaimRoles(decoded.Role),
+        ...normalizeClaimRoles(decoded[ROLE_CLAIM_KEY]),
+      ];
+
+      setAuth({
+        access_token: response.access_token,
+        userId: response.userId,
+        role,
+        roles: response.roles || (roles.length > 0 ? roles : undefined),
+        isVerify: response.isVerify,
+      });
+
+      // Refetch user related data
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+};
+
 export const useLogoutMutation = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();

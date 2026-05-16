@@ -1,10 +1,7 @@
-import { useState } from "react";
-import { useMyProducts } from "@/features/products/hooks/useProduct";
-import { useApplyPromotion } from "../hooks/usePromotions";
+import { useProductsWithoutPromotion, useApplyPromotion } from "../hooks/usePromotions";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
-import { Loader2, X, Search, Package, Check, Sparkles } from "lucide-react";
-import { Input } from "@/shared/components/ui/input";
+import { Loader2, X, Package, Check } from "lucide-react";
 import type { MySubscriptionResponse } from "../types";
 
 
@@ -14,12 +11,10 @@ interface PromotionApplyModalProps {
 }
 
 export function PromotionApplyModal({ subscription, onClose }: PromotionApplyModalProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const { products, isLoading: isProductsLoading } = useMyProducts({ 
-    limit: 50,
-    title: searchTerm || undefined,
+  const { data: products = [], isLoading: isProductsLoading } = useProductsWithoutPromotion({ 
     enabled: !!subscription 
   });
+
   const { mutate: apply, isPending: isApplying } = useApplyPromotion();
 
   if (!subscription) return null;
@@ -55,24 +50,11 @@ export function PromotionApplyModal({ subscription, onClose }: PromotionApplyMod
 
         <CardContent className="p-10 md:p-14">
           <header className="space-y-4 mb-10 text-center">
-            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-[2rem] flex items-center justify-center mb-6">
-                <Sparkles className="w-8 h-8 text-primary" />
-            </div>
             <h3 className="text-3xl font-black tracking-tighter">Áp dụng ưu đãi</h3>
             <p className="text-muted-foreground font-medium max-w-md mx-auto leading-relaxed">
               Chọn sản phẩm bạn muốn áp dụng gói <span className="text-foreground font-bold">{subscription.promotionPackageName}</span>.
             </p>
           </header>
-
-          <div className="relative mb-8">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            <Input 
-              placeholder="Tìm kiếm sản phẩm của bạn..."
-              className="h-16 pl-14 pr-6 rounded-3xl bg-muted/40 border-none text-lg font-medium focus-visible:ring-2 focus-visible:ring-primary/20"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
 
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
             {isProductsLoading ? (
@@ -88,27 +70,27 @@ export function PromotionApplyModal({ subscription, onClose }: PromotionApplyMod
             ) : (
               products.map((product) => (
                 <div 
-                  key={product.id}
+                  key={product.productId}
                   className="group relative flex items-center gap-6 p-4 rounded-[2rem] bg-muted/30 border border-border/50 hover:bg-muted/50 hover:border-primary/20 transition-all duration-300"
                 >
                   <div className="relative w-20 h-20 shrink-0 rounded-2xl overflow-hidden shadow-lg">
                     <img 
-                      src={product.imageUrls[0] || "/placeholder-product.png"} 
-                      alt={product.title}
+                      src={product.urlImage?.[0] || "/placeholder-product.png"} 
+                      alt={product.productTitle}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   </div>
                   
                   <div className="flex-1 min-w-0 space-y-1">
-                    <h4 className="font-bold text-lg truncate group-hover:text-primary transition-colors">{product.title}</h4>
-                    <p className="text-sm text-primary font-black">{product.price.toLocaleString("vi-VN")}đ</p>
+                    <h4 className="font-bold text-lg truncate group-hover:text-primary transition-colors">{product.productTitle}</h4>
+                    <p className="text-sm text-primary font-black">{product.productPrice.toLocaleString("vi-VN")}đ</p>
                   </div>
 
                   <Button
                     size="sm"
                     className="rounded-2xl px-6 font-bold h-11"
                     disabled={isApplying}
-                    onClick={() => handleApply(product.id)}
+                    onClick={() => handleApply(product.productId)}
                   >
                     {isApplying ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

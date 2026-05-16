@@ -60,8 +60,16 @@ export default function SellerOrderDetail() {
               <div className="divide-y divide-border/50">
                 {order.items.map((item) => (
                   <div key={item.productId} className="flex items-center gap-4 p-6">
-                    <div className="w-16 h-16 rounded-xl bg-muted flex items-center justify-center">
-                      <Package className="w-8 h-8 text-muted-foreground/50" />
+                    <div className="w-16 h-16 rounded-xl bg-muted overflow-hidden flex items-center justify-center border border-border/50 shadow-sm">
+                      {item.imageUrl?.[0] ? (
+                        <img 
+                          src={item.imageUrl[0]} 
+                          alt={item.productTitle} 
+                          className="w-full h-full object-cover transition-transform hover:scale-110"
+                        />
+                      ) : (
+                        <Package className="w-8 h-8 text-muted-foreground/50" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-lg truncate">{item.productTitle}</h4>

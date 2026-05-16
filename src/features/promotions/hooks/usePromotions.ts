@@ -99,10 +99,10 @@ export function useApplyPromotion() {
   });
 }
 
-export function useAppliedProducts(options?: { enabled?: boolean }) {
+export function useAppliedProducts(packageId?: string, options?: { enabled?: boolean }) {
   return useQuery({
-    queryKey: ["applied-products"],
-    queryFn: () => promotionService.getAppliedProducts(),
+    queryKey: packageId ? ["applied-products", packageId] : ["applied-products"],
+    queryFn: () => promotionService.getAppliedProducts(packageId),
     ...options,
   });
 }
@@ -115,12 +115,21 @@ export function useTogglePromotion() {
       promotionService.toggleAppliedProduct(productPromotionId),
     onSuccess: () => {
       toast.success("Cập nhật trạng thái ưu đãi thành công!");
+      // Invalidate all related queries to ensure UI updates everywhere
       queryClient.invalidateQueries({ queryKey: ["applied-products"] });
+      queryClient.invalidateQueries({ queryKey: ["my-subscription"] });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PRODUCTS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_PRODUCTS });
     },
     onError: (error: any) => {
       toast.error(error.message || "Không thể cập nhật trạng thái");
     },
+  });
+}
+export function useProductsWithoutPromotion(options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: QUERY_KEYS.PRODUCTS_WITHOUT_PROMOTION,
+    queryFn: () => promotionService.getProductsWithoutPromotion(),
+    ...options,
   });
 }

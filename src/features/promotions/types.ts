@@ -68,9 +68,23 @@ export interface MySubscriptionResponse {
 
 export interface AppliedProductResponse {
   productPromotionId: string;
+  promotionPackageId: string;
   userPromotionSubscriptionId: string;
   productId: string;
+  productTitle: string;
+  productPrice: number;
   isActive: boolean;
+  imageUrl: string[];
   activeAt: string;
   expiresAt: string;
+}
+
+export interface ProductWithoutPromotion {
+  productId: string;
+  productTitle: string;
+  productPrice: number;
+  productStatus: number;
+  createdAt: string;
+  urlImage: string[];
+  isActive: boolean;
 }

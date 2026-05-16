@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { ShoppingBag, Trash2, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -23,11 +25,43 @@ export default function CartPage() {
   const removeCartItemMutation = useRemoveCartItem();
   const createOrderMutation = useCreateOrder();
 
+  // Selection state
+  const [selectedItemIds, setSelectedItemIds] = useState<string[]>([]);
+
   const items = cart?.items ?? [];
-  const total = cart?.total ?? 0;
+  
+  // Calculate total and count based on selection
+  const selectedItems = items.filter((item) => selectedItemIds.includes(item.productId));
+  const selectedTotal = selectedItems.reduce(
+    (sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1),
+    0
+  );
+
+  const isAllSelected = items.length > 0 && selectedItemIds.length === items.length;
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedItemIds([]);
+    } else {
+      setSelectedItemIds(items.map((item) => item.productId));
+    }
+  };
+
+  const toggleSelectItem = (productId: string) => {
+    setSelectedItemIds((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
 
   const handleCheckoutSubmit = (address: string, refId: string) => {
-    const cartDetailIds = items.map((item: CartItem) => item.cartDetailId);
+    if (selectedItems.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một sản phẩm để thanh toán");
+      return;
+    }
+
+    const cartDetailIds = selectedItems.map((item: CartItem) => item.cartDetailId);
 
     createOrderMutation.mutate(
       {
@@ -88,12 +122,55 @@ export default function CartPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-4">
+            {/* Select All Section */}
+            <div className="flex items-center gap-3 px-4 py-3 bg-muted/30 rounded-xl border border-transparent hover:border-primary/10 transition-colors">
+              <div 
+                className={cn(
+                  "h-5 w-5 rounded-full border-2 cursor-pointer flex items-center justify-center transition-all duration-200",
+                  isAllSelected 
+                    ? "border-primary bg-primary" 
+                    : "border-muted-foreground/30 bg-transparent"
+                )}
+                onClick={toggleSelectAll}
+              >
+                {isAllSelected && (
+                  <div className="h-1.5 w-1.5 rounded-full bg-background animate-in zoom-in duration-200" />
+                )}
+              </div>
+              <span className="text-sm font-bold tracking-tight">Chọn tất cả ({items.length} sản phẩm)</span>
+              
+              {selectedItemIds.length > 0 && (
+                <span className="ml-auto text-xs font-black text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                  Đã chọn {selectedItemIds.length}
+                </span>
+              )}
+            </div>
+
             {items.map((item: CartItem) => (
               <Card
                 key={item.productId}
-                className="overflow-hidden rounded-2xl"
+                className={cn(
+                    "overflow-hidden rounded-2xl transition-all duration-300 border-2",
+                    selectedItemIds.includes(item.productId) 
+                        ? "border-primary/30 bg-primary/[0.02] shadow-sm" 
+                        : "border-transparent bg-background"
+                )}
               >
-                <CardContent className="flex gap-4 p-4">
+                <CardContent className="flex items-center gap-4 p-4">
+                  <div 
+                    className={cn(
+                      "h-5 w-5 rounded-full border-2 cursor-pointer flex items-center justify-center transition-all duration-200 shrink-0",
+                      selectedItemIds.includes(item.productId) 
+                        ? "border-primary bg-primary" 
+                        : "border-muted-foreground/30 bg-transparent"
+                    )}
+                    onClick={() => toggleSelectItem(item.productId)}
+                  >
+                    {selectedItemIds.includes(item.productId) && (
+                      <div className="h-1.5 w-1.5 rounded-full bg-background animate-in zoom-in duration-200" />
+                    )}
+                  </div>
+
                   <div className="shrink-0">
                     <img
                       src={item.productImageUrls?.[0] || "/placeholder-image.png"}
@@ -148,30 +225,37 @@ export default function CartPage() {
             ))}
           </div>
 
-          <Card className="h-fit rounded-2xl">
+          <Card className="h-fit rounded-2xl shadow-lg border-primary/10 sticky top-24">
             <CardHeader>
               <CardTitle>Tổng đơn hàng</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between text-sm">
-                <span>Số sản phẩm</span>
-                <span className="font-medium">{items.length}</span>
+                <span>Sản phẩm đã chọn</span>
+                <span className="font-medium">{selectedItemIds.length}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span>Tổng tiền</span>
-                <span className="font-semibold text-primary">
-                  {total.toLocaleString("vi-VN")} đ
+                <span>Tổng tiền tạm tính</span>
+                <span className="font-semibold text-primary text-lg">
+                  {selectedTotal.toLocaleString("vi-VN")} đ
                 </span>
               </div>
 
-              <Button
-                className="w-full rounded-full"
-                size="lg"
-                onClick={() => setIsCheckoutOpen(true)}
-                disabled={createOrderMutation.isPending}
-              >
-                {createOrderMutation.isPending ? "Đang xử lý..." : "Thanh toán"}
-              </Button>
+              <div className="pt-2">
+                <Button
+                    className="w-full rounded-full py-6 text-base font-bold shadow-xl shadow-primary/20"
+                    size="lg"
+                    onClick={() => setIsCheckoutOpen(true)}
+                    disabled={createOrderMutation.isPending || selectedItemIds.length === 0}
+                >
+                    {createOrderMutation.isPending ? "Đang xử lý..." : "Thanh toán ngay"}
+                </Button>
+                {selectedItemIds.length === 0 && (
+                    <p className="text-[10px] text-center mt-2 text-muted-foreground">
+                        Vui lòng chọn sản phẩm để thanh toán
+                    </p>
+                )}
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -13,31 +13,31 @@ const products = [
     title: "iPhone 13 128GB",
     price: "$450",
     loc: "HCMC",
-    img: "src/shared/pictures/iPhone-13-Pro-Max-Front.jpg",
+    img: "public/iPhone-13-Pro-Max-Front.jpg",
   },
   {
     title: "MacBook Air M1",
     price: "$620",
     loc: "HANOI",
-    img: "src/shared/pictures/macbook.jpg",
+    img: "public/macbook.jpg",
   },
   {
     title: "Retro Sneaker",
     price: "$95",
     loc: "DANANG",
-    img: "src/shared/pictures/NB.jpg",
+    img: "public/NB.jpg",
   },
   {
     title: "Keyboard",
     price: "$55",
     loc: "CANTHO",
-    img: "src/shared/pictures/banphim.jpg",
+    img: "public/banphim.jpg",
   },
   {
     title: "Sony Camera A6000",
     price: "$700",
     loc: "HCMC",
-    img: "src/shared/pictures/sony-alpha-6000-8.jpg",
+    img: "public/sony-alpha-6000-8.jpg",
   },
 ];
 
@@ -49,7 +49,7 @@ export default function HomePage() {
         <section className="relative w-full aspect-[4/5] md:aspect-21/9 overflow-hidden group/hero rounded-none border-none">
           <div className="absolute inset-0 z-0">
             <img
-              src="src/shared/pictures/apple-watch-ultra.jpg"
+              src="public/apple-watch-ultra.jpg"
               alt="Apple Watch Ultra Background"
               className="object-cover size-full grayscale hover:grayscale-0 transition-all duration-1000 scale-105 group-hover/hero:scale-100"
             />
@@ -63,11 +63,12 @@ export default function HomePage() {
               >
                 Được tin dùng bởi hơn 5 người dùng
               </Badge>
-              <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-[100px] font-black tracking-tighter md:tracking-[-0.06em] leading-[1.1] md:leading-[0.85] uppercase italic break-words">
-                Sản phẩm <br />
-                <span className="text-white/30">Cũ nhưng tốt</span> <br />
-                Cuộc sống tốt hơn.
+              <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[120px] font-black tracking-tight md:tracking-[-0.04em] leading-none uppercase italic">
+                Đồ tuy cũ
               </h1>
+              <div className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black text-primary-light uppercase italic tracking-widest whitespace-nowrap opacity-90">
+                Vẫn cứ là mlem!
+              </div>
             </div>
 
             <div className="max-w-md space-y-6 md:space-y-8">
@@ -85,9 +86,6 @@ export default function HomePage() {
                     <ArrowRight className="ml-3 size-4 group-hover:translate-x-2 transition-transform" />
                   </Link>
                 </Button>
-                <button className="text-[10px] md:text-xs font-bold uppercase tracking-widest border-b-2 border-primary pb-1 text-white hover:text-primary transition-colors">
-                  Cách thức hoạt động
-                </button>
               </div>
             </div>
           </div>
@@ -105,16 +103,6 @@ export default function HomePage() {
             <h2 className="text-4xl font-black tracking-tighter uppercase italic">
               Sản phẩm chọn lọc
             </h2>
-            <div className="flex gap-8 text-[10px] font-bold uppercase tracking-widest">
-              {["Recent", "Popular"].map((filter, idx) => (
-                <button
-                  key={filter}
-                  className={`${idx === 0 ? "text-primary border-b-2 border-primary" : "text-muted-foreground"} pb-1`}
-                >
-                  {filter === "Recent" ? "Mới nhất" : "Phổ biến"}
-                </button>
-              ))}
-            </div>
           </div>
 
           <div className="relative group/slider px-4">

@@ -6,7 +6,7 @@ import { sellerOrderService } from "../services";
 import type { SellerOrderFilterParams } from "../types";
 import type { OrderStatus } from "@/features/orders/types";
 
-export function useSellerOrders() {
+export function useSellerOrders(options?: { enabled?: boolean }) {
   const [searchParams] = useSearchParams();
   
   const filter = useMemo<SellerOrderFilterParams>(() => {
@@ -21,6 +21,7 @@ export function useSellerOrders() {
     queryKey: [...QUERY_KEYS.SELLER_ORDERS, filter],
     queryFn: () => sellerOrderService.getMyOrders(filter),
     placeholderData: (prev) => prev,
+    enabled: options?.enabled ?? true,
   });
 
   return {

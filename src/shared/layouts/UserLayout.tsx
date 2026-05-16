@@ -3,6 +3,8 @@ import Header from "./Header";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/features/auth/store";
 import { VerificationPoller } from "@/shared/components/common/VerificationPoller";
+import { useEffect } from "react";
+
 export function UserLayout() {
   const access_token = useAuthStore((s) => s.access_token);
   const role = useAuthStore((s) => s.role);
@@ -10,6 +12,15 @@ export function UserLayout() {
   const isLoggedIn = !!access_token && !!role;
   const location = useLocation();
   const isIdentifyRoute = location.pathname.startsWith("/identify");
+
+  // Scroll to top on every route change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant", // Use instant to avoid weird scrolling animations during page transitions
+    });
+  }, [location.pathname]);
 
   if (access_token && role) {
     if (role === "Shipper") {

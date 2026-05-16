@@ -114,7 +114,9 @@ export default function ManageReportList() {
           />
 
           {pagination && (
-            <Pagination meta={pagination} onPageChange={handlePageChange} />
+            <div className="flex justify-center pt-4">
+              <Pagination meta={pagination} onPageChange={handlePageChange} />
+            </div>
           )}
         </>
       )}

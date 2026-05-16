@@ -34,7 +34,8 @@ export default function ManageUserList() {
   );
 
   useEffect(() => {
-    if (debouncedSearch !== searchParams.get("search")) {
+    const currentSearch = searchParams.get("search") || "";
+    if (debouncedSearch !== currentSearch) {
       updateSearchParam(debouncedSearch);
     }
   }, [debouncedSearch, searchParams, updateSearchParam]);
@@ -97,7 +98,9 @@ export default function ManageUserList() {
           <UserTable users={users} />
 
           {pagination && (
-            <Pagination meta={pagination} onPageChange={handlePageChange} />
+            <div className="flex justify-center pt-4">
+              <Pagination meta={pagination} onPageChange={handlePageChange} />
+            </div>
           )}
         </>
       )}

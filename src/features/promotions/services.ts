@@ -10,6 +10,7 @@ import type {
   SubscriptionResponse,
   MySubscriptionResponse,
   AppliedProductResponse,
+  ProductWithoutPromotion,
 } from "./types";
 import { API_ENDPOINTS } from "@/shared/constants";
 import apiClient from "@/lib/axios";
@@ -40,7 +41,15 @@ const baseService = createBaseService<
     const itemsPerPage = data.pageSize > 0 ? data.pageSize : (params?.limit ?? 10);
     const currentPage = data.pageIndex > 0 ? data.pageIndex : (params?.page ?? 1);
     
-    const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+    let totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+    
+    // Smart fallback: if the page is full, assume there might be more
+    if (items.length >= itemsPerPage && totalPages <= currentPage) {
+      totalPages = currentPage + 1;
+    }
+
+    // Ensure we can always see the pagination to go back if we are not on page 1
+    totalPages = Math.max(totalPages, currentPage);
 
     return {
       data: items,
@@ -76,13 +85,20 @@ export const promotionService = {
       productId,
     });
   },
-  getAppliedProducts: async () => {
-    const response = await apiClient.get<PromotionApiResponse<AppliedProductResponse[]>>(
-      API_ENDPOINTS.PROMOTION.GET_APPLIED_PRODUCTS,
-    );
+  getAppliedProducts: async (packageId?: string) => {
+    const endpoint = packageId 
+      ? API_ENDPOINTS.PROMOTION.GET_PRODUCTS_BY_PACKAGE(packageId)
+      : API_ENDPOINTS.PROMOTION.GET_APPLIED_PRODUCTS;
+    const response = await apiClient.get<PromotionApiResponse<AppliedProductResponse[]>>(endpoint);
     return response as unknown as AppliedProductResponse[];
   },
   toggleAppliedProduct: async (productPromotionId: string) => {
     await apiClient.patch(`${API_ENDPOINTS.PROMOTION.GET_APPLIED_PRODUCTS}/${productPromotionId}/status`);
+  },
+  getProductsWithoutPromotion: async () => {
+    const response = await apiClient.get<PromotionApiResponse<ProductWithoutPromotion[]>>(
+      API_ENDPOINTS.PROMOTION.GET_PRODUCTS_WITHOUT_PROMOTION,
+    );
+    return response as unknown as ProductWithoutPromotion[];
   },
 };

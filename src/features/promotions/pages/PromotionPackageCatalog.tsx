@@ -19,7 +19,7 @@ export default function PromotionPackageCatalog() {
   const { data: mySubscriptions, isLoading: isSubsLoading, refetch: refetchSubs } = useMySubscription({
     enabled: activeTab === "mine",
   });
-  const { data: appliedItems } = usePromotionsHook.useAppliedProducts({ 
+  const { data: appliedItems } = usePromotionsHook.useAppliedProducts(undefined, { 
     enabled: activeTab === "mine" 
   });
   const [selectedPkg, setSelectedPkg] = useState<PromotionPackage | null>(null);
