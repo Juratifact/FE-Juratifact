@@ -15,6 +15,8 @@ export interface Product {
   status: 0 | 1; // 0: Sold/Unavailable, 1: Available
   imageUrls: string[];
   videoUrls?: string[];
+  isPromoted?: boolean;
+  promotionExpiresAt?: string;
   comments?: ProductComment[];
   createdAt: string;
   updatedAt: string;

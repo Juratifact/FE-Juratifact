@@ -1,5 +1,5 @@
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Filter, X, Loader2} from "lucide-react";
+import {  X, Loader2} from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/shared/components/ui/button";
@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/shared/components/ui/card";
 import { useInfinityScroll } from "@/shared/hooks/useInfinityScroll";
 import { EmptyState } from "@/shared/components/common/EmptyState";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
+import { cn } from "@/lib/utils";
 import { PRODUCT_CONDITIONS } from "@/shared/constants";
 import {
   useInfiniteProducts,
@@ -65,7 +66,7 @@ export default function ProductCatalog() {
 
     const nextVideo = data.video?.[0] ?? null;
     if (nextVideo) {
-      payload.video = nextVideo;
+      payload.video = [nextVideo];
     }
 
     return payload;
@@ -143,67 +144,86 @@ export default function ProductCatalog() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-8">
-      <div className="mx-auto mb-6 w-full max-w-4xl rounded-2xl border bg-card p-6 shadow-sm md:p-7">
-        <h1 className="text-3xl font-black tracking-tight md:text-4xl">
-          Product Marketplace
-        </h1>
-        <p className="mt-2 text-muted-foreground md:text-base">
-          Discover high-quality pre-owned items at the best prices.
-        </p>
-      </div>
-
-      <div className="sticky top-2 z-20 mx-auto mb-6 w-full max-w-4xl rounded-2xl border bg-background/95 p-3 shadow-sm backdrop-blur supports-backdrop-filter:bg-background/80 md:p-4">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-1.5 rounded-full border bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">
-            <Filter className="h-4 w-4" />
-            Filters:
+    <div className="min-h-screen bg-muted/20 pb-20 overflow-x-hidden">
+      {/* Premium Hero Section */}
+      <div className="relative overflow-hidden bg-background border-b">
+        <div className="absolute inset-0 bg-linear-to-tr from-primary/5 via-transparent to-primary/5" />
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/10 rounded-full blur-[100px]" />
+        
+        <div className="w-full max-w-7xl mx-auto px-4 py-16 md:py-24 relative">
+          <div className="max-w-3xl space-y-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider animate-in fade-in slide-in-from-left-4 duration-500">
+                
+                Sàn giao dịch uy tín số 1
+            </div>
+            <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-[1.1] animate-in fade-in slide-in-from-left-4 duration-700 delay-100">
+              Khám phá thế giới <br /> 
+              <span className="text-primary bg-linear-to-r from-primary to-blue-600 bg-clip-text text-transparent">Đồ cũ chất lượng cao</span>
+            </h1>
+            <p className="text-lg text-muted-foreground font-medium leading-relaxed max-w-xl animate-in fade-in slide-in-from-left-4 duration-1000 delay-200">
+              Nơi kết nối những người đam mê đồ cũ, đảm bảo minh bạch, an toàn và mức giá tốt nhất thị trường.
+            </p>
           </div>
-
-          {titleQuery && (
-            <Badge variant="outline" className="gap-1 rounded-full">
-              Search: {titleQuery}
-            </Badge>
-          )}
-
-          <select
-            value={searchParams.get("condition") || ""}
-            onChange={(e) =>
-              handleFilterChange("condition", e.target.value || undefined)
-            }
-            className="h-9 rounded-full border border-input bg-background px-3 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="">All conditions</option>
-            {PRODUCT_CONDITIONS.map((cond) => (
-              <option key={cond.value} value={cond.value}>
-                {cond.label}
-              </option>
-            ))}
-          </select>
-
-
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full"
-              onClick={clearFilters}
-            >
-              <X className="mr-1 h-3 w-3" />
-              Clear filters
-            </Button>
-          )}
-
-          <Badge variant="secondary" className="ml-auto rounded-full">
-            {products.length} results
-          </Badge>
         </div>
       </div>
+
+      {/* Modern Filter Section */}
+      <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b shadow-xs">
+        <div className="w-full max-w-7xl mx-auto px-4 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+               <div className="flex items-center gap-2 rounded-xl bg-muted p-1 border">
+                  <button 
+                    className={cn(
+                        "px-4 py-1.5 text-xs font-bold rounded-lg transition-all",
+                        !hasActiveFilters ? "bg-background shadow-xs text-primary" : "text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={clearFilters}
+                  >
+                    Tất cả
+                  </button>
+                  {PRODUCT_CONDITIONS.map((cond) => (
+                    <button
+                        key={cond.value}
+                        className={cn(
+                            "px-4 py-1.5 text-xs font-bold rounded-lg transition-all",
+                            searchParams.get("condition") === cond.value ? "bg-background shadow-xs text-primary" : "text-muted-foreground hover:text-foreground"
+                        )}
+                        onClick={() => handleFilterChange("condition", cond.value)}
+                    >
+                        {cond.label}
+                    </button>
+                  ))}
+               </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+                {titleQuery && (
+                    <Badge variant="secondary" className="h-9 px-4 rounded-xl gap-2 font-bold animate-in zoom-in duration-300">
+                        "{titleQuery}"
+                        <X 
+                            className="h-3.5 w-3.5 cursor-pointer hover:text-destructive transition-colors" 
+                            onClick={() => handleFilterChange("title", undefined)}
+                        />
+                    </Badge>
+                )}
+                
+                <div className="h-8 w-px bg-border hidden md:block" />
+                
+                <span className="text-xs font-black text-muted-foreground/60 uppercase tracking-widest hidden sm:block">
+                    {products.length} sản phẩm
+                </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-2xl px-0 md:px-4 py-6 md:py-10">
 
       {error && (
         <div className="mx-auto mb-6 w-full max-w-4xl rounded-xl border border-destructive/50 bg-destructive/10 p-4">
           <p className="text-sm text-destructive">
-            Failed to load products. Please try again.
+            Không thể tải sản phẩm. Vui lòng thử lại.
           </p>
         </div>
       )}
@@ -212,8 +232,8 @@ export default function ProductCatalog() {
         <LoadingSpinner className="py-20" size="lg" />
       ) : !products.length ? (
         <EmptyState
-          title="No products found"
-          description="Try changing your search keyword or filters."
+          title="Không tìm thấy sản phẩm"
+          description="Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc."
         />
       ) : (
         <>
@@ -234,7 +254,7 @@ export default function ProductCatalog() {
             <div className="mt-8 flex justify-center">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Loading more...
+                Đang tải thêm...
               </div>
             </div>
           )}
@@ -244,17 +264,18 @@ export default function ProductCatalog() {
               ref={observerRef}
               className="mt-5 text-center text-xs text-muted-foreground"
             >
-              Scroll down to load more products
+              Cuộn xuống để tải thêm sản phẩm
             </div>
           )}
 
           {!hasMore && products.length > 0 && (
             <div className="mt-8 py-8 text-center text-sm text-muted-foreground">
-              No more products
+              Không còn sản phẩm nào
             </div>
           )}
         </>
       )}
+      </div>
 
       {editingProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">

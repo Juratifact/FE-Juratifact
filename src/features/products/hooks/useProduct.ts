@@ -86,11 +86,12 @@ export function useMyProducts(params?: {
   page?: number;
   limit?: number;
   title?: string;
+  enabled?: boolean;
 }) {
   const filter = useMemo(
     () => ({
       page: params?.page ?? 1,
-      limit: params?.limit ?? 6,
+      limit: params?.limit ?? 10,
       title: params?.title || undefined,
     }),
     [params?.limit, params?.page, params?.title],
@@ -100,6 +101,7 @@ export function useMyProducts(params?: {
     queryKey: [QUERY_KEYS.MY_PRODUCTS, filter],
     queryFn: () => productService.getMyProducts(filter),
     placeholderData: (prev) => prev,
+    enabled: params?.enabled !== false,
   });
 
   return {

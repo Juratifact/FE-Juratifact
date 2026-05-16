@@ -44,9 +44,9 @@ const products = [
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground antialiased overflow-x-hidden">
-      <main className="container mx-auto px-8 py-20 space-y-32">
+      <main className="w-full mx-auto px-4 sm:px-8 py-10 md:py-20 space-y-16 md:space-y-32">
         {/* Hero Section*/}
-        <section className="relative w-full aspect-video md:aspect-21/9 overflow-hidden group/hero rounded-none border-2 border-primary">
+        <section className="relative w-full aspect-[4/5] md:aspect-21/9 overflow-hidden group/hero rounded-none border-none">
           <div className="absolute inset-0 z-0">
             <img
               src="src/shared/pictures/apple-watch-ultra.jpg"
@@ -55,55 +55,55 @@ export default function HomePage() {
             />
             <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
           </div>
-          <div className="relative z-10 flex flex-col justify-center h-full max-w-5xl px-12 md:px-20 py-16 text-white space-y-10">
+          <div className="relative z-10 flex flex-col justify-center h-full max-w-5xl px-6 sm:px-12 md:px-20 py-10 md:py-16 text-white space-y-6 md:space-y-10">
             <div className="space-y-4">
               <Badge
                 variant="outline"
                 className="rounded-none border-primary/60 text-primary px-3 py-1 text-[10px] font-bold uppercase tracking-widest bg-black/30"
               >
-                Trusted by 5+ Users
+                Được tin dùng bởi hơn 5 người dùng
               </Badge>
-              <h1 className="text-6xl md:text-[100px] font-black tracking-[-0.06em] leading-[0.85] uppercase italic">
-                Better <br />
-                <span className="text-white/30">Pre-owned</span> <br />
-                Better Life.
+              <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-[100px] font-black tracking-tighter md:tracking-[-0.06em] leading-[1.1] md:leading-[0.85] uppercase italic break-words">
+                Sản phẩm <br />
+                <span className="text-white/30">Cũ nhưng tốt</span> <br />
+                Cuộc sống tốt hơn.
               </h1>
             </div>
 
-            <div className="max-w-md space-y-8">
-              <p className="text-xl text-white/80 font-medium leading-relaxed">
-                A premium marketplace for high-quality secondhand goods.
+            <div className="max-w-md space-y-6 md:space-y-8">
+              <p className="text-base md:text-xl text-white/80 font-medium leading-relaxed">
+                Sàn giao dịch cao cấp cho các mặt hàng đã qua sử dụng chất lượng cao.
               </p>
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
                 <Button
                   asChild
                   size="lg"
-                  className="rounded-none h-16 px-10 text-xs font-bold uppercase tracking-[0.2em] group bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="w-full sm:w-auto rounded-none h-14 md:h-16 px-8 md:px-10 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] group bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   <Link to="/products">
-                    Explore Market
+                    Khám phá ngay
                     <ArrowRight className="ml-3 size-4 group-hover:translate-x-2 transition-transform" />
                   </Link>
                 </Button>
-                <button className="text-xs font-bold uppercase tracking-widest border-b-2 border-primary pb-1 text-white hover:text-primary transition-colors">
-                  How It Works
+                <button className="text-[10px] md:text-xs font-bold uppercase tracking-widest border-b-2 border-primary pb-1 text-white hover:text-primary transition-colors">
+                  Cách thức hoạt động
                 </button>
               </div>
             </div>
           </div>
-          <div className="absolute bottom-10 right-10 z-20 text-right text-white">
-            <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">
-              New Arrival
+          <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 z-20 text-right text-white">
+            <p className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest opacity-70">
+              Hàng mới về
             </p>
-            <p className="text-2xl font-black italic uppercase">
-              The Watch Collection
+            <p className="text-lg md:text-2xl font-black italic uppercase">
+              Bộ sưu tập đồng hồ
             </p>
           </div>
         </section>
         <section className="space-y-12">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <h2 className="text-4xl font-black tracking-tighter uppercase italic">
-              Curated Picks
+              Sản phẩm chọn lọc
             </h2>
             <div className="flex gap-8 text-[10px] font-bold uppercase tracking-widest">
               {["Recent", "Popular"].map((filter, idx) => (
@@ -111,7 +111,7 @@ export default function HomePage() {
                   key={filter}
                   className={`${idx === 0 ? "text-primary border-b-2 border-primary" : "text-muted-foreground"} pb-1`}
                 >
-                  {filter}
+                  {filter === "Recent" ? "Mới nhất" : "Phổ biến"}
                 </button>
               ))}
             </div>
@@ -152,7 +152,7 @@ export default function HomePage() {
                       />
                       <div className="absolute bottom-0 left-0 w-full p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-background/90 backdrop-blur-sm">
                         <Button className="w-full rounded-none text-[10px] font-bold uppercase tracking-[0.2em]">
-                          Quick View
+                          Xem nhanh
                         </Button>
                       </div>
                     </div>
@@ -164,7 +164,7 @@ export default function HomePage() {
                         <span className="text-sm font-bold">{p.price}</span>
                       </div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                        {p.loc} — Available Now
+                        {p.loc} — Đang có sẵn
                       </p>
                     </div>
                   </div>

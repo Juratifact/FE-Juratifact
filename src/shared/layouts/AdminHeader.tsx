@@ -10,6 +10,8 @@ import {
   Truck,
   Sun,
   Moon,
+  Zap,
+  ArrowRightLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/app/store";
@@ -19,6 +21,8 @@ const adminNavItems = [
   { label: "Báo cáo vi phạm", to: "/admin/reports", icon: FlagTriangleRight },
   { label: "Xác minh tài liệu", to: "/admin/identify", icon: FileCheck },
   { label: "Người dùng", to: "/admin/users", icon: Users },
+  { label: "Gói ưu đãi", to: "/admin/promotions", icon: Zap },
+  { label: "Lịch sử giao dịch", to: "/admin/transactions", icon: ArrowRightLeft },
 ];
 
 const shipperNavItems = [
@@ -52,7 +56,7 @@ export default function AdminHeader() {
               Juratifact
             </h1>
             <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground mt-1">
-              {role === "Shipper" ? "Shipper Console" : "Management Suite"}
+              {role === "Shipper" ? "Bảng điều khiển Shipper" : "Hệ thống quản trị"}
             </span>
           </div>
         </div>

@@ -4,7 +4,6 @@ import type {
   Order,
   OrderFilterParams,
   UpdateOrderDto,
-  OrderItem,
 } from "./types";
 import { API_ENDPOINTS } from "@/shared/constants";
 import apiClient from "@/lib/axios";
@@ -47,7 +46,7 @@ export const orderActions = {
   getProductsByOrderId: async (orderId: string, productId: string) =>
     (await apiClient.get(
       API_ENDPOINTS.ORDER.GET_PRODUCTS_BY_ORDER(orderId, productId),
-    )) as unknown as OrderItem,
+    )) as unknown as any,
   cancelCheckout: async (orderId: string) =>
     (await apiClient.put(
       API_ENDPOINTS.ORDER.CANCEL_CHECKOUT(orderId),

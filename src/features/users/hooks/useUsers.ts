@@ -4,7 +4,11 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { userService } from "../services";
-import type { UpdateUserProfileDto, UserFilterParams } from "../types";
+import type {
+  UpdateUserProfileDto,
+  UserFilterParams,
+  CreateShipperDto,
+} from "../types";
 import { QUERY_KEYS } from "@/shared/constants";
 import { useAuthStore } from "@/features/auth/store";
 
@@ -69,6 +73,30 @@ export function useUpdateProfile() {
       toast.success("Cập nhật hồ sơ thành công");
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS });
       queryClient.invalidateQueries({ queryKey: ["users", "my-profile"] });
+    },
+  });
+}
+
+export function useCreateShipper() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateShipperDto) => userService.createShipper(data),
+    onSuccess: () => {
+      toast.success("Tạo tài khoản shipper thành công");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS });
+    },
+  });
+}
+
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => userService.deleteUser(id),
+    onSuccess: () => {
+      toast.success("Xóa người dùng thành công");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS });
     },
   });
 }

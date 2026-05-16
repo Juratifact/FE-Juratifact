@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
-import { ArrowLeft, MapPin, Phone, Calendar, FileText } from "lucide-react";
-import { toast } from "sonner";
+import { ArrowLeft, MapPin, Phone, Calendar, FileText, CheckCircle, Loader2 } from "lucide-react";
+
 
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -18,6 +18,7 @@ import {
   useConfirmDelivery,
 } from "../hooks/useShipper";
 import type { OrderItem } from "../types";
+import { cn } from "@/lib/utils";
 
 const statusLabel: Record<number, string> = {
   0: "Chờ thanh toán",
@@ -96,51 +97,84 @@ export default function ShipperOrderDetail() {
         <CardContent className="space-y-6">
           {/* Customer Info */}
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-muted-foreground">
-                Tên khách hàng
+            <div className="space-y-4">
+              <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Người mua
               </p>
-              <p className="text-base font-medium">{order.customerName}</p>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-muted-foreground">
+                  Họ tên
+                </p>
+                <p className="text-base font-medium">{order.customerName}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-muted-foreground">
+                  Số điện thoại
+                </p>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-base font-medium">{order.customerPhone}</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-muted-foreground">
-                Số điện thoại
+
+            <div className="space-y-4">
+              <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Người bán
               </p>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <p className="text-base font-medium">{order.customerPhone}</p>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-muted-foreground">
+                  Số điện thoại
+                </p>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-base font-medium">
+                    {order.sellerPhone || "Chưa cập nhật"}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-muted-foreground">
+                  Địa chỉ lấy hàng
+                </p>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-base font-medium">
+                    {order.sellerAddress || "Chưa cập nhật"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Shipping Address */}
-          <div className="space-y-2 rounded-lg bg-muted/50 p-4">
+          <div className="space-y-3 rounded-2xl bg-muted/30 p-5 border border-border/50">
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-blue-600" />
-              <p className="font-semibold text-muted-foreground">
+              <MapPin className="h-4 w-4 text-primary" />
+              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
                 Địa chỉ giao hàng
               </p>
             </div>
-            <p className="ml-6 text-base">{order.shippingAddress}</p>
+            <p className="text-base font-medium leading-relaxed">{order.shippingAddress}</p>
           </div>
 
           {/* Order Items */}
-          <div className="space-y-3">
-            <p className="font-semibold">Sản phẩm:</p>
-            <div className="space-y-2">
+          <div className="space-y-4">
+            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Sản phẩm:</p>
+            <div className="grid gap-3">
               {order.items.map((item: OrderItem) => (
                 <div
                   key={item.productId}
-                  className="flex items-center justify-between rounded-lg bg-slate-50 p-3"
+                  className="flex items-center justify-between rounded-xl border border-border/50 bg-muted/20 p-4 transition-colors hover:bg-muted/30"
                 >
-                  <div>
-                    <p className="font-medium">{item.productName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      ID: {item.productId.slice(0, 8)}...
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm truncate">{item.productName}</p>
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                      ID: {item.productId.slice(0, 8)}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-base">
+                  <div className="text-right ml-4">
+                    <p className="font-black text-primary text-sm">
                       {item.price.toLocaleString()} ₫
                     </p>
                   </div>
@@ -163,9 +197,9 @@ export default function ShipperOrderDetail() {
                 {order.shippingFee.toLocaleString()} ₫
               </p>
             </div>
-            <div className="flex items-center justify-between border-t pt-2">
-              <p className="font-semibold">Tổng cộng:</p>
-              <p className="text-lg font-bold text-green-600">
+            <div className="flex items-center justify-between border-t pt-3">
+              <p className="text-sm font-bold uppercase tracking-tight">Tổng cộng:</p>
+              <p className="text-xl font-black text-primary">
                 {order.totalPrice.toLocaleString()} ₫
               </p>
             </div>
@@ -193,26 +227,30 @@ export default function ShipperOrderDetail() {
           {(order.pickupAt || order.deliveryAt) && (
             <div className="grid gap-4 sm:grid-cols-2">
               {order.pickupAt && (
-                <div className="flex items-center gap-2 rounded-lg bg-blue-50 p-3">
-                  <Calendar className="h-4 w-4 text-blue-600" />
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground">
+                <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-muted/20 p-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Lấy hàng
                     </p>
-                    <p className="font-medium">
+                    <p className="text-sm font-bold truncate">
                       {new Date(order.pickupAt).toLocaleString("vi-VN")}
                     </p>
                   </div>
                 </div>
               )}
               {order.deliveryAt && (
-                <div className="flex items-center gap-2 rounded-lg bg-green-50 p-3">
-                  <Calendar className="h-4 w-4 text-green-600" />
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground">
+                <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-primary/5 p-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500/10">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
                       Giao hàng
                     </p>
-                    <p className="font-medium">
+                    <p className="text-sm font-bold truncate">
                       {new Date(order.deliveryAt).toLocaleString("vi-VN")}
                     </p>
                   </div>
@@ -238,7 +276,7 @@ export default function ShipperOrderDetail() {
                   >
                     <img
                       src={order.shipperPod1Url}
-                      alt="POD 1"
+                      alt="Ảnh minh chứng 1"
                       className="aspect-square w-full object-cover"
                     />
                   </a>
@@ -252,7 +290,7 @@ export default function ShipperOrderDetail() {
                   >
                     <img
                       src={order.shipperPod2Url}
-                      alt="POD 2"
+                      alt="Ảnh minh chứng 2"
                       className="aspect-square w-full object-cover"
                     />
                   </a>
@@ -266,43 +304,68 @@ export default function ShipperOrderDetail() {
             <div className="space-y-3 border-t pt-4">
               <p className="font-semibold">Xác nhận</p>
               <div className="space-y-3">
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium">
-                    Tải lên hình ảnh chứng minh
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                    className="rounded-md border px-3 py-2"
-                    required
-                  />
+                <div className="flex flex-col gap-3 p-4 rounded-xl border-2 border-dashed border-muted bg-muted/20">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-black uppercase tracking-widest text-muted-foreground">
+                      Hình ảnh chứng minh <span className="text-destructive">*</span>
+                    </label>
+                    {file && (
+                      <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20 text-[10px] font-bold">
+                        Đã chọn ảnh
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="relative group">
+                    <input
+                      key={file ? "has-file" : "no-file"}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      required
+                    />
+                    <div className={cn(
+                      "flex flex-col items-center justify-center py-6 px-4 rounded-lg border-2 border-dashed transition-all duration-300",
+                      file ? "border-green-500/50 bg-green-500/5" : "border-muted-foreground/20 hover:border-primary/50 hover:bg-primary/5"
+                    )}>
+                      <CheckCircle className={cn("h-8 w-8 mb-2 transition-colors", file ? "text-green-500" : "text-muted-foreground/40")} />
+                      <p className="text-sm font-bold text-center">
+                        {file ? file.name : "Nhấn để chọn hoặc kéo thả ảnh vào đây"}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-1">PNG, JPG tối đa 10MB</p>
+                    </div>
+                  </div>
+
                   {!file && (
-                    <p className="text-xs text-red-600">
-                      Vui lòng chọn hình ảnh trước khi xác nhận
-                    </p>
+                    <div className="flex items-center gap-2 text-destructive animate-pulse">
+                      <div className="h-1.5 w-1.5 rounded-full bg-destructive" />
+                      <p className="text-[10px] font-black uppercase tracking-tight">
+                        Bắt buộc phải có ảnh để xác nhận
+                      </p>
+                    </div>
                   )}
                 </div>
-                <div className="flex gap-2">
+
+                <div className="flex gap-3">
                   {/* Show pickup button only if status is pending (2) */}
                   {order.status === 2 && (
                     <Button
                       disabled={!file || confirmPickupMutation.isPending}
                       onClick={() => {
-                        if (!file) {
-                          toast.error(
-                            "Vui lòng chọn hình ảnh trước khi xác nhận",
-                          );
-                          return;
-                        }
-                        confirmPickupMutation.mutate({
-                          orderId: order.orderId,
-                          file,
-                        });
+                        if (!file) return;
+                        confirmPickupMutation.mutate(
+                          { orderId: order.orderId, file },
+                          { onSuccess: () => setFile(null) }
+                        );
                       }}
-                      className="flex-1"
+                      className="flex-1 h-12 rounded-xl font-black uppercase tracking-wider text-xs shadow-lg shadow-primary/20"
                     >
-                      Xác nhận nhận hàng
+                      {confirmPickupMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Xác nhận đã lấy hàng"
+                      )}
                     </Button>
                   )}
                   {/* Show delivery button only if already picked up (status !== 2) */}
@@ -310,20 +373,19 @@ export default function ShipperOrderDetail() {
                     <Button
                       disabled={!file || confirmDeliveryMutation.isPending}
                       onClick={() => {
-                        if (!file) {
-                          toast.error(
-                            "Vui lòng chọn hình ảnh trước khi xác nhận",
-                          );
-                          return;
-                        }
-                        confirmDeliveryMutation.mutate({
-                          orderId: order.orderId,
-                          file,
-                        });
+                        if (!file) return;
+                        confirmDeliveryMutation.mutate(
+                          { orderId: order.orderId, file },
+                          { onSuccess: () => setFile(null) }
+                        );
                       }}
-                      className="flex-1"
+                      className="flex-1 h-12 rounded-xl font-black uppercase tracking-wider text-xs shadow-lg shadow-primary/20"
                     >
-                      Xác nhận giao hàng
+                      {confirmDeliveryMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Xác nhận đã giao hàng"
+                      )}
                     </Button>
                   )}
                 </div>

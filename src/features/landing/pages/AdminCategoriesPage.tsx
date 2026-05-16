@@ -28,7 +28,7 @@ export default function AdminCategoriesPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <Badge className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-white hover:bg-white/15">
-              Categories hub
+              Trung tâm danh mục
             </Badge>
             <h1 className="mt-4 text-3xl font-black italic uppercase tracking-tight sm:text-5xl">
               Danh mục
@@ -47,7 +47,7 @@ export default function AdminCategoriesPage() {
             </div>
             <div className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-sm">
               <p className="text-[10px] uppercase tracking-[0.2em] text-white/75">
-                Active
+                Đang hoạt động
               </p>
               <p className="mt-1 text-2xl font-black">4</p>
             </div>
@@ -73,7 +73,7 @@ export default function AdminCategoriesPage() {
                   {category.name}
                 </CardTitle>
                 <p className="text-xs text-slate-500">
-                  {category.count} listings
+                  {category.count} tin đăng
                 </p>
               </div>
               <div className="grid size-11 place-items-center rounded-2xl bg-orange-50 text-orange-600">

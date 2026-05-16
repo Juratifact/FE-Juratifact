@@ -18,6 +18,8 @@ import {
   Package,
   Fingerprint,
   LayoutGrid,
+  Star,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/features/auth/store";
@@ -32,6 +34,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+
 
 const Header = () => {
   const location = useLocation();
@@ -106,7 +109,7 @@ const Header = () => {
                                 activeClass,
                             )}
                           >
-                            {isBackoffice ? "Dashboard" : "Home"}
+                            {isBackoffice ? "Bảng điều khiển" : "Trang chủ"}
                           </Link>
                         </NavigationMenuLink>
                       </NavigationMenuItem>
@@ -121,7 +124,7 @@ const Header = () => {
                                 location.pathname === "/map" && activeClass,
                               )}
                             >
-                              Map
+                              Bản đồ
                             </Link>
                           </NavigationMenuLink>
                         </NavigationMenuItem>
@@ -136,7 +139,7 @@ const Header = () => {
                               location.pathname === "/products" && activeClass,
                             )}
                           >
-                            Products
+                            Sản phẩm
                           </Link>
                         </NavigationMenuLink>
                       </NavigationMenuItem>
@@ -164,10 +167,10 @@ const Header = () => {
 
           {/* 3. RIGHT: Search, Theme & Actions */}
           <div className="flex items-center justify-end gap-2 min-w-0">
-            <div className="relative hidden lg:flex items-center max-w-40 w-full">
+            <div className="relative flex items-center max-w-[120px] sm:max-w-40 w-full">
               {!isUnverified && (
                 <>
-                  <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <Search className="absolute left-2.5 top-1/2 size-3 sm:size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                   <Input
                     key={location.search}
                     ref={searchInputRef}
@@ -178,8 +181,8 @@ const Header = () => {
                         applySearch();
                       }
                     }}
-                    placeholder="Search..."
-                    className="h-8 w-full rounded-full border border-border/40 bg-muted/30 pl-9 text-xs placeholder:text-muted-foreground/60 focus-visible:ring-1 transition-all duration-300"
+                    placeholder="Tìm..."
+                    className="h-8 w-full rounded-full border border-border/40 bg-muted/30 pl-8 sm:pl-9 text-[10px] sm:text-xs placeholder:text-muted-foreground/60 focus-visible:ring-1 transition-all duration-300"
                   />
                 </>
               )}
@@ -225,7 +228,7 @@ const Header = () => {
                     asChild
                     className="rounded-full px-4 h-8 text-xs font-semibold"
                   >
-                    <Link to="/login">Sign in</Link>
+                    <Link to="/login">Đăng nhập</Link>
                   </Button>
                 ) : (
                   <div className="flex items-center gap-1">
@@ -247,22 +250,32 @@ const Header = () => {
                         <DropdownMenuItem asChild>
                           <Link to="/profile" className="flex items-center">
                             <User className="mr-2 h-4 w-4" />
-                            <span>Profile</span>
+                            <span>Hồ sơ</span>
                           </Link>
                         </DropdownMenuItem>
                         {!isBackoffice && (
-                          <DropdownMenuItem asChild>
-                            <Link to="/my-products" className="flex items-center">
-                              <LayoutGrid className="mr-2 h-4 w-4" />
-                              <span>My products</span>
-                            </Link>
-                          </DropdownMenuItem>
+                          <>
+                            <DropdownMenuItem asChild>
+                              <Link to="/my-products" className="flex items-center">
+                                <LayoutGrid className="mr-2 h-4 w-4" />
+                                <span>Sản phẩm của tôi</span>
+                              </Link>
+                            </DropdownMenuItem>
+                            {!isBackoffice && (
+                              <DropdownMenuItem asChild>
+                                <Link to="/promotions" className="flex items-center">
+                                  <Star className="mr-2 h-4 w-4 text-amber-500" />
+                                  <span>Gói ưu đãi</span>
+                                </Link>
+                              </DropdownMenuItem>
+                            )}
+                          </>
                         )}
                         {canSeeOrders && (
                           <DropdownMenuItem asChild>
                             <Link to="/orders" className="flex items-center">
                               <Package className="mr-2 h-4 w-4" />
-                              <span>Orders</span>
+                              <span>Đơn hàng</span>
                             </Link>
                           </DropdownMenuItem>
                         )}
@@ -270,9 +283,20 @@ const Header = () => {
                           <DropdownMenuItem asChild>
                             <Link to="/identify" className="flex items-center">
                               <Fingerprint className="mr-2 h-4 w-4" />
-                              <span>Identify</span>
+                              <span>Xác minh</span>
                             </Link>
                           </DropdownMenuItem>
+                        )}
+                        {isLoggedIn && !isBackoffice && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <Link to="/wallet" className="flex items-center">
+                                <Wallet className="mr-2 h-4 w-4" />
+                                <span>Quản lý ví</span>
+                              </Link>
+                            </DropdownMenuItem>
+                          </>
                         )}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -280,7 +304,7 @@ const Header = () => {
                           onClick={() => logoutMutation.mutate()}
                         >
                           <LogOut className="mr-2 h-4 w-4" />
-                          <span>Sign out</span>
+                          <span>Đăng xuất</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

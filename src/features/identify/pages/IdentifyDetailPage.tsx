@@ -172,7 +172,7 @@ export default function IdentifyDetailPage() {
                         approveMutation.isPending || rejectMutation.isPending
                       }
                     >
-                      {approveMutation.isPending ? "Đang duyệt..." : "Approve"}
+                      {approveMutation.isPending ? "Đang duyệt..." : "Phê duyệt"}
                     </Button>
                     {!showRejectReason ? (
                       <Button
@@ -182,7 +182,7 @@ export default function IdentifyDetailPage() {
                           approveMutation.isPending || rejectMutation.isPending
                         }
                       >
-                        Reject
+                        Từ chối
                       </Button>
                     ) : (
                       <Button
@@ -218,7 +218,7 @@ export default function IdentifyDetailPage() {
                       >
                         {rejectMutation.isPending
                           ? "Đang từ chối..."
-                          : "Xác nhận Reject"}
+                          : "Xác nhận từ chối"}
                       </Button>
                     </>
                   )}

@@ -81,9 +81,9 @@ export interface OrderFilterParams extends BaseFilterParams {
 export type OrderListResponse = PaginatedResponse<Order>;
 
 export interface CreateOrderDto {
-  items: { productId: string; quantity: number }[];
   shippingAddress: string;
-  note?: string;
+  vietMapRefId: string;
+  cartDetailIds: string[];
 }
 
 export type UpdateOrderDto = Partial<CreateOrderDto> & { status?: OrderStatus };

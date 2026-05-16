@@ -19,12 +19,12 @@ export function UserCard({ user }: UserCardProps) {
           {user.profilePicture ? (
             <img
               src={user.profilePicture}
-              alt={user.userName ?? user.fullName ?? "avatar"}
+              alt={user.userName ?? user.fullName ?? "ảnh đại diện"}
               className="h-16 w-16 rounded-full border object-cover"
             />
           ) : (
             <div className="flex h-16 w-16 items-center justify-center rounded-full border bg-muted text-sm text-muted-foreground">
-              N/A
+              Trống
             </div>
           )}
           <div>
@@ -42,7 +42,9 @@ export function UserCard({ user }: UserCardProps) {
       <CardContent className="space-y-3 text-base">
         {user.email && <p className="break-all">Email: {user.email}</p>}
         {user.phoneNumber && <p>SĐT: {user.phoneNumber}</p>}
-        {user.address && <p>Địa chỉ: {user.address}</p>}
+        {user.address && (
+          <p>Địa chỉ: {user.vietMapDisplay || user.address}</p>
+        )}
         {user.createdAt && (
           <Badge variant="outline" className="text-sm">
             Tạo: {new Date(user.createdAt).toLocaleDateString("vi-VN")}

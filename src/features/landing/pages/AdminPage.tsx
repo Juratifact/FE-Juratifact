@@ -142,19 +142,19 @@ export default function AdminPage() {
                 {[
                   {
                     name: "iPhone 13 128GB Blue",
-                    status: "Active",
+                    status: "Đang hoạt động",
                     price: "$450",
                     sku: "IP13-128",
                   },
                   {
                     name: "MacBook Air M1 Space Gray",
-                    status: "Pending",
+                    status: "Đang chờ duyệt",
                     price: "$620",
                     sku: "MBA-M1",
                   },
                   {
                     name: "Sony WH-1000XM4",
-                    status: "Active",
+                    status: "Đang hoạt động",
                     price: "$280",
                     sku: "SNY-XM4",
                   },
@@ -171,7 +171,7 @@ export default function AdminPage() {
                     <TableCell>
                       <Badge
                         variant={
-                          item.status === "Active" ? "outline" : "secondary"
+                          item.status === "Đang hoạt động" ? "outline" : "secondary"
                         }
                         className="text-[10px] font-normal"
                       >

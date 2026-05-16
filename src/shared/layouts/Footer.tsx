@@ -20,8 +20,7 @@ export const Footer = () => {
               </h2>
             </Link>
             <p className="max-w-sm text-lg text-muted-foreground font-medium">
-              The ultimate destination for premium secondhand. Quality over
-              quantity, always.
+              Điểm đến cuối cùng cho đồ cũ cao cấp. Luôn đặt chất lượng lên hàng đầu.
             </p>
           </div>
 
@@ -29,7 +28,7 @@ export const Footer = () => {
           <div className="md:col-span-6 grid grid-cols-2 md:grid-cols-3 gap-12">
             <div className="space-y-6">
               <p className="text-xs font-black uppercase tracking-widest">
-                Connect
+                Kết nối
               </p>
               <ul className="text-sm font-bold text-muted-foreground space-y-4 uppercase tracking-tighter">
                 <li className="hover:text-primary cursor-pointer transition-colors">
@@ -46,17 +45,17 @@ export const Footer = () => {
 
             <div className="space-y-6">
               <p className="text-xs font-black uppercase tracking-widest">
-                Support
+                Hỗ trợ
               </p>
               <ul className="text-sm font-bold text-muted-foreground space-y-4 uppercase tracking-tighter">
                 <li className="hover:text-primary cursor-pointer transition-colors">
-                  Shipping
+                  Giao hàng
                 </li>
                 <li className="hover:text-primary cursor-pointer transition-colors">
-                  Authenticity
+                  Xác thực
                 </li>
                 <li className="hover:text-primary cursor-pointer transition-colors">
-                  Returns
+                  Đổi trả
                 </li>
               </ul>
             </div>
@@ -65,13 +64,13 @@ export const Footer = () => {
 
         {/* Bottom Section */}
         <div className="mt-32 pt-8 border-t flex flex-col md:flex-row justify-between gap-4 text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em]">
-          <p>© 2026 Juratifact. Built for the modern collector.</p>
+          <p>© 2026 Juratifact. Xây dựng cho những nhà sưu tầm hiện đại.</p>
           <div className="flex gap-8">
             <span className="hover:text-primary cursor-pointer transition-colors">
-              Privacy
+              Bảo mật
             </span>
             <span className="hover:text-primary cursor-pointer transition-colors">
-              Terms
+              Điều khoản
             </span>
           </div>
         </div>

@@ -33,6 +33,8 @@ export const userProfileSchema = z.object({
     .max(255, "Địa chỉ tối đa 255 ký tự")
     .optional()
     .or(z.literal("")),
+  vietMapRefId: z.string().optional().or(z.literal("")),
+  vietMapDisplay: z.string().optional().or(z.literal("")),
   password: z
     .string()
     .min(6, "Mật khẩu phải có ít nhất 6 ký tự")
@@ -42,4 +44,12 @@ export const userProfileSchema = z.object({
   profilePicture: optionalFileListSchema,
 });
 
+export const createShipperSchema = z.object({
+  email: z.string().email("Email không hợp lệ"),
+  fullName: z.string().min(1, "Họ tên là bắt buộc").max(120, "Họ tên tối đa 120 ký tự"),
+  password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+  phoneNumber: z.string().min(10, "Số điện thoại không hợp lệ"),
+});
+
+export type CreateShipperFormData = z.infer<typeof createShipperSchema>;
 export type UserProfileFormData = z.infer<typeof userProfileSchema>;

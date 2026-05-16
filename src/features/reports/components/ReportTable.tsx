@@ -64,12 +64,12 @@ export function ReportTable({
                   <TableCell className="font-medium">{report.reason}</TableCell>
                   <TableCell>
                     <div className="max-w-[200px] truncate text-sm font-medium">
-                      {report.product?.title || "N/A"}
+                      {report.product?.title || "Trống"}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {report.reporter?.fullName || "N/A"}
+                      {report.reporter?.fullName || "Trống"}
                     </div>
                   </TableCell>
                   <TableCell className="max-w-xs truncate text-sm text-muted-foreground">

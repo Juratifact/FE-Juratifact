@@ -4,15 +4,15 @@ export const registerSchema = z
   .object({
     fullName: z
       .string()
-      .min(1, { message: "FullName là bắt buộc" })
-      .min(3, { message: "FullName phải có ít nhất 3 ký tự" }),
+      .min(1, { message: "Họ và tên là bắt buộc" })
+      .min(3, { message: "Họ và tên phải có ít nhất 3 ký tự" }),
 
     userName: z
       .string()
-      .min(1, { message: "UserName là bắt buộc" })
-      .min(3, { message: "UserName phải có ít nhất 3 ký tự" })
+      .min(1, { message: "Tên đăng nhập là bắt buộc" })
+      .min(3, { message: "Tên đăng nhập phải có ít nhất 3 ký tự" })
       .regex(/^[a-zA-Z0-9_]+$/, {
-        message: "UserName không được chứa ký tự đặc biệt",
+        message: "Tên đăng nhập không được chứa ký tự đặc biệt",
       }),
 
     email: z
@@ -28,7 +28,7 @@ export const registerSchema = z
 
     password: z
       .string()
-      .min(1, { message: "Password là bắt buộc" })
+      .min(1, { message: "Mật khẩu là bắt buộc" })
       .min(8, "Tối thiểu 8 ký tự")
       .refine((val) => /[A-Z]/.test(val), {
         message: "Phải có ít nhất 1 chữ hoa",

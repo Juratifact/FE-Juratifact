@@ -62,7 +62,7 @@ export default function OrderDetailPage() {
           </Button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Reference</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Mã tham chiếu</span>
               <span className="font-mono text-xs font-bold text-primary">
                 #{order?.code ?? orderId?.slice(0, 8)}
               </span>
@@ -110,8 +110,8 @@ export default function OrderDetailPage() {
               {/* Media Column */}
               <div className="w-full lg:w-1/2 bg-muted/5 p-6 border-b lg:border-b-0 lg:border-r">
                 {(() => {
-                  const images = (productDetail?.imageUrl || []).filter((url: any) => url && typeof url === "string");
-                  const videos = (productDetail?.video || []).filter((url: any) => url && typeof url === "string");
+                  const images = (productDetail?.imageUrls || productDetail?.imageUrl || []).filter((url: any) => url && typeof url === "string");
+                  const videos = (productDetail?.videoUrls || productDetail?.video || []).filter((url: any) => url && typeof url === "string");
                   const allMedia = [
                     ...images.map((url: string) => ({ type: "image", url })),
                     ...videos.map((url: string) => ({ type: "video", url })),

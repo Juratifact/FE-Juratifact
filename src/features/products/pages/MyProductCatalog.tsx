@@ -26,7 +26,7 @@ interface MyProductCatalogProps {
 
 export default function MyProductCatalog({ embedded }: MyProductCatalogProps) {
   const [page, setPage] = useState(1);
-  const pageSize = 6;
+  const pageSize = 10;
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 

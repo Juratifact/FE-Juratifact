@@ -82,6 +82,27 @@ export const API_ENDPOINTS = {
     GET_PRODUCTS_BY_ORDER: (orderId: string, productId: string) =>
       `/api/orders/${orderId}/products/${productId}`,
   },
+  SELLER_ORDER: {
+    MY_ORDERS: "/api/seller-orders/me",
+    GET_BY_ID: (id: string) => `/api/seller-orders/${id}`,
+  },
+  PROMOTION: {
+    BASE: "/api/promotions/packages",
+    GET_AVAILABLE_PACKAGES: "/api/promotions/packages/available",
+    SUBSCRIBE: (packageId: string) => `/api/promotions/packages/${packageId}/subscriptions`,
+    MY_SUBSCRIPTION: "/api/promotions/subscriptions/me",
+    APPLY: "/api/promotions/products/applications",
+    GET_APPLIED_PRODUCTS: "/api/promotions/products",
+  },
+  VIETMAP: {
+    AUTOCOMPLETE: "/api/vietmap/autocomplete",
+  },
+  WALLET: {
+    MY_WALLET: "/api/wallets/me",
+  },
+  TRANSACTION: {
+    BASE: "/api/transaction",
+  },
 };
 export const QUERY_KEYS = {
   PRODUCTS: ["products"] as const,
@@ -103,12 +124,16 @@ export const QUERY_KEYS = {
   CART: ["cart"] as const,
   SHIPPER_AVAILABLE_ORDERS: ["shipper", "available-orders"] as const,
   SHIPPER_ORDERS: ["shipper", "orders"] as const,
+  PROMOTIONS: ["promotions"] as const,
+  MAP_AUTOCOMPLETE: (text: string) => ["map", "autocomplete", text] as const,
+  WALLET: ["wallet"] as const,
+  TRANSACTIONS: ["transactions"] as const,
 };
 
 export const PRODUCT_CONDITIONS = [
-  { value: "New", label: "New" },
-  { value: "Like new", label: "Like new" },
-  { value: "Good", label: "Good" },
+  { value: "New", label: "Mới" },
+  { value: "Like new", label: "Như mới" },
+  { value: "Good", label: "Tốt" },
 ];
 
 export const REPORT_STATUS_OPTIONS = [

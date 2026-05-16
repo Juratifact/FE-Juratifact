@@ -88,6 +88,7 @@ apiClient.interceptors.response.use(
           access_token: newToken,
           userId: useAuthStore.getState().userId ?? undefined,
           role: useAuthStore.getState().role,
+          isVerify: useAuthStore.getState().isVerify,
         });
         proccessQueue(null, newToken);
         originalRequest.headers.Authorization = `Bearer ${newToken}`;

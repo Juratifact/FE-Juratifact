@@ -22,7 +22,7 @@ export function ProductForm({
   initialImageUrls,
   onSubmit,
   isPending,
-  submitLabel = "Save product",
+  submitLabel = "Lưu sản phẩm",
 }: ProductFormProps) {
   const {
     register,
@@ -71,7 +71,7 @@ export function ProductForm({
       const invalidFilesCount = addedFiles.length - validFiles.length;
 
       if (invalidFilesCount > 0) {
-        toast.error(`${invalidFilesCount} video(s) exceed the 100MB size limit and were skipped.`);
+        toast.error(`${invalidFilesCount} video vượt quá giới hạn 100MB và đã bị bỏ qua.`);
       }
 
       if (validFiles.length > 0) {
@@ -137,11 +137,11 @@ export function ProductForm({
     >
       {/* Title */}
       <div className="space-y-2">
-        <Label htmlFor="title">Product title *</Label>
+        <Label htmlFor="title">Tên sản phẩm *</Label>
         <Input
           id="title"
           type="text"
-          placeholder="e.g. iPhone 13 Pro Max"
+          placeholder="VD: iPhone 13 Pro Max"
           {...register("title")}
           className={errors.title ? "border-destructive" : ""}
           required
@@ -153,10 +153,10 @@ export function ProductForm({
 
       {/* Description */}
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">Mô tả</Label>
         <textarea
           id="description"
-          placeholder="Describe your product..."
+          placeholder="Mô tả sản phẩm của bạn..."
           {...register("description")}
           className={`min-h-32 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
             errors.description ? "border-destructive" : ""
@@ -171,7 +171,7 @@ export function ProductForm({
 
       {/* Condition */}
       <div className="space-y-2">
-        <Label htmlFor="condition">Condition *</Label>
+        <Label htmlFor="condition">Tình trạng *</Label>
         <div
           id="condition"
           className={`grid gap-2 sm:grid-cols-3 ${
@@ -200,7 +200,7 @@ export function ProductForm({
 
       {/* Price */}
       <div className="space-y-2">
-        <Label htmlFor="price">Price (VND) *</Label>
+        <Label htmlFor="price">Giá (VNĐ) *</Label>
         <Input
           id="price"
           type="text"
@@ -231,7 +231,7 @@ export function ProductForm({
         <div className="space-y-2">
           <Label htmlFor="image" className="flex items-center gap-2">
             <ImagePlus className="h-4 w-4" />
-            Images
+            Hình ảnh
           </Label>
           <Input
             id="image"
@@ -286,7 +286,7 @@ export function ProductForm({
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            You can select multiple images.
+            Bạn có thể chọn nhiều hình ảnh.
           </p>
           {errors.image && (
             <p className="text-destructive text-xs">{errors.image.message}</p>
@@ -294,7 +294,7 @@ export function ProductForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="video">Videos (optional)</Label>
+          <Label htmlFor="video">Video (tùy chọn)</Label>
           <Input
             id="video"
             type="file"
@@ -327,7 +327,7 @@ export function ProductForm({
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            You can select multiple videos.
+            Bạn có thể chọn nhiều video.
           </p>
           {errors.video && (
             <p className="text-destructive text-xs">{errors.video.message}</p>
@@ -344,7 +344,7 @@ export function ProductForm({
         {isPending || isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Processing...
+            Đang xử lý...
           </>
         ) : (
           submitLabel

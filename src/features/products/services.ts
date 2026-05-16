@@ -339,6 +339,8 @@ const normalizeProduct = (item: ProductApiItem): Product => {
       item.imageUrls ?? item.imageUrl ?? item.images ?? item.productImages,
     ),
     videoUrls: normalizeArray(item.videoUrls ?? item.video),
+    isPromoted: !!item.isPromoted,
+    promotionExpiresAt: item.promotionExpiresAt,
     comments,
     createdAt: item.createdAt ?? new Date().toISOString(),
     updatedAt: item.updatedAt ?? item.createdAt ?? new Date().toISOString(),
@@ -529,7 +531,7 @@ const productBaseService = createBaseService<
 export const productService = Object.assign(productBaseService, {
   async getMyProducts(params?: ProductFilterParams) {
     const page = params?.page ?? 1;
-    const limit = params?.limit ?? 6;
+    const limit = params?.limit ?? 10;
     const title = toTrimmed(params?.title);
 
     const raw = (await apiClient.get(API_ENDPOINTS.PRODUCT.GET_MY_PRODUCTS, {

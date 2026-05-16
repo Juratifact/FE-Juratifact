@@ -33,7 +33,7 @@ export function OrderCard({
       <CardHeader className="px-6 py-4 space-y-0 flex-row items-center justify-between bg-muted/30">
         <div className="flex flex-col gap-0.5">
           <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/80">
-            Reference
+            Mã đơn hàng
           </span>
           <span className="font-mono text-xs font-semibold">
             #{order.code ?? order.id.toString().slice(0, 8)}
@@ -54,7 +54,7 @@ export function OrderCard({
               Khách hàng
             </p>
             <p className="text-[13px] font-medium leading-none">
-              {isGroupedOrder(order) ? order.recipientName : "N/A"}
+              {isGroupedOrder(order) ? order.recipientName : "Trống"}
             </p>
           </div>
           {isGroupedOrder(order) && order.sellerName && (
@@ -102,7 +102,7 @@ export function OrderCard({
             </span>
             <div className="flex items-baseline gap-2">
               <span className="text-[11px] font-medium text-muted-foreground">
-                Total
+                Tổng cộng
               </span>
               <span className="text-xl font-black tracking-tighter">
                 {priceFormatter.format(Number(order.totalAmount))}đ

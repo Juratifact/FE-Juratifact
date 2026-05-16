@@ -35,7 +35,7 @@ export default function ManageProductCreate() {
         >
           <Link to="/products">
             <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            Back to listings
+            Quay lại danh sách
           </Link>
         </Button>
       </div>
@@ -44,15 +44,13 @@ export default function ManageProductCreate() {
       <header className="space-y-4">
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-            Sell{" "}
+            Bán những món đồ <br />
             <span className="text-muted-foreground/40 italic font-serif">
-              Somethings
-            </span>{" "}
-            Decent.
+              Giá trị.
+            </span>
           </h1>
           <p className="max-w-150 text-lg text-muted-foreground leading-relaxed">
-            Sell your own stuff. Add high-quality visuals to increase engagement
-            and trust.
+            Bán những món đồ của bạn. Thêm hình ảnh chất lượng cao để tăng sự tin tưởng.
           </p>
         </div>
       </header>
@@ -70,7 +68,7 @@ export default function ManageProductCreate() {
               <ProductForm
                 onSubmit={handleSubmit}
                 isPending={isPending}
-                submitLabel={isPending ? "Publishing..." : "Posting"}
+                submitLabel={isPending ? "Đang đăng..." : "Đăng bài"}
               />
             </div>
           </CardContent>

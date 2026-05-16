@@ -37,9 +37,9 @@ export default function ManageProductEdit() {
   if (!product) {
     return (
       <div className="py-12 text-center">
-        <p className="text-muted-foreground">Product not found.</p>
+        <p className="text-muted-foreground">Không tìm thấy sản phẩm.</p>
         <Button variant="link" asChild className="mt-2">
-          <Link to="/admin/products">Back to list</Link>
+          <Link to="/products">Quay lại danh sách</Link>
         </Button>
       </div>
     );
@@ -50,11 +50,11 @@ export default function ManageProductEdit() {
       <Button variant="ghost" size="sm" asChild className="mb-6">
         <Link to="/admin/products">
           <ArrowLeft className="mr-1 h-4 w-4" />
-          Back to list
+          Quay lại danh sách
         </Link>
       </Button>
 
-      <h2 className="mb-6 text-2xl font-bold">Edit product</h2>
+      <h2 className="mb-6 text-2xl font-bold">Chỉnh sửa sản phẩm</h2>
 
       <ProductForm
         defaultValues={{
@@ -66,7 +66,7 @@ export default function ManageProductEdit() {
         initialImageUrls={product.imageUrls}
         onSubmit={handleSubmit}
         isPending={isPending}
-        submitLabel="Update"
+        submitLabel="Cập nhật"
       />
     </div>
   );

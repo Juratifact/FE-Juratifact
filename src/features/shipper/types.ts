@@ -19,6 +19,8 @@ export interface ShipperOrder {
   shippingAddress: string;
   customerName: string;
   customerPhone: string;
+  sellerPhone?: string | null;
+  sellerAddress?: string | null;
   pickupAt: string | null;
   deliveryAt: string | null;
   createdAt: string;
@@ -42,6 +44,8 @@ export interface ShipperAvailableOrder {
   orderId: string;
   addressSeller?: string | null;
   addressBuyer?: string | null;
+  sellerPhone?: string | null;
+  sellerAddress?: string | null;
   totalPrice?: number;
 }
 

@@ -42,7 +42,7 @@ export function LoginForm() {
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">Mật khẩu</Label>
         <Input
           id="password"
           type="password"
@@ -70,7 +70,7 @@ export function LoginForm() {
             Đang đăng nhập...
           </>
         ) : (
-          "Login"
+          "Đăng nhập"
         )}
       </Button>
       <div className="text-center text-sm">
