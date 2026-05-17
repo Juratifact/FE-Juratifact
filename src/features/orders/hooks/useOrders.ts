@@ -92,6 +92,20 @@ export function useCancelOrder() {
     onSuccess: () => {
       toast.success("Huỷ đơn hàng thành công");
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_ORDERS });
+    },
+  });
+}
+
+export function useUpdateShippingAddress() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: { newAddress: string; vietMapRefId: string } }) =>
+      orderActions.updateShippingAddress(id, data),
+    onSuccess: () => {
+      toast.success("Cập nhật địa chỉ thành công");
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_ORDERS });
     },
   });
 }

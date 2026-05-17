@@ -431,9 +431,9 @@ export function ProductCard({
 
             <div className="flex items-center gap-2">
                 {product.isPromoted && (
-                    <Badge className="bg-linear-to-r from-amber-500 to-orange-600 border-none text-[10px] h-6 font-black text-white animate-pulse">
-                        
-                        NỔI BẬT
+                    <Badge className="relative overflow-hidden bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 border-none text-[10px] h-6 font-black text-white shadow-[0_0_15px_rgba(249,115,22,0.6)] px-2.5 flex items-center gap-1 group/badge transition-transform hover:scale-105">
+                        <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover/badge:animate-[shimmer_1.5s_infinite]" />
+                        <span className="tracking-widest">ĐANG ĐƯỢC CHÚ Ý</span>
                     </Badge>
                 )}
                 <Badge variant="secondary" className="h-6 text-[10px] font-black uppercase tracking-wider">
@@ -521,19 +521,47 @@ export function ProductCard({
           )}
 
           {mediaList.length > 1 && (
-            <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
-              {mediaList.map((_, idx) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    "h-1.5 rounded-full transition-all duration-300",
-                    idx === currentMediaIndex
-                      ? "w-6 bg-white"
-                      : "w-1.5 bg-white/40",
-                  )}
-                />
-              ))}
-            </div>
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute left-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-black/20 text-white hover:bg-black/40 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentMediaIndex((prev) =>
+                    prev === 0 ? mediaList.length - 1 : prev - 1,
+                  );
+                }}
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-black/20 text-white hover:bg-black/40 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentMediaIndex((prev) =>
+                    prev === mediaList.length - 1 ? 0 : prev + 1,
+                  );
+                }}
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                {mediaList.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all duration-300",
+                      idx === currentMediaIndex
+                        ? "w-6 bg-white shadow-[0_0_5px_rgba(0,0,0,0.5)]"
+                        : "w-1.5 bg-white/50 shadow-[0_0_5px_rgba(0,0,0,0.5)]",
+                    )}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
 

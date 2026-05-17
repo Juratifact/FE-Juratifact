@@ -11,7 +11,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
-import { Play, ArrowLeft } from "lucide-react";
+import { Play, ArrowLeft, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getOrderStatusLabel, getPaymentStatusLabel } from "../types";
 
@@ -236,12 +236,15 @@ export default function OrderDetailPage() {
           <Card className="overflow-hidden rounded-3xl border bg-card shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                  <Play className="h-4 w-4 text-primary rotate-90" />
+                <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                  <MapPin className="h-4 w-4 text-primary" />
                 </div>
                 <div className="space-y-1">
                   <h4 className="text-xs font-black uppercase tracking-widest">Giao hàng</h4>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed">
+                  <p className="text-[13px] font-medium text-foreground leading-relaxed">
+                    {productDetail?.shippingAddress || "Chưa cập nhật địa chỉ giao hàng."}
+                  </p>
+                  <p className="text-[12px] text-muted-foreground leading-relaxed mt-2">
                     Sản phẩm sẽ được giao đến bạn trong thời gian sớm nhất bởi đội ngũ vận chuyển chuyên nghiệp.
                   </p>
                 </div>

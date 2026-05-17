@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, X, Eye } from "lucide-react";
+import { Check, X, Eye, MapPin } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import {
   Table,
@@ -11,11 +12,13 @@ import {
 } from "@/shared/components/ui/table";
 import { getOrderStatusLabel, getPaymentStatusLabel } from "../types";
 import type { GroupedOrder } from "../types";
+import { UpdateAddressDialog } from "./UpdateAddressDialog";
 
 interface OrderTableProps {
   orders: GroupedOrder[];
   onConfirmReceipt?: (id: string) => void;
   onCancel?: (id: string, reason: string) => void;
+  onChangeAddress?: (id: string, newAddress: string, vietMapRefId: string) => void;
   isProcessing?: boolean;
 }
 
@@ -23,8 +26,11 @@ export function OrderTable({
   orders,
   onConfirmReceipt,
   onCancel,
+  onChangeAddress,
   isProcessing,
 }: OrderTableProps) {
+  const [editingAddressOrderId, setEditingAddressOrderId] = useState<string | null>(null);
+
   return (
     <div className="overflow-x-auto rounded-lg border">
       <Table>
@@ -99,12 +105,34 @@ export function OrderTable({
                       Huỷ đơn
                     </Button>
                   )}
+                  {o.status === 1 && onChangeAddress && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setEditingAddressOrderId(o.id)}
+                      disabled={isProcessing}
+                    >
+                      <MapPin className="mr-1 h-3 w-3" />
+                      Đổi địa chỉ
+                    </Button>
+                  )}
                 </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <UpdateAddressDialog
+        open={!!editingAddressOrderId}
+        onOpenChange={(open) => !open && setEditingAddressOrderId(null)}
+        onConfirm={(address, refId) => {
+          if (editingAddressOrderId) {
+            onChangeAddress?.(editingAddressOrderId, address, refId);
+            setEditingAddressOrderId(null);
+          }
+        }}
+        isProcessing={isProcessing}
+      />
     </div>
   );
 }

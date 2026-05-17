@@ -91,9 +91,9 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className="mx-auto max-w-7xl px-4 py-4 mt-2">
-        <div className="flex items-center justify-between rounded-full border border-border/40 bg-background/40 backdrop-blur-md p-2 sm:p-3 shadow-md hover:shadow-lg transition-shadow duration-300">
+        <div className="flex items-center justify-between rounded-full border border-border/40 bg-background/40 backdrop-blur-md p-2 sm:p-3 shadow-md hover:shadow-lg transition-shadow duration-300 relative">
           {/* 1. LEFT: Navigation Menu */}
-          <div className="flex flex-1 justify-start min-w-0">
+          <div className="flex items-center gap-2 justify-start shrink-0 min-w-0">
             <nav className="hidden lg:flex items-center shrink-0">
               {!isUnverified && (
                 <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/30">
@@ -175,11 +175,24 @@ const Header = () => {
                 </DropdownMenu>
               )}
             </div>
-          </div>
-          <div className="flex shrink-0 justify-center mx-2">
+            {/* Mobile Logo */}
             <Link
               to="/"
-              className="flex items-center gap-0 shrink-0 group hover:opacity-80 transition-opacity duration-300 -space-x-4"
+              className="lg:hidden flex items-center shrink-0 group hover:opacity-80 transition-opacity duration-300"
+            >
+              <img
+                src="/juralogo.png"
+                alt="Logo"
+                className="size-10 sm:size-12 object-contain dark:invert ml-1"
+              />
+            </Link>
+          </div>
+          
+          {/* 2. CENTER: Logo (Desktop Only) */}
+          <div className="hidden lg:flex shrink-0 justify-center absolute left-1/2 -translate-x-1/2 pointer-events-none">
+            <Link
+              to="/"
+              className="flex items-center gap-0 shrink-0 group hover:opacity-80 transition-opacity duration-300 -space-x-4 pointer-events-auto"
             >
               <img
                 src="/juralogo.png"
@@ -193,7 +206,7 @@ const Header = () => {
           </div>
 
           {/* 3. RIGHT: Search, Theme & Actions */}
-          <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2 min-w-0">
+          <div className="flex items-center justify-end gap-1 sm:gap-2 shrink-0 min-w-0">
             <div className="relative flex items-center max-w-[120px] sm:max-w-40 w-full">
               {!isUnverified && (
                 <>

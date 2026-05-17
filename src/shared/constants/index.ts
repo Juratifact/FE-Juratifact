@@ -79,6 +79,8 @@ export const API_ENDPOINTS = {
     CANCEL: (orderId: string) => `/api/orders/${orderId}/cancel`,
     CANCEL_CHECKOUT: (orderId: string) =>
       `/api/orders/${orderId}/cancel-checkout`,
+    UPDATE_SHIPPING_ADDRESS: (orderId: string) =>
+      `/api/orders/${orderId}/shipping-address`,
     GET_PRODUCTS_BY_ORDER: (orderId: string, productId: string) =>
       `/api/orders/${orderId}/products/${productId}`,
   },
