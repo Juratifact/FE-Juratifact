@@ -3,6 +3,7 @@ import {
   useMyOrders,
   useConfirmReceipt,
   useCancelOrder,
+  useUpdateShippingAddress,
 } from "../hooks/useOrders";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
 import { EmptyState } from "@/shared/components/common/EmptyState";
@@ -27,6 +28,7 @@ export default function MyOrdersPage() {
   });
   const confirmReceipt = useConfirmReceipt();
   const cancelOrder = useCancelOrder();
+  const updateOrder = useUpdateShippingAddress();
 
   const handleTabChange = (value: string) => {
     setSearchParams({ tab: value });
@@ -71,7 +73,10 @@ export default function MyOrdersPage() {
                 onCancel={(orderId, reason) =>
                   cancelOrder.mutate({ id: orderId, data: { reason } })
                 }
-                isProcessing={confirmReceipt.isPending || cancelOrder.isPending}
+                onChangeAddress={(orderId, newAddress, vietMapRefId) =>
+                  updateOrder.mutate({ id: orderId, data: { newAddress, vietMapRefId } })
+                }
+                isProcessing={confirmReceipt.isPending || cancelOrder.isPending || updateOrder.isPending}
               />
             </div>
           )}

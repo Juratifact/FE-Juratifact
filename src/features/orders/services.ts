@@ -51,4 +51,9 @@ export const orderActions = {
     (await apiClient.put(
       API_ENDPOINTS.ORDER.CANCEL_CHECKOUT(orderId),
     )) as unknown as Order,
+  updateShippingAddress: async (orderId: string, data: { newAddress: string; vietMapRefId: string }) =>
+    (await apiClient.put(
+      API_ENDPOINTS.ORDER.UPDATE_SHIPPING_ADDRESS(orderId),
+      data
+    )) as unknown as Order,
 };
