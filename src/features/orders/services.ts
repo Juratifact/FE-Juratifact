@@ -26,8 +26,8 @@ export const orderActions = {
     )) as unknown as Order,
   getMyOrders: async (): Promise<Order[]> =>
     (await apiClient.get(API_ENDPOINTS.ORDER.MY_ORDERS)) as unknown as Order[],
-  confirmReceipt: async (orderId: string): Promise<void> => {
-    await apiClient.put(API_ENDPOINTS.ORDER.CONFIRM_RECEIPT(orderId));
+  confirmReceipt: async (sellerOrderId: string): Promise<void> => {
+    await apiClient.put(API_ENDPOINTS.ORDER.CONFIRM_RECEIPT(sellerOrderId));
   },
   cancel: async (
     orderId: string,

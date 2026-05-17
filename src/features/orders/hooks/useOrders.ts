@@ -26,6 +26,8 @@ interface MyOrderRow {
   status?: number;
   paymentStatus?: number;
   quantity?: number;
+  parentOrderStatus?: number;
+  canConfirmReceipt?: boolean;
 }
 
 // use the exported GroupedOrder from types.ts
@@ -73,10 +75,11 @@ export function useCreateOrder() {
 export function useConfirmReceipt() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (orderId: string) => orderActions.confirmReceipt(orderId),
+    mutationFn: (sellerOrderId: string) => orderActions.confirmReceipt(sellerOrderId),
     onSuccess: () => {
       toast.success("Xác nhận nhận hàng thành công");
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ORDERS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.MY_ORDERS });
     },
   });
 }
@@ -119,6 +122,8 @@ export function useMyOrders() {
         status: r.status,
         paymentStatus: r.paymentStatus as PaymentStatus | undefined,
         sellerName: r.sellerName,
+        parentOrderStatus: r.parentOrderStatus,
+        canConfirmReceipt: r.canConfirmReceipt,
         items: [{
           productId: r.productId,
           productName: r.title,

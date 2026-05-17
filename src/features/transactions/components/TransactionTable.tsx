@@ -98,11 +98,11 @@ export function TransactionTable({ transactions, isLoading }: TransactionTablePr
               </TableCell>
               <TableCell className="font-bold py-4">
                 <span className={cn(
-                  tx.status === TransactionStatus.FAILED 
+                  (tx.status === TransactionStatus.FAILED || tx.status === TransactionStatus.EXPIRED)
                     ? "text-muted-foreground" 
                     : "text-emerald-500"
                 )}>
-                  {tx.status !== TransactionStatus.FAILED && "+"}
+                  {(tx.status !== TransactionStatus.FAILED && tx.status !== TransactionStatus.EXPIRED) && "+"}
                   {tx.amount.toLocaleString("vi-VN")}đ
                 </span>
               </TableCell>

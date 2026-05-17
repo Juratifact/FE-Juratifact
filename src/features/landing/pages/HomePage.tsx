@@ -13,31 +13,31 @@ const products = [
     title: "iPhone 13 128GB",
     price: "$450",
     loc: "HCMC",
-    img: "public/iPhone-13-Pro-Max-Front.jpg",
+    img: "/iPhone-13-Pro-Max-Front.jpg",
   },
   {
     title: "MacBook Air M1",
     price: "$620",
     loc: "HANOI",
-    img: "public/macbook.jpg",
+    img: "/macbook.jpg",
   },
   {
     title: "Retro Sneaker",
     price: "$95",
     loc: "DANANG",
-    img: "public/NB.jpg",
+    img: "/NB.jpg",
   },
   {
     title: "Keyboard",
     price: "$55",
     loc: "CANTHO",
-    img: "public/banphim.jpg",
+    img: "/banphim.jpg",
   },
   {
     title: "Sony Camera A6000",
     price: "$700",
     loc: "HCMC",
-    img: "public/sony-alpha-6000-8.jpg",
+    img: "/sony-alpha-6000-8.jpg",
   },
 ];
 
@@ -49,8 +49,8 @@ export default function HomePage() {
         <section className="relative w-full aspect-[4/5] md:aspect-21/9 overflow-hidden group/hero rounded-none border-none">
           <div className="absolute inset-0 z-0">
             <img
-              src="public/apple-watch-ultra.jpg"
-              alt="Apple Watch Ultra Background"
+              src="/apple-watch-ultra.jpg"
+               alt="Apple Watch Ultra Background"
               className="object-cover size-full grayscale hover:grayscale-0 transition-all duration-1000 scale-105 group-hover/hero:scale-100"
             />
             <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
