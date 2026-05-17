@@ -74,8 +74,8 @@ export const API_ENDPOINTS = {
     MY_ORDERS: "/api/orders/me",
     GET_BY_ID: (orderId: string) => `/api/orders/${orderId}`,
     GET_STATUS: (orderId: string) => `/api/orders/${orderId}/status`,
-    CONFIRM_RECEIPT: (orderId: string) =>
-      `/api/orders/${orderId}/confirm-receipt`,
+    CONFIRM_RECEIPT: (sellerOrderId: string) =>
+      `/api/orders/seller-orders/${sellerOrderId}/confirm-receipt`,
     CANCEL: (orderId: string) => `/api/orders/${orderId}/cancel`,
     CANCEL_CHECKOUT: (orderId: string) =>
       `/api/orders/${orderId}/cancel-checkout`,
@@ -143,5 +143,4 @@ export const REPORT_STATUS_OPTIONS = [
   { value: 0, label: "Chờ xử lý" },
   { value: 1, label: "Đã duyệt" },
   { value: 2, label: "Bị từ chối" },
-  { value: 3, label: "Bị từ chối" },
 ];

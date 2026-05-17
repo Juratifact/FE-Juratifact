@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Badge } from "@/shared/components/ui/badge";
 import { LoadingSpinner } from "@/shared/components/common/LoadingSpinner";
@@ -11,6 +11,22 @@ import { REPORT_STATUS_OPTIONS } from "@/shared/constants";
 export default function IdentifyList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { documents, pagination, isLoading } = useIdentifyList();
+
+  useEffect(() => {
+    if (!isLoading && pagination) {
+      const currentPage = Number(searchParams.get("page")) || 1;
+      if (pagination.totalItems > 0 && currentPage > pagination.totalPages) {
+        const params = new URLSearchParams(searchParams);
+        params.set("page", String(pagination.totalPages));
+        setSearchParams(params, { replace: true });
+      } else if (currentPage < 1) {
+        const params = new URLSearchParams(searchParams);
+        params.set("page", "1");
+        setSearchParams(params, { replace: true });
+      }
+    }
+  }, [isLoading, pagination, searchParams, setSearchParams]);
+
   const handleFilterChange = useCallback(
     (key: string, value: string | undefined) => {
       const params = new URLSearchParams(searchParams);

@@ -1,4 +1,4 @@
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import { PromotionForm } from "../components/PromotionForm";
@@ -33,7 +33,6 @@ export default function ManagePromotionCreate() {
             </Button>
             <div className="space-y-1">
               <div className="inline-flex items-center gap-2 text-primary text-[10px] font-black uppercase tracking-widest">
-                <Sparkles className="w-3 h-3" />
                 Thiết lập hệ thống
               </div>
               <h1 className="text-4xl font-black tracking-tighter">Tạo gói ưu đãi mới</h1>

@@ -20,6 +20,7 @@ import {
   LayoutGrid,
   Star,
   Wallet,
+  Menu,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/features/auth/store";
@@ -90,10 +91,10 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full">
       <div className="mx-auto max-w-7xl px-4 py-4 mt-2">
-        <div className="grid grid-cols-3 items-center rounded-full border border-border/40 bg-background/40 backdrop-blur-md p-2 sm:p-3 shadow-md hover:shadow-lg transition-shadow duration-300">
+        <div className="flex items-center justify-between rounded-full border border-border/40 bg-background/40 backdrop-blur-md p-2 sm:p-3 shadow-md hover:shadow-lg transition-shadow duration-300">
           {/* 1. LEFT: Navigation Menu */}
-          <div className="flex justify-start">
-            <nav className="hidden xl:flex items-center shrink-0">
+          <div className="flex flex-1 justify-start min-w-0">
+            <nav className="hidden lg:flex items-center shrink-0">
               {!isUnverified && (
                 <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-full border border-border/30">
                   <NavigationMenu>
@@ -148,8 +149,34 @@ const Header = () => {
                 </div>
               )}
             </nav>
+            <div className="lg:hidden flex items-center">
+              {!isUnverified && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-8 h-8 p-0 rounded-full">
+                      <Menu className="w-5 h-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link to={isBackoffice ? "/admin" : "/"}>
+                        {isBackoffice ? "Bảng điều khiển" : "Trang chủ"}
+                      </Link>
+                    </DropdownMenuItem>
+                    {!isBackoffice && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/map">Bản đồ</Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link to="/products">Sản phẩm</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
-          <div className="flex justify-center">
+          <div className="flex shrink-0 justify-center mx-2">
             <Link
               to="/"
               className="flex items-center gap-0 shrink-0 group hover:opacity-80 transition-opacity duration-300 -space-x-4"
@@ -157,7 +184,7 @@ const Header = () => {
               <img
                 src="/juralogo.png"
                 alt="Logo"
-                className="size-10 sm:size-12 object-contain dark:invert "
+                className="size-14 sm:size-16 object-contain dark:invert "
               />
               <span className="text-base sm:text-2xl font-bold tracking-tight text-foreground hidden md:block ">
                 Juratifact
@@ -166,7 +193,7 @@ const Header = () => {
           </div>
 
           {/* 3. RIGHT: Search, Theme & Actions */}
-          <div className="flex items-center justify-end gap-2 min-w-0">
+          <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2 min-w-0">
             <div className="relative flex items-center max-w-[120px] sm:max-w-40 w-full">
               {!isUnverified && (
                 <>

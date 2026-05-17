@@ -3,36 +3,13 @@ import { useLogoutMutation } from "@/features/auth/hooks/useAuthMutation";
 import { useAuthStore } from "@/features/auth/store";
 import { Button } from "@/shared/components/ui/button";
 import {
-  LayoutDashboard,
-  FlagTriangleRight,
-  Users,
-  FileCheck,
-  Truck,
   Sun,
   Moon,
-  Zap,
-  ArrowRightLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/app/store";
+import { adminNavItems, shipperNavItems } from "./adminNavItems";
 
-const adminNavItems = [
-  { label: "Bảng điều khiển", to: "/admin", icon: LayoutDashboard },
-  { label: "Báo cáo vi phạm", to: "/admin/reports", icon: FlagTriangleRight },
-  { label: "Xác minh tài liệu", to: "/admin/identify", icon: FileCheck },
-  { label: "Người dùng", to: "/admin/users", icon: Users },
-  { label: "Gói ưu đãi", to: "/admin/promotions", icon: Zap },
-  { label: "Lịch sử giao dịch", to: "/admin/transactions", icon: ArrowRightLeft },
-];
-
-const shipperNavItems = [
-  { label: "Đơn hàng khả dụng", to: "/admin/shipper/orders", icon: Truck },
-  {
-    label: "Đơn hàng đã nhận",
-    to: "/admin/shipper/my-orders",
-    icon: FileCheck,
-  },
-];
 
 export default function AdminHeader() {
   const logoutMutation = useLogoutMutation();

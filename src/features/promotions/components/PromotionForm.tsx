@@ -226,15 +226,6 @@ export function PromotionForm({
         >
           {isPending ? "Đang xử lý..." : submitLabel}
         </Button>
-        <Button 
-          type="button" 
-          variant="secondary" 
-          disabled={isPending}
-          className="rounded-full px-10 h-14 font-bold"
-          onClick={() => form.reset()}
-        >
-          Làm mới
-        </Button>
       </div>
     </form>
   );

@@ -54,13 +54,13 @@ export const identifyService = createBaseService<
     
     let totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
-    // Smart fallback: if the page is full, assume there might be more
-    if (items.length >= itemsPerPage && totalPages <= currentPage) {
+    // Smart fallback: if the API doesn't provide totalItems and the page is full, assume there might be more
+    if (data.totalItems == null && items.length >= itemsPerPage && totalPages <= currentPage) {
       totalPages = currentPage + 1;
     }
 
-    // Ensure we can always see the pagination to go back if we are not on page 1
-    totalPages = Math.max(totalPages, currentPage);
+    // Ensure we don't spoof totalPages so our out-of-bounds redirect logic can trigger
+    // removed totalPages = Math.max(totalPages, currentPage);
 
     return {
       data: items,

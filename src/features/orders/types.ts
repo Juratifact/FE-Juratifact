@@ -71,6 +71,9 @@ export interface GroupedOrder {
   paymentStatus?: PaymentStatus;
   items: (OrderItem & { condition?: string; unitPrice?: number })[];
   sellerName?: string;
+  parentOrderStatus?: number;
+  canConfirmReceipt?: boolean;
+  sellerOrderId?: string;
 }
 
 export interface OrderFilterParams extends BaseFilterParams {

@@ -1,13 +1,27 @@
-import { Outlet, useLocation } from "react-router-dom";
-import { CircleUserRound } from "lucide-react";
+import { Outlet, useLocation, Link } from "react-router-dom";
+import { CircleUserRound, Menu, LogOut, Sun, Moon } from "lucide-react";
 import AdminHeader from "./AdminHeader";
+import { adminNavItems, shipperNavItems } from "./adminNavItems";
 import { useAuthStore } from "@/features/auth/store";
 import { useEffect } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { Button } from "@/shared/components/ui/button";
+import { useLogoutMutation } from "@/features/auth/hooks/useAuthMutation";
+import { useThemeStore } from "@/app/store";
 
 export default function AdminLayout() {
   const location = useLocation();
   const role = useAuthStore((s) => s.role);
   const isShipper = role === "Shipper";
+  const navItems = isShipper ? shipperNavItems : adminNavItems;
+  const logoutMutation = useLogoutMutation();
+  const { theme, toggleTheme } = useThemeStore();
 
   // Scroll to top on every route change
   useEffect(() => {
@@ -61,14 +75,60 @@ export default function AdminLayout() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 border-b border-border/50 bg-background/80 backdrop-blur">
           <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-orange-500">
-                {isShipper ? "Giao hàng sàn" : "Quản trị viên sàn"}
-              </p>
-              <h2 className="mt-1 text-2xl font-black italic uppercase tracking-tight">
-                {current.title}
-              </h2>
-              <p className="text-sm text-muted-foreground">{current.subtitle}</p>
+            <div className="flex items-center gap-3">
+              <div className="lg:hidden flex items-center">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon" className="w-9 h-9 shrink-0">
+                      <Menu className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-56">
+                    {navItems.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <DropdownMenuItem asChild key={item.to}>
+                          <Link to={item.to} className="flex items-center gap-3 cursor-pointer">
+                            <Icon className="size-4" />
+                            <span>{item.label}</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleTheme();
+                      }}
+                      className="cursor-pointer"
+                    >
+                      {theme === "dark" ? (
+                        <Sun className="mr-3 size-4" />
+                      ) : (
+                        <Moon className="mr-3 size-4" />
+                      )}
+                      <span>Đổi giao diện</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
+                      onClick={() => logoutMutation.mutate()}
+                    >
+                      <LogOut className="mr-3 size-4" />
+                      <span>Đăng xuất</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-orange-500">
+                  {isShipper ? "Giao hàng sàn" : "Quản trị viên sàn"}
+                </p>
+                <h2 className="mt-1 text-xl sm:text-2xl font-black italic uppercase tracking-tight">
+                  {current.title}
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">{current.subtitle}</p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <div className="hidden sm:flex items-center gap-3 rounded-2xl border border-border bg-card px-3 py-2 shadow-sm">

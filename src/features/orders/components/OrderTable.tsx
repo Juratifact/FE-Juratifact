@@ -74,10 +74,10 @@ export function OrderTable({
                       Chi tiết
                     </Link>
                   </Button>
-                  {o.status === 4 && onConfirmReceipt && (
+                  {((o.canConfirmReceipt !== undefined ? o.canConfirmReceipt : o.status === 4)) && onConfirmReceipt && (
                     <Button
                       size="sm"
-                      onClick={() => onConfirmReceipt(o.id)}
+                      onClick={() => onConfirmReceipt(o.sellerOrderId ?? o.id)}
                       disabled={isProcessing}
                     >
                       <Check className="mr-1 h-3 w-3" />
