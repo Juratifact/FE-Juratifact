@@ -83,6 +83,7 @@ export const API_ENDPOINTS = {
       `/api/orders/${orderId}/shipping-address`,
     GET_PRODUCTS_BY_ORDER: (orderId: string, productId: string) =>
       `/api/orders/${orderId}/products/${productId}`,
+    DISPUTE: (orderId: string) => `/api/orders/${orderId}/disputes`,
   },
   SELLER_ORDER: {
     MY_ORDERS: "/api/seller-orders/me",
@@ -107,6 +108,17 @@ export const API_ENDPOINTS = {
   TRANSACTION: {
     BASE: "/api/transaction",
   },
+  DISPUTE: {
+    BASE: "/api/disputes",
+    MY_DISPUTES: "/api/disputes/me",
+    RESOLVE: (id: string) => `/api/disputes/${id}/resolution`,
+    CANCEL: (id: string) => `/api/disputes/${id}/cancellation`,
+    ASSIGN: (id: string) => `/api/disputes/${id}/assignment`,
+  },
+  NOTIFICATION: {
+    BASE: "/api/notifications",
+    READ: (id: string) => `/api/notifications/${id}/read`,
+  },
 };
 export const QUERY_KEYS = {
   PRODUCTS: ["products"] as const,
@@ -122,6 +134,7 @@ export const QUERY_KEYS = {
   ORDERS: ["orders"] as const,
   ORDER_DETAIL: (id: string) => ["orders", id] as const,
   MY_ORDERS: ["orders", "my"] as const,
+  MY_DISPUTES: ["disputes", "me"] as const,
   SELLER_ORDERS: ["orders", "seller"] as const,
   IDENTIFY_MY_DOCUMENT: ["identify", "my-document"] as const,
   IDENTIFY_DOCUMENTS: ["identify", "documents"] as const,
@@ -133,6 +146,7 @@ export const QUERY_KEYS = {
   WALLET: ["wallet"] as const,
   TRANSACTIONS: ["transactions"] as const,
   PRODUCTS_WITHOUT_PROMOTION: ["promotions", "products-without"] as const,
+  NOTIFICATIONS: ["notifications"] as const,
 };
 
 export const PRODUCT_CONDITIONS = [

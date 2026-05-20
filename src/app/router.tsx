@@ -40,6 +40,8 @@ import { ProtectedRoute } from "@/shared/components/common/ProtectedRoute";
 import AdminLayout from "@/shared/layouts/AdminLayout";
 import { UserLayout } from "@/shared/layouts/UserLayout";
 import { createBrowserRouter } from "react-router-dom";
+import ManageDisputeList from "@/features/disputes/pages/ManageDisputeList";
+import NotificationListPage from "@/features/notifications/pages/NotificationListPage";
 
 export const router = createBrowserRouter([
   {
@@ -79,6 +81,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["Admin"]}>
             <ManageReportList />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "disputes",
+        element: (
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <ManageDisputeList />
           </ProtectedRoute>
         ),
       },
@@ -287,6 +297,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["User", "Buyer", "Seller"]}>
             <WalletPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "notifications",
+        element: (
+          <ProtectedRoute allowedRoles={["User", "Buyer", "Seller", "Admin", "Shipper"]}>
+            <NotificationListPage />
           </ProtectedRoute>
         ),
       },

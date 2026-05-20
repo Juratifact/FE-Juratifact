@@ -6,10 +6,12 @@ import {
   Truck,
   Zap,
   ArrowRightLeft,
+  Scale,
 } from "lucide-react";
 
 export const adminNavItems = [
   { label: "Bảng điều khiển", to: "/admin", icon: LayoutDashboard },
+  { label: "Tranh chấp", to: "/admin/disputes", icon: Scale },
   { label: "Báo cáo vi phạm", to: "/admin/reports", icon: FlagTriangleRight },
   { label: "Xác minh tài liệu", to: "/admin/identify", icon: FileCheck },
   { label: "Người dùng", to: "/admin/users", icon: Users },

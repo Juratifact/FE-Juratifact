@@ -35,6 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar";
+import { NotificationPopover } from "@/features/notifications/components/NotificationPopover";
 
 
 const Header = () => {
@@ -240,6 +241,13 @@ const Header = () => {
               </Button>
 
               <div className="hidden sm:block w-px h-6 bg-border/40"></div>
+
+              {isLoggedIn && (
+                <>
+                  <NotificationPopover />
+                  <div className="hidden sm:block w-px h-6 bg-border/40"></div>
+                </>
+              )}
 
               {isLoggedIn && !isBackoffice && (
                 <>

@@ -12,23 +12,55 @@ import { OrderTable } from "../components/OrderTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import { useSellerOrders } from "@/features/sellerOrders/hooks/useSellerOrders";
 import { SellerOrderTable } from "@/features/sellerOrders/components/SellerOrderTable";
-import { ShoppingBag, Store } from "lucide-react";
+import { ShoppingBag, Store, AlertCircle } from "lucide-react";
 import { useAuthStore } from "@/features/auth/store";
+import { useCreateDispute, useMyDisputes, useCancelDispute } from "@/features/disputes/hooks/useDisputes";
+import { DisputeTable } from "@/features/disputes/components/DisputeTable";
+import { Pagination } from "@/shared/components/common/Pagination";
 
 export default function MyOrdersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("tab") === "selling" ? "selling" : "buying";
+  const tabParam = searchParams.get("tab");
+  const activeTab = tabParam === "selling" ? "selling" : tabParam === "disputes" ? "disputes" : "buying";
+  
+  const disputePage = Number(searchParams.get("disputePage")) || 1;
   
   const roles = useAuthStore((s) => s.roles);
   const isSeller = roles.includes("Seller");
 
   const { data: buyOrders = [], isLoading: isBuyLoading } = useMyOrders();
+  const { data: disputesData, isLoading: isDisputesLoading } = useMyDisputes({
+    pageIndex: disputePage,
+    pageSize: 10,
+  });
+  const disputes = disputesData?.items || [];
+
+  const totalItems = disputesData?.totalItems || 0;
+  const itemsPerPage = disputesData?.pageSize || 10;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  const disputesPaginationMeta = {
+    totalItems,
+    totalPages,
+    itemsPerPage,
+    currentPage: disputePage,
+    hasPreviousPage: disputePage > 1,
+    hasNextPage: disputePage < totalPages,
+  };
+
+  const handleDisputePageChange = (page: number) => {
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("disputePage", String(page));
+    setSearchParams(newParams);
+  };
   const { orders: sellOrders = [], isLoading: isSellLoading } = useSellerOrders({
     enabled: isSeller,
   });
   const confirmReceipt = useConfirmReceipt();
   const cancelOrder = useCancelOrder();
   const updateOrder = useUpdateShippingAddress();
+  const disputeOrder = useCreateDispute();
+  const cancelDispute = useCancelDispute();
 
   const handleTabChange = (value: string) => {
     setSearchParams({ tab: value });
@@ -55,6 +87,10 @@ export default function MyOrdersPage() {
               Đơn bán
             </TabsTrigger>
           )}
+          <TabsTrigger value="disputes" className="gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-500" />
+            Khiếu nại
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="buying">
@@ -76,7 +112,18 @@ export default function MyOrdersPage() {
                 onChangeAddress={(orderId, newAddress, vietMapRefId) =>
                   updateOrder.mutate({ id: orderId, data: { newAddress, vietMapRefId } })
                 }
-                isProcessing={confirmReceipt.isPending || cancelOrder.isPending || updateOrder.isPending}
+                onDispute={(orderId, sellerOrderId, reason) =>
+                  disputeOrder.mutate({
+                    orderId,
+                    data: { sellerOrderId, reason },
+                  })
+                }
+                isProcessing={
+                  confirmReceipt.isPending ||
+                  cancelOrder.isPending ||
+                  updateOrder.isPending ||
+                  disputeOrder.isPending
+                }
               />
             </div>
           )}
@@ -90,6 +137,31 @@ export default function MyOrdersPage() {
               orders={sellOrders} 
               isLoading={isSellLoading} 
             />
+          )}
+        </TabsContent>
+
+        <TabsContent value="disputes">
+          {isDisputesLoading ? (
+            <LoadingSpinner className="py-16" size="lg" />
+          ) : !disputes.length ? (
+            <EmptyState
+              title="Bạn chưa có khiếu nại nào"
+              description="Các khiếu nại đơn hàng của bạn sẽ được hiển thị và theo dõi tại đây."
+            />
+          ) : (
+            <div className="space-y-6">
+              <DisputeTable
+                disputes={disputes}
+                buyOrders={buyOrders as GroupedOrder[]}
+                onCancelDispute={cancelDispute.mutate}
+                isProcessing={cancelDispute.isPending}
+              />
+              <Pagination
+                meta={disputesPaginationMeta}
+                onPageChange={handleDisputePageChange}
+                className="mt-6"
+              />
+            </div>
           )}
         </TabsContent>
       </Tabs>
