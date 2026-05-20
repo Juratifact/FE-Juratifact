@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
@@ -14,12 +15,19 @@ import { Separator } from "@/shared/components/ui/separator";
 import { Play, ArrowLeft, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getOrderStatusLabel, getPaymentStatusLabel } from "../types";
+import { CancelOrderDialog } from "../components/CancelOrderDialog";
+import { useCreateDispute } from "@/features/disputes/hooks/useDisputes";
+import { DisputeOrderDialog } from "@/features/disputes/components/DisputeOrderDialog";
+import { ConfirmReceiptDialog } from "../components/ConfirmReceiptDialog";
 
 export default function OrderDetailPage() {
   const navigate = useNavigate();
   const { orderId } = useParams();
   const [searchParams] = useSearchParams();
   const productId = searchParams.get("productId");
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [isDisputeDialogOpen, setIsDisputeDialogOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   const { data: allOrders = [], isLoading: isListLoading } = useMyOrders();
   const order = allOrders.find((o) => o.id === orderId);
@@ -31,6 +39,7 @@ export default function OrderDetailPage() {
 
   const confirm = useConfirmReceipt();
   const cancel = useCancelOrder();
+  const dispute = useCreateDispute();
 
   const isLoading = isListLoading || isProductLoading;
 
@@ -81,23 +90,67 @@ export default function OrderDetailPage() {
             </Badge>
           )}
           {order?.status === 4 && (
-            <Button
-              className="h-9 rounded-full px-6 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
-              onClick={() => confirm.mutate(order.id)}
-              disabled={confirm.isPending}
-            >
-              Đã nhận được hàng
-            </Button>
+            <>
+              <Button
+                className="h-9 rounded-full px-6 font-bold bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white shadow-lg shadow-amber-600/20 transition-all hover:scale-105 active:scale-95 mr-2 border-none"
+                onClick={() => setIsDisputeDialogOpen(true)}
+                disabled={confirm.isPending || dispute.isPending}
+              >
+                Khiếu nại
+              </Button>
+              <Button
+                className="h-9 rounded-full px-6 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                onClick={() => setIsConfirmDialogOpen(true)}
+                disabled={confirm.isPending || dispute.isPending}
+              >
+                Đã nhận được hàng
+              </Button>
+              <DisputeOrderDialog
+                open={isDisputeDialogOpen}
+                onOpenChange={setIsDisputeDialogOpen}
+                onConfirm={(reason) => {
+                  dispute.mutate({
+                    orderId: order.id,
+                    data: {
+                      sellerOrderId: order.sellerOrderId ?? order.id,
+                      reason,
+                    },
+                  });
+                  setIsDisputeDialogOpen(false);
+                }}
+                isProcessing={dispute.isPending}
+              />
+              <ConfirmReceiptDialog
+                open={isConfirmDialogOpen}
+                onOpenChange={setIsConfirmDialogOpen}
+                onConfirm={() => {
+                  confirm.mutate(order.id);
+                  setIsConfirmDialogOpen(false);
+                }}
+                isProcessing={confirm.isPending}
+              />
+            </>
           )}
           {order && order.status !== 4 && order.status !== 5 && order.status !== 6 && order.status !== 3 && (
-            <Button
-              variant="destructive"
-              className="h-9 rounded-full px-6 font-bold shadow-lg shadow-destructive/20 transition-all hover:scale-105 active:scale-95"
-              onClick={() => cancel.mutate({ id: order.id })}
-              disabled={cancel.isPending}
-            >
-              Huỷ đơn
-            </Button>
+            <>
+              <Button
+                variant="destructive"
+                className="h-9 rounded-full px-6 font-bold shadow-lg shadow-destructive/20 transition-all hover:scale-105 active:scale-95"
+                onClick={() => setIsCancelDialogOpen(true)}
+                disabled={cancel.isPending}
+              >
+                Huỷ đơn
+              </Button>
+              <CancelOrderDialog
+                open={isCancelDialogOpen}
+                onOpenChange={setIsCancelDialogOpen}
+                onConfirm={(reason) => {
+                  cancel.mutate({ id: order.id, data: { reason } });
+                  setIsCancelDialogOpen(false);
+                }}
+                isProcessing={cancel.isPending}
+              />
+            </>
           )}
         </div>
       </div>
